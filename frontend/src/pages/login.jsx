@@ -158,7 +158,7 @@ const Login = () => {
                     }`}
                   >
                     <span className="flex items-center">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                      <span className='mr-1'>👤</span>
                       {loginAs}
                     </span>
                     <ChevronDown className={`w-5 h-5 transition-transform ${
@@ -186,8 +186,8 @@ const Login = () => {
                               : 'text-gray-900 hover:bg-gray-50'
                           } ${loginAs === option ? (isDark ? 'bg-gray-600' : 'bg-gray-50') : ''}`}
                         >
-                          <span className="flex items-center">
-                            <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                          <span className="flex items-center mr-1">
+                            {option === 'Client' ? '👤' : option === 'Team Member' ? '⚡' : '👑'}
                             {option}
                           </span>
                         </button>

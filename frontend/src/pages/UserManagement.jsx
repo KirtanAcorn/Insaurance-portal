@@ -4,6 +4,7 @@ import {
 import DashboardHeader from '../components/DashboardHeader';
 import NavigationTabs from '../components/NavigationTabs';
 import Userr from "./tabs/Userr"
+import Claims from './tabs/Claims';
 
 const UserManagement = () => {
   const [theme, setTheme] = useState('system');
@@ -158,6 +159,105 @@ const UserManagement = () => {
     { name: 'Users', icon: Users, active: true }
   ];
 
+    // Sample claims data
+  const claims = [
+    {
+      id: 'CLM-2024-001',
+      company: 'Astute Healthcare Limited',
+      policyType: 'Property',
+      type: 'Water Damage',
+      status: 'Under Review',
+      claimAmount: '£15,000',
+      excess: '£1,000',
+      netAmount: '£14,000',
+      date: '2024-01-15',
+      statusColor: 'orange',
+      companyIcon: '🏥'
+    },
+    {
+      id: 'CLM-2024-002',
+      company: 'Tech Solutions Ltd',
+      policyType: 'Commercial Liability',
+      type: 'Public Liability',
+      status: 'Approved',
+      claimAmount: '£8,500',
+      excess: '£2,500',
+      netAmount: '£6,000',
+      date: '2024-01-10',
+      statusColor: 'green',
+      companyIcon: '💻'
+    },
+    {
+      id: 'CLM-2024-003',
+      company: 'Manufacturing Co Ltd',
+      policyType: 'Property',
+      type: 'Equipment Damage',
+      status: 'Paid',
+      claimAmount: '£25,000',
+      excess: '£5,000',
+      netAmount: '£20,000',
+      date: '2024-01-05',
+      statusColor: 'blue',
+      companyIcon: '🏭'
+    }
+  ];
+
+    const getStatusColorr = (status) => {
+    switch (status) {
+      case 'Under Review':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'Approved':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'Paid':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'Rejected':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusDarkColorr = (status) => {
+    switch (status) {
+      case 'Under Review':
+        return 'bg-orange-900 text-orange-200 border-orange-700';
+      case 'Approved':
+        return 'bg-green-900 text-green-200 border-green-700';
+      case 'Paid':
+        return 'bg-blue-900 text-blue-200 border-blue-700';
+      case 'Rejected':
+        return 'bg-red-900 text-red-200 border-red-700';
+      default:
+        return 'bg-gray-700 text-gray-200 border-gray-600';
+    }
+  };
+
+  const getPolicyTypeColorr = (type) => {
+    switch (type) {
+      case 'Property':
+        return isDark ? 'bg-purple-900 text-purple-200 border-purple-700' : 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'Commercial Liability':
+        return isDark ? 'bg-blue-900 text-blue-200 border-blue-700' : 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'Motor':
+        return isDark ? 'bg-green-900 text-green-200 border-green-700' : 'bg-green-100 text-green-800 border-green-200';
+      default:
+        return isDark ? 'bg-gray-700 text-gray-200 border-gray-600' : 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getClaimTypeColorr = (type) => {
+    switch (type) {
+      case 'Water Damage':
+        return isDark ? 'bg-cyan-900 text-cyan-200 border-cyan-700' : 'bg-cyan-100 text-cyan-800 border-cyan-200';
+      case 'Public Liability':
+        return isDark ? 'bg-indigo-900 text-indigo-200 border-indigo-700' : 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      case 'Equipment Damage':
+        return isDark ? 'bg-amber-900 text-amber-200 border-amber-700' : 'bg-amber-100 text-amber-800 border-amber-200';
+      default:
+        return isDark ? 'bg-gray-700 text-gray-200 border-gray-600' : 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   const getRoleColor = (role) => {
     switch (role) {
       case 'Client': return 'bg-green-100 text-green-800 border-green-200';
@@ -237,13 +337,14 @@ const UserManagement = () => {
   };
 
   const handleCompanyAccessChange = (company) => {
-    setFormData(prev => ({
-      ...prev,
-      companyAccess: prev.companyAccess.includes(company)
-        ? prev.companyAccess.filter(c => c !== company)
-        : [...prev.companyAccess, company]
-    }));
-  };
+  setFormData(prev => ({
+    ...prev,
+    companyAccess: prev.companyAccess.includes(company)
+      ? prev.companyAccess.filter(c => c !== company)
+      : [...prev.companyAccess, company]
+  }));
+};
+
 
   const handlePermissionChange = (permission) => {
     setFormData(prev => ({
@@ -301,7 +402,7 @@ const handleConfirmDelete = () => {
 
       {/* Main Content */}
       <main className="p-6">
-        <Userr
+       { true &&  <Userr
         openCreateModal={setIsCreateModalOpen}
         stats={stats}
         isDark={isDark}
@@ -329,7 +430,10 @@ const handleConfirmDelete = () => {
         isDeleteModalOpen={isDeleteModalOpen}
         handleCloseDeleteModal={handleCloseDeleteModal}
         handleConfirmDelete={handleConfirmDelete}
-        />
+        /> } 
+     
+        {false && <Claims/>}
+        
       </main>
     </div>
   );

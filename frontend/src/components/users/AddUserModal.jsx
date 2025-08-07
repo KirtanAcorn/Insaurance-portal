@@ -247,7 +247,7 @@ const AddUserModal = ({isCreateModalOpen, isDark, handleCloseModalCreateUser, fo
                     <div key={company} className="flex items-center space-x-3">
                       <div className="relative">
                         <input
-                          type="radio"
+                          type="checkbox"
                           id={company}
                           name="companyAccess"
                           checked={formData.companyAccess.includes(company)}
