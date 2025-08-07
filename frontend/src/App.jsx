@@ -2,7 +2,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/login';
-import UserManagementDashboard from './pages/UserManagementDashboard';
+import UserManagement from './pages/UserManagement';
+import TestPage from './pages/TestPage';
 
 
 const App = () => {
@@ -11,7 +12,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<UserManagementDashboard/>} />
+        <Route path="/users" element={<UserManagement/>} />
+        <Route path="/test" element={<TestPage/>} />
       </Routes>
     </Router>
   );

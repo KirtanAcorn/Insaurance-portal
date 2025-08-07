@@ -13,7 +13,7 @@ const NavigationTabs = ({isDark, tabs, activeTabChanger}) => {
               <button
                 key={tab.name}
                 onClick={() => activeTabChanger(tab.name)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                   isActive
                     ? 'bg-purple-500 text-white'
                     : isDark
