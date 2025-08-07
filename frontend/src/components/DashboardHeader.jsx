@@ -31,7 +31,7 @@ const DashboardHeader = ({theme, setTheme, isDark}) => {
             <select
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
-              className={`px-3 py-2 rounded-lg border text-sm ${
+              className={`px-3 py-2 rounded-lg border text-sm cursor-pointer ${
                 isDark 
                   ? 'bg-gray-700 border-gray-600 text-gray-200' 
                   : 'bg-white border-gray-300 text-gray-700'
@@ -42,7 +42,7 @@ const DashboardHeader = ({theme, setTheme, isDark}) => {
               <option value="system">System</option>
             </select>
             
-            <button className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+            <button className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
               isDark 
                 ? 'text-gray-300 hover:text-white hover:bg-gray-700' 
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
