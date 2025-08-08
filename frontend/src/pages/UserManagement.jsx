@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  FileText, Sun, Moon, Monitor, ChevronDown, BarChart3, FileCheck, Shield, Users, UserPlus, Mail, MapPin, Clock, Edit, Trash2, X, User, Building, Key, Eye, Settings, } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FileText, Sun, Moon, Monitor, ChevronDown, BarChart3, FileCheck, Shield, Users, UserPlus, Mail, MapPin, Clock, Edit, Trash2, X, User, Building, Key, Eye, Settings, ClipboardList } from 'lucide-react';
 import DashboardHeader from '../components/DashboardHeader';
 import NavigationTabs from '../components/NavigationTabs';
 import Userr from "./tabs/Userr"
@@ -12,6 +11,200 @@ const UserManagement = () => {
   const [activeTab, setActiveTab] = useState('Users');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [isEditModalOpenClaim, setIsEditModalOpenClaim] = useState(false)
+  const [activeTabClaim, setActiveTabClaim] = useState('claim')
+  const [isModalOpenNew, setIsModalOpenNew] = useState(false);
+  const [activeTabNew, setActiveTabNew] = useState(0);
+  const [formDataNew, setFormDataNew] = useState({
+    company: '',
+    policy: '',
+    claimType: '',
+    claimAmount: '',
+    incidentDescription: '',
+    incidentDate: ''
+  });
+  const [editFormDataClaim, setEditFormDataClaim] = useState({
+    claimId: 'CLM-2024-001',
+    claimType: 'Water Damage',
+    claimAmount: '15000',
+    description: 'Water damage to building foundation due to burst pipe',
+    status: 'Under Review',
+    assignedTo: 'Sarah Johnson',
+    policyId: '45857501282A',
+    company: 'Astute Healthcare Limited',
+    claimAmountPolicy: '£15,000',
+    excess: '£1,000',
+    netAmount: '£14,000'
+  })
+
+    const companiesData = {
+    'manufacturing-co': {
+      name: 'Manufacturing Co Ltd',
+      policies: {
+        'property-insurance': {
+          name: 'Property Insurance',
+          id: 'MC2024001',
+          status: 'Active',
+          sumAssured: '£5,500,000',
+          excessPerClaim: '£5,000',
+          location: 'Birmingham & Coventry Sites',
+          claimsMade: 2,
+          coverageBreakdown: {
+            buildingCover: '£3,000,000',
+            contentsCover: '£2,500,000',
+            businessInterruption: '£1,000,000'
+          }
+        },
+        'liability-insurance': {
+          name: 'Public Liability Insurance',
+          id: 'MC2024002',
+          status: 'Active',
+          sumAssured: '£2,000,000',
+          excessPerClaim: '£1,000',
+          location: 'All UK Sites',
+          claimsMade: 0,
+          coverageBreakdown: {
+            publicLiability: '£2,000,000',
+            productLiability: '£1,500,000',
+            employersLiability: '£10,000,000'
+          }
+        }
+      }
+    },
+    'tech-solutions': {
+      name: 'Tech Solutions Inc',
+      policies: {
+        'cyber-insurance': {
+          name: 'Cyber Liability Insurance',
+          id: 'TS2024001',
+          status: 'Active',
+          sumAssured: '£1,000,000',
+          excessPerClaim: '£2,500',
+          location: 'London Office',
+          claimsMade: 1,
+          coverageBreakdown: {
+            dataProtection: '£500,000',
+            cyberCrime: '£300,000',
+            businessInterruption: '£200,000'
+          }
+        }
+      }
+    },
+    'retail-group': {
+      name: 'Retail Group Ltd',
+      policies: {
+        'commercial-insurance': {
+          name: 'Commercial Combined Insurance',
+          id: 'RG2024001',
+          status: 'Active',
+          sumAssured: '£3,000,000',
+          excessPerClaim: '£3,500',
+          location: 'Multiple Retail Locations',
+          claimsMade: 5,
+          coverageBreakdown: {
+            buildingCover: '£1,500,000',
+            stockCover: '£1,000,000',
+            publicLiability: '£500,000'
+          }
+        }
+      }
+    }
+  };
+
+    const getSelectedCompany = () => companiesData[formDataNew.company];
+
+  
+    const tabsNew = [
+      {
+        id: 0,
+        title: 'Company & Policy',
+        icon: FileText,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-100'
+      },
+      {
+        id: 1,
+        title: 'Claim Information',
+        icon: ClipboardList,
+        color: 'text-green-600',
+        bgColor: 'bg-green-100'
+      },
+      {
+        id: 2,
+        title: 'Policy Details',
+        icon: Shield,
+        color: 'text-purple-600',
+        bgColor: 'bg-purple-100'
+      }
+    ];
+  
+    const handleInputChange = (field, value) => {
+      setFormDataNew(prev => {
+        // If company changes, reset policy
+        if (field === 'company') {
+          return {
+            ...prev,
+            company: value,
+            policy: ''
+          };
+        }
+        return {
+          ...prev,
+          [field]: value
+        };
+      });
+    };
+  
+    const handleCloseModalNew = () => {
+      setIsModalOpenNew(false);
+    };
+  
+    const handleSubmitNew = () => {
+      console.log('Submitting claim:', formDataNew);
+      setIsModalOpenNew(false);
+
+      // Handle form submission
+    };
+
+  
+  const handleFormChangeClaim = (field, value) => {
+    setEditFormDataClaim(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handleCloseModalClaim = () => {
+    setIsEditModalOpenClaim(false)
+  }
+
+  const handleUpdateClaim = () => {
+    console.log('Updating claim:', editFormDataClaim)
+    handleCloseModalClaim()
+  }
+
+  const timelineEvents = [
+    {
+      title: 'Claim Submitted',
+      subtitle: 'John Smith',
+      date: '2024-01-15',
+      active: true
+    },
+    {
+      title: 'Assigned to Agent',
+      subtitle: 'System',
+      date: '2024-01-16',
+      description: 'Assigned to Sarah Johnson',
+      active: true
+    },
+    {
+      title: 'Under Review',
+      subtitle: 'Sarah Johnson',
+      date: '2024-01-17',
+      active: true
+    }
+  ]
+  
   const [editFormData, setEditFormData] = useState({
     fullName: '',
     email: '',
@@ -90,6 +283,38 @@ const UserManagement = () => {
       change: '+1 from last month',
       changeType: 'positive',
       color: 'bg-orange-500'
+    }
+  ];
+
+    // Statistics data
+  const statsClaim = [
+    {
+      title: 'Pending Claims',
+      value: '1',
+      subtitle: 'Awaiting review',
+      color: 'bg-orange-500',
+      // icon: Clock
+    },
+    {
+      title: 'Approved Claims',
+      value: '2',
+      subtitle: 'This month',
+      color: 'bg-green-500',
+      // icon: CheckCircle
+    },
+    {
+      title: 'Total Payout',
+      value: '£20K',
+      subtitle: 'Net amount paid',
+      color: 'bg-blue-500',
+      // icon: DollarSign
+    },
+    {
+      title: 'Total Excess',
+      value: '£9K',
+      subtitle: 'Collected excess',
+      color: 'bg-pink-500',
+      // icon: AlertCircle
     }
   ];
 
@@ -402,7 +627,8 @@ const handleConfirmDelete = () => {
 
       {/* Main Content */}
       <main className="p-6">
-       { true &&  <Userr
+
+       {false &&  <Userr
         openCreateModal={setIsCreateModalOpen}
         stats={stats}
         isDark={isDark}
@@ -432,7 +658,34 @@ const handleConfirmDelete = () => {
         handleConfirmDelete={handleConfirmDelete}
         /> } 
      
-        {false && <Claims/>}
+        {true && <Claims
+        isDark={isDark}
+        claims={claims}
+        getStatusColorr={getStatusColorr}
+        getPolicyTypeColorr={getPolicyTypeColorr}
+        getClaimTypeColorr={getClaimTypeColorr}
+        getStatusDarkColorr={getStatusDarkColorr}
+        statsClaim={statsClaim}
+        isEditModalOpenClaim={isEditModalOpenClaim}
+        editFormDataClaim={editFormDataClaim}
+        handleCloseModalClaim={handleCloseModalClaim}
+        activeTabClaim={activeTabClaim} 
+        openActiveTabClaim={setActiveTabClaim}
+        handleFormChangeClaim={handleFormChangeClaim}
+        timelineEvents={timelineEvents}
+        handleUpdateClaim={handleUpdateClaim}
+        openEditModalOpenClaim={setIsEditModalOpenClaim}     
+        isModalOpenNew={isModalOpenNew}  
+        openIsModalOpenNew={setIsModalOpenNew}  
+        handleCloseModalNew={handleCloseModalNew} 
+        tabsNew={tabsNew}
+        openActiveTabNew={setActiveTabNew}
+        activeTabNew={activeTabNew}
+        formDataNew={formDataNew}
+        handleInputChange={handleInputChange}
+        getSelectedCompany={getSelectedCompany}
+        handleSubmitNew={handleSubmitNew}
+        />}
         
       </main>
     </div>
