@@ -21,7 +21,7 @@ const ClaimsHeader = ({openIsModalOpenNew}) => {
               <span className="font-medium">New Claim</span>
             </button>
           </div>
-        </div>
+    </div>
     </>
   )
 }

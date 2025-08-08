@@ -56,7 +56,7 @@ const UserTable = ({isDark, users, getRoleDarkColor, getRoleColor, getStatusDark
                         </div>
                         <div>
                           <div className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {user.name}
+                             {[user.firstname, user.lastname].filter(Boolean).join(' ')}
                           </div>
                           <div className={`text-sm flex items-center space-x-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                             <Mail className="w-3 h-3" />
