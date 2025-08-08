@@ -1,6 +1,6 @@
 import { FileText, Plus} from "lucide-react"
 
-const ClaimsHeader = () => {
+const ClaimsHeader = ({openIsModalOpenNew}) => {
   return (
     <>
     <div className={`mb-6 p-6 rounded-2xl bg-gradient-to-br from-orange-600 via-red-600 to-pink-600 text-white`}>
@@ -13,9 +13,9 @@ const ClaimsHeader = () => {
                 <h2 className="text-2xl font-bold">Claims Management</h2>
                 <p className="text-purple-100">Advanced claims processing and policy integration</p>
               </div>
-            </div>
+            </div>  
             <button 
-            onClick={() => openCreateModal(true)}
+            onClick={() => openIsModalOpenNew(true)}
             className="flex items-center space-x-2 px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-colors text-black cursor-pointer">
               <Plus className="w-4 h-4" />
               <span className="font-medium">New Claim</span>
