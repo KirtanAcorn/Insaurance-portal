@@ -10,6 +10,19 @@ const App = () => {
   return (
     <Router>
       <Routes>
+
+        <Toaster
+        position="top-right"
+        toastOptions={{
+          success: {
+            style: { background: '#4caf50', color: '#fff' },
+          },
+          error: {
+            style: { background: '#f44336', color: '#fff' },
+          },
+        }}
+      />
+      
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<UserManagement/>} />
