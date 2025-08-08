@@ -2,17 +2,17 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/login';
-import UserManagement from './pages/UserManagement';
 import TestPage from './pages/TestPage';
+import { Toaster } from 'react-hot-toast';
+import Dashboard from './pages/Dashboard';
 
 
 const App = () => {
   return (
     <Router>
-      <Routes>
-
-        <Toaster
-        position="top-right"
+      
+      <Toaster
+        position="top-center"
         toastOptions={{
           success: {
             style: { background: '#4caf50', color: '#fff' },
@@ -22,10 +22,10 @@ const App = () => {
           },
         }}
       />
-      
+      <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<UserManagement/>} />
+        <Route path="/dashboard" element={<Dashboard/>} />
         <Route path="/test" element={<TestPage/>} />
       </Routes>
     </Router>

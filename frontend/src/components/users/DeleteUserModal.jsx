@@ -35,7 +35,7 @@ const DeleteUserModal = ({isDeleteModalOpen, isDark, handleCloseDeleteModal, han
         </div>
         <button
           onClick={handleCloseDeleteModal}
-          className={`p-2 rounded-lg ${
+          className={`p-2 rounded-lg cursor-pointer${
             isDark
               ? "text-gray-400 hover:text-white hover:bg-gray-700"
               : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
@@ -54,7 +54,7 @@ const DeleteUserModal = ({isDeleteModalOpen, isDark, handleCloseDeleteModal, han
       <div className="flex justify-end space-x-3">
         <button
           onClick={handleCloseDeleteModal}
-          className={`px-4 py-2 text-sm font-medium rounded-lg ${
+          className={`px-4 py-2 text-sm font-medium rounded-lg cursor-pointer${
             isDark
               ? "text-gray-300 border border-gray-600 hover:bg-gray-700"
               : "text-gray-700 border border-gray-300 hover:bg-gray-100"
@@ -64,7 +64,7 @@ const DeleteUserModal = ({isDeleteModalOpen, isDark, handleCloseDeleteModal, han
         </button>
         <button
           onClick={handleConfirmDelete}
-          className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors"
+          className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors cursor-pointer"
         >
           Delete User
         </button>
