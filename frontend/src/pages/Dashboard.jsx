@@ -18,8 +18,6 @@ const Dashboard = () => {
   const [isModalOpenNew, setIsModalOpenNew] = useState(false);
   const [activeTabNew, setActiveTabNew] = useState(0);
   const [selectedCompany, setSelectedCompany] = useState('');
-  const [selectedInsuranceType, setSelectedInsuranceType] = useState('Property');
-  const [policyYear, setPolicyYear] = useState('2024-2025');
   const [formDataNew, setFormDataNew] = useState({
     company: '',
     policy: '',
@@ -42,132 +40,9 @@ const Dashboard = () => {
     netAmount: '£14,000'
   })
 
-    const policyCompanies = [
-      {
-        id: 'astute',
-        name: 'Astute Healthcare Limited',
-        regAddress: 'Unit 1 Bilton Road, Cadwell Lane Industrial Estate, Hitchin, SG40SB',
-        postalAddress: 'Unit 1 Bilton Road, Hitchin SG40SB & Unit 28 Brick Knoll Park, St. Albans AL1 5UG',
-        regNo: 'B147250',
-        vatNo: 'GB139479686',
-        directorName: 'Dhruvil Patel',
-        insuranceAgent: 'PIB INSURANCE BROKERS (CROYDON)',
-        employeeCount: '51',
-        turnover: '105,000,000'
-      },
-      {
-        id: 'manufacturing',
-        name: 'Manufacturing Co Ltd',
-        regAddress: 'Unit 5 Industrial Park, Manchester, M1 2AB',
-        postalAddress: 'Unit 5 Industrial Park, Manchester, M1 2AB',
-        regNo: 'B234567',
-        vatNo: 'GB234567890',
-        directorName: 'John Smith',
-        insuranceAgent: 'ABC INSURANCE BROKERS',
-        employeeCount: '125',
-        turnover: '85,000,000'
-      },
-      {
-        id: 'tech',
-        name: 'Tech Solutions Ltd',
-        regAddress: 'Tech Hub, London, SW1 3CD',
-        postalAddress: 'Tech Hub, London, SW1 3CD',
-        regNo: 'B345678',
-        vatNo: 'GB345678901',
-        directorName: 'Sarah Johnson',
-        insuranceAgent: 'XYZ INSURANCE BROKERS',
-        employeeCount: '75',
-        turnover: '45,000,000'
-      }
-    ];
   
-    const insuranceData = {
-      Property: {
-        policyNumber: '45057501202A',
-        status: 'Expired',
-        startDate: '1 May 2024',
-        endDate: '30 April 2025',
-        premiumPaid: '£3,950.06',
-        sumAssured: '£2,087,097',
-        location: 'Unit 1 Hitchin (Bluepuffin)',
-        excessPerClaim: '£1,000',
-        claimsMade: '0',
-        coverage: {
-          'Building Cover': '£1,500,000',
-          'Contents Cover': '£587,097',
-          'Business Interruption': '£500,000'
-        }
-      },
-      'Commercial Liability': {
-        policyNumber: 'APP650950COM-24',
-        status: 'Expired',
-        startDate: '15 March 2024',
-        endDate: '22 April 2025',
-        premiumPaid: '£1,825.62',
-        sumAssured: '£4,000,000',
-        location: 'All UK Locations',
-        excessPerClaim: '£2,500',
-        claimsMade: '1',
-        coverage: {
-          'Public Liability': '£2,000,000',
-          'Products Liability': '£2,000,000',
-          'Professional Indemnity': '£1,000,000'
-        }
-      },
-      Fleet: {
-        policyNumber: 'FC380567',
-        status: 'Expired',
-        startDate: '1 January 2024',
-        endDate: '7 April 2025',
-        premiumPaid: '£16,036.98',
-        sumAssured: '£500,000',
-        location: 'UK Wide',
-        excessPerClaim: '£750',
-        claimsMade: '2',
-        coverage: {
-          'Comprehensive Cover': '£300,000',
-          'Third Party': '£150,000',
-          'Personal Accident': '£50,000'
-        }
-      },
-      Marine: {
-        policyNumber: 'LMC306726501',
-        status: 'Expired',
-        startDate: '1 June 2024',
-        endDate: '15 June 2025',
-        premiumPaid: '£99,999.88',
-        sumAssured: '£46,100,000',
-        location: 'International Waters',
-        excessPerClaim: '£10,000',
-        claimsMade: '0',
-        coverage: {
-          'Hull Cover': '£40,000,000',
-          'Cargo Cover': '£5,000,000',
-          'P&I Cover': '£1,100,000'
-        }
-      }
-    };
-  
-    const allPolicies = [
-      { id: '45057501202A', type: 'Property', status: 'Expired', premium: '£3,950.06', coverage: '£2,087,097', endDate: '30 April 2025' },
-      { id: 'APP650950COM-24', type: 'Commercial Liability', status: 'Expired', premium: '£1,825.62', coverage: '£4,000,000', endDate: '22 April 2025' },
-      { id: 'FC380567', type: 'Fleet', status: 'Expired', premium: '£16,036.98', coverage: '£500,000', endDate: '7 April 2025' },
-      { id: 'LMC306726501', type: 'Marine', status: 'Expired', premium: '£99,999.88', coverage: '£46,100,000', endDate: '15 June 2025' }
-    ];
-  
-    const selectedCompanyData = policyCompanies.find(c => c.id === selectedCompany);
-    const currentInsuranceData = insuranceData[selectedInsuranceType];
-  
-    const getInsuranceIcon = (type) => {
-      switch(type) {
-        case 'Property': return <BuildingIcon className="w-5 h-5" />;
-        case 'Commercial Liability': return <UserIcon className="w-5 h-5" />;
-        case 'Fleet': return <TruckIcon className="w-5 h-5" />;
-        case 'Marine': return <ShipIcon className="w-5 h-5" />;
-        default: return <BuildingIcon className="w-5 h-5" />;
-      }
-    };
 
+  
     const companiesData = {
     'manufacturing-co': {
       name: 'Manufacturing Co Ltd',
