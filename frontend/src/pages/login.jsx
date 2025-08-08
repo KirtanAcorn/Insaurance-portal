@@ -151,7 +151,7 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className={`w-full px-4 py-3 rounded-lg border text-left flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    className={`w-full px-4 py-3 rounded-lg border text-left flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
                       isDark 
                         ? 'bg-gray-700 border-gray-600 text-white' 
                         : 'bg-white border-gray-300 text-gray-900'
@@ -180,7 +180,7 @@ const Login = () => {
                             setLoginAs(option);
                             setIsDropdownOpen(false);
                           }}
-                          className={`w-full px-4 py-3 text-left hover:bg-opacity-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                          className={`w-full px-4 py-3 text-left hover:bg-opacity-50 transition-colors first:rounded-t-lg last:rounded-b-lg cursor-pointer${
                             isDark 
                               ? 'text-white hover:bg-gray-600' 
                               : 'text-gray-900 hover:bg-gray-50'
@@ -201,7 +201,7 @@ const Login = () => {
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
               >
                 Sign In
               </button>

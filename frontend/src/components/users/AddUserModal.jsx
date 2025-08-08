@@ -28,7 +28,7 @@ const AddUserModal = ({isCreateModalOpen, isDark, handleCloseModalCreateUser, fo
               </div>
               <button
                 onClick={handleCloseModalCreateUser}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-2 rounded-lg transition-colors cursor-pointer ${
                   isDark ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -422,7 +422,7 @@ const AddUserModal = ({isCreateModalOpen, isDark, handleCloseModalCreateUser, fo
             }`}>
               <button
                 onClick={handleCloseModalCreateUser}
-                className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
+                className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors cursor-pointer${
                   isDark 
                     ? 'text-gray-300 border-gray-600 hover:bg-gray-700' 
                     : 'text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -432,7 +432,7 @@ const AddUserModal = ({isCreateModalOpen, isDark, handleCloseModalCreateUser, fo
               </button>
               <button
                 onClick={handleCreateUser}
-                className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2"
+                className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2 cursor-pointer"
               >
                 <UserPlus className="w-4 h-4" />
                 <span>Create User</span>
