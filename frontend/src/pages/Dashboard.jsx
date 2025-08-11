@@ -687,15 +687,18 @@ const getInitials = (name) => {
       {/* Navigation Tabs */}
       <NavigationTabs
       isDark={isDark}
-      tabs={tabs}
-      activeTabChanger={setActiveTab}
+      tabs={tabs.map((tab) => ({
+    ...tab,
+    active: activeTab === tab.name
+  }))}
+  activeTabChanger={setActiveTab}
 
       />
 
       {/* Main Content */}
       <main className="p-6">
 
-       {true &&  <Userr
+       {activeTab === "Users" && <Userr
         openCreateModal={setIsCreateModalOpen}
         stats={stats}
         isDark={isDark}
@@ -727,7 +730,7 @@ const getInitials = (name) => {
 
         /> } 
      
-        {false && <Claims
+        {activeTab === "Claims" &&  <Claims
         isDark={isDark}
         claims={claims}
         getStatusColorr={getStatusColorr}
@@ -755,7 +758,10 @@ const getInitials = (name) => {
         getSelectedCompany={getSelectedCompany}
         handleSubmitNew={handleSubmitNew}
         />}
-       {false && <Policies/>}
+
+       {activeTab === "Policies" && 
+       <Policies/>
+       }
         
       </main>
     </div>
