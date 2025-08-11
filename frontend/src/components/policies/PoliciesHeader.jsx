@@ -14,6 +14,12 @@ const PoliciesHeader = () => {
                 <p className="text-purple-100">Advanced insurance policy management system</p>
               </div>
             </div>
+            <button 
+            onClick={() => openIsModalOpenNew(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-colors text-black cursor-pointer">
+              <Plus className="w-4 h-4" />
+              <span className="font-medium">New Policy</span>
+            </button>
           </div>
     </div>
     </>
