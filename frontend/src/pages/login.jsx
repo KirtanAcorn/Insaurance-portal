@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, Sun, Moon, Monitor, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [theme, setTheme] = useState('system');
@@ -8,6 +9,8 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loginAs, setLoginAs] = useState('Client');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const updateTheme = () => {
@@ -30,11 +33,7 @@ const Login = () => {
 
   const handleSubmit = () => {
     console.log('Login attempt:', { email, password, loginAs });
-  };
-
-  const useDemoCredentials = () => {
-    setEmail('demo@insurance.com');
-    setPassword('demo123');
+    navigate("/dashboard");
   };
 
   const themeOptions = [

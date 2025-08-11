@@ -276,7 +276,7 @@ const CreateUserModal = () => {
                     >
                       <option value="">Select user role</option>
                       <option value="Client">👤 Client</option>
-                      <option value="Agent">⚡ Agent</option>
+                      <option value="Team Member">⚡ Team Member</option>
                       <option value="Admin">👑 Admin</option>
                     </select>
                   </div>
