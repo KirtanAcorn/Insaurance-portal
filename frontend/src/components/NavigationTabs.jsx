@@ -5,7 +5,7 @@ const NavigationTabs = ({isDark, tabs, activeTabChanger}) => {
     <nav className={`px-6 py-4 border-b transition-colors ${
         isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
       }`}>
-        <div className="flex space-x-1">
+        <div className="flex justify-center">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = tab.active;
@@ -13,7 +13,7 @@ const NavigationTabs = ({isDark, tabs, activeTabChanger}) => {
               <button
                 key={tab.name}
                 onClick={() => activeTabChanger(tab.name)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer w-1/4 text-center justify-center ${
                   isActive
                     ? 'bg-purple-500 text-white'
                     : isDark

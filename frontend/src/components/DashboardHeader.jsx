@@ -1,6 +1,12 @@
 import { FileText} from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 
 const DashboardHeader = ({theme, setTheme, isDark}) => {
+   const navigate = useNavigate();
+
+     const handleLogout = () => {
+    navigate("/login");
+  };
   return (
     <>
     <header className={`px-6 py-4 border-b transition-colors ${
@@ -42,7 +48,9 @@ const DashboardHeader = ({theme, setTheme, isDark}) => {
               <option value="system">System</option>
             </select>
             
-            <button className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+            <button
+            onClick={handleLogout}
+             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
               isDark 
                 ? 'text-gray-300 hover:text-white hover:bg-gray-700' 
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
