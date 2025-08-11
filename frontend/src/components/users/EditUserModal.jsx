@@ -50,12 +50,12 @@ const EditUserModal = ({isEditModalOpen, isDark, selectedUser, handleCloseModal,
                     {/* Full Name */}
                     <div>
                       <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                        firstname
+                        First Name
                       </label>
                       <input
                         type="text"
-                        value={editFormData.firstname}
-                        onChange={(e) => handleFormChange('firstname', e.target.value)}
+                        value={editFormData.firstName}
+                        onChange={(e) => handleFormChange('firstName', e.target.value)}
                         className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                           isDark 
                             ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
@@ -66,12 +66,12 @@ const EditUserModal = ({isEditModalOpen, isDark, selectedUser, handleCloseModal,
 
                     <div>
                       <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                        lastname
+                        Last Name
                       </label>
                       <input
                         type="text"
-                        value={editFormData.lastname}
-                        onChange={(e) => handleFormChange('lastname', e.target.value)}
+                        value={editFormData.lastName}
+                        onChange={(e) => handleFormChange('lastName', e.target.value)}
                         className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                           isDark 
                             ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
@@ -89,24 +89,6 @@ const EditUserModal = ({isEditModalOpen, isDark, selectedUser, handleCloseModal,
                         type="email"
                         value={editFormData.email}
                         onChange={(e) => handleFormChange('email', e.target.value)}
-                        className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          isDark 
-                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                            : 'bg-white border-gray-300 text-gray-900'
-                        }`}
-                        disabled
-                      />
-                    </div>
-
-                    {/* Phone Number */}
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Phone Number
-                      </label>
-                      <input
-                        type="text"
-                        value={editFormData.phoneNumber}
-                        onChange={(e) => handleFormChange('phoneNumber', e.target.value)}
                         className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                           isDark 
                             ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 

@@ -1,6 +1,5 @@
 import React from 'react'
-
-const DeleteUserModal = ({isDeleteModalOpen, isDark, handleCloseDeleteModal, handleConfirmDelete}) => {
+const DeleteUserModal = ({isDeleteModalOpen, isDark,handleCloseDeleteModal,selectedUser, handleConfirmDelete,handleDeleteUser }) => {
   return (
     <>
 {isDeleteModalOpen && (
@@ -63,7 +62,7 @@ const DeleteUserModal = ({isDeleteModalOpen, isDark, handleCloseDeleteModal, han
           Cancel
         </button>
         <button
-          onClick={handleConfirmDelete}
+          onClick={() => handleConfirmDelete(selectedUser)}
           className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors cursor-pointer"
         >
           Delete User

@@ -16,7 +16,6 @@ const Userr = ({
   getStatusDarkColor,
   getStatusColor,
   handleEditUser,
-  openDeleteModal,
   isCreateModalOpen,
   handleCloseModalCreateUser,
   formData,
@@ -33,8 +32,8 @@ const Userr = ({
   handleUpdateUser,
   isDeleteModalOpen,
   handleCloseDeleteModal,
-  handleConfirmDelete
-
+  handleConfirmDelete,
+  handleDeleteUser
 
 }) => {
 
@@ -63,7 +62,9 @@ const Userr = ({
         getStatusDarkColor={getStatusDarkColor}
         getStatusColor={getStatusColor}
         handleEditUser={handleEditUser}
-        openDeleteModal={openDeleteModal}
+        handleConfirmDelete={handleConfirmDelete}
+        isDeleteModalOpen={isDeleteModalOpen}
+        handleDeleteUser={handleDeleteUser}
         />
 
         {/* Create User Modal */}
@@ -98,8 +99,10 @@ const Userr = ({
       <DeleteUserModal
       isDeleteModalOpen={isDeleteModalOpen}
       isDark={isDark}
+      selectedUser={selectedUser}
       handleCloseDeleteModal={handleCloseDeleteModal}
       handleConfirmDelete={handleConfirmDelete}
+      handleDeleteUser={handleDeleteUser}
       />
     </>
   )

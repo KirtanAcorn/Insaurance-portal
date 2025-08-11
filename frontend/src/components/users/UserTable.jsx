@@ -1,6 +1,47 @@
 import { User, Mail, MapPin, Shield, Clock, Edit, Trash2, Users  } from "lucide-react"
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+const UserTable = ({isDark, getRoleDarkColor, getRoleColor, getStatusDarkColor, getStatusColor, handleEditUser, handleDeleteUser}) => {
+  const [users, setUsers] = useState([]);
+   const [selectedUser, setSelectedUser] = useState(null);
 
-const UserTable = ({isDark, users, getRoleDarkColor, getRoleColor, getStatusDarkColor, getStatusColor, handleEditUser, openDeleteModal}) => {
+  useEffect(() => {
+
+  const fetchUsers = async () => {
+    
+    try {
+      const response = await axios.get('http://localhost:7001/api/users');
+      const formattedUsers = response.data.map((user, index) => ({
+        id: user.id,
+        avatar: getInitials(user.name || user.firstName || ""), 
+        // name: `${user.firstName} ${user.lastName}`,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        location: user.location || 'N/A',
+        role: user.userRole,
+        status: user.accountStatus,
+        phoneNumber: user.phoneNumber,
+        department: user.department,
+        policies: user.policies || 0,
+        claims: user.claims || 0,
+      }));
+      setUsers(formattedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  fetchUsers();
+}, []);
+
+
+const getInitials = (name) => {
+  const names = name.trim().split(" ");
+  if (names.length === 1) return names[0][0].toUpperCase();
+  return (names[0][0] + names[1][0]).toUpperCase();
+};
+  
   return (
     <>
     <div className={`rounded-xl border transition-colors ${
@@ -34,7 +75,6 @@ const UserTable = ({isDark, users, getRoleDarkColor, getRoleColor, getStatusDark
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Role</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Status</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Department</th>
-                  <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Last Login</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Policies</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Claims</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Actions</th>
@@ -56,7 +96,7 @@ const UserTable = ({isDark, users, getRoleDarkColor, getRoleColor, getStatusDark
                         </div>
                         <div>
                           <div className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                             {[user.firstname, user.lastname].filter(Boolean).join(' ')}
+                             {[user.firstName, user.lastName].filter(Boolean).join(' ')}
                           </div>
                           <div className={`text-sm flex items-center space-x-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                             <Mail className="w-3 h-3" />
@@ -96,14 +136,6 @@ const UserTable = ({isDark, users, getRoleDarkColor, getRoleColor, getStatusDark
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <Clock className={`w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
-                        <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {user.lastLogin}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
                       <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         {user.policies}
                       </span>
@@ -124,7 +156,7 @@ const UserTable = ({isDark, users, getRoleDarkColor, getRoleColor, getStatusDark
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
-                        onClick={() => openDeleteModal(true)} 
+                        onClick={() => handleDeleteUser(user)} 
                         className={`p-2 rounded-lg hover:bg-opacity-10 transition-colors cursor-pointer ${
                           isDark ? 'text-gray-400 hover:bg-gray-600' : 'text-gray-500 hover:bg-gray-100'
                         }`}>

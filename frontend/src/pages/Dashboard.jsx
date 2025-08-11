@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { FileText, ChevronDownIcon, UserIcon, Sun, Moon, Monitor, ChevronDown, BarChart3, FileCheck, Shield, Users, UserPlus, Mail, MapPin, Clock, Edit, Trash2, X, User, Building, Key, Eye, Settings, ClipboardList, BuildingIcon, TruckIcon, ShipIcon } from 'lucide-react';
+import { FileText, ChevronDownIcon, UserIcon, Sun, Moon, Monitor, ChevronDown, BarChart3, FileCheck, Shield,Users, UserPlus, Mail, MapPin, Clock, Edit, Trash2, X, User, Building, Key, Eye, Settings, ClipboardList, BuildingIcon, TruckIcon, ShipIcon } from 'lucide-react';
 import DashboardHeader from '../components/DashboardHeader';
 import NavigationTabs from '../components/NavigationTabs';
 import Userr from "./tabs/Userr"
 import Claims from './tabs/Claims';
 import toast from 'react-hot-toast';
 import Policies from './tabs/Policies';
+import axios from "axios";
 
 const Dashboard = () => {
   const [theme, setTheme] = useState('system');
@@ -18,6 +19,7 @@ const Dashboard = () => {
   const [isModalOpenNew, setIsModalOpenNew] = useState(false);
   const [activeTabNew, setActiveTabNew] = useState(0);
   const [selectedCompany, setSelectedCompany] = useState('');
+  const [users, setUsers] = useState([]);
   const [formDataNew, setFormDataNew] = useState({
     company: '',
     policy: '',
@@ -214,8 +216,8 @@ const Dashboard = () => {
   ]
   
   const [editFormData, setEditFormData] = useState({
-    firstname:'',
-    lastname:'',
+    firstName:'',
+    lastName:'',
     email: '',
     phoneNumber: '',
     department: '',
@@ -225,8 +227,8 @@ const Dashboard = () => {
   });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    firstname: '',
-    lastname: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phoneNumber: '',
     department: '',
@@ -324,69 +326,6 @@ const Dashboard = () => {
       subtitle: 'Collected excess',
       color: 'bg-pink-500',
       // icon: AlertCircle
-    }
-  ];
-
-  const users = [
-    {
-      id: 1,
-      firstname: 'John',
-      lastname: 'Smith',
-      email: 'john.smith@astutehealth.com',
-      location: 'London, UK',
-      role: 'Client',
-      status: 'Active',
-      department: 'Operations',
-      lastLogin: '2024-01-15',
-      policies: 3,
-      claims: 1,
-      avatar: 'JS',
-      phoneNumber: '+44 20 7123 4567'
-    },
-    {
-      id: 2,
-      firstname: 'Sarah',
-      lastname: 'Johnson',
-      email: 'sarah.johnson@plb.com',
-      location: 'Manchester, UK',
-      role: 'Agent',
-      status: 'Active',
-      department: 'Insurance',
-      lastLogin: '2024-01-14',
-      policies: 45,
-      claims: 12,
-      avatar: 'SJ',
-      phoneNumber: '+44 20 7123 4568'
-    },
-    {
-      id: 3,
-      firstname: 'Mike',
-      lastname: 'Wilson',
-      email: 'mike.wilson@insurance.com',
-      location: 'Birmingham, UK',
-      role: 'Admin',
-      status: 'Active',
-      department: 'Administration',
-      lastLogin: '2024-01-13',
-      policies: 234,
-      claims: 89,
-      avatar: 'MW',
-      phoneNumber: '+44 20 7123 4569'
-    },
-    {
-      id: 4,
-      firstname: 'Emma',
-      lastname: 'Davis',
-      email: 'emma.davis@client.com',
-      location: 'Leeds, UK',
-      role: 'Client',
-      status: 'Inactive',
-      department: 'Finance',
-      lastLogin: '2024-01-01',
-      policies: 2,
-      claims: 0,
-      avatar: 'ED',
-      phoneNumber: '+44 20 7123 4570'
     }
   ];
 
@@ -528,18 +467,29 @@ const Dashboard = () => {
 
   const handleEditUser = (user) => {
     setSelectedUser(user);
+ 
     setEditFormData({
-      firstname: user.firstname,
-      lastname: user.lastname,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email, 
+      phoneNumber: user.phoneNumber, 
       department: user.department,
       location: user.location,
-      userRole: user.role,
-      accountActive: user.status === 'Active'
+      userRole: user.userRole,
+      isActive: user.isActive === "Active" || user.isActive === 1,
     });
+ 
     setIsEditModalOpen(true);
   };
+
+  const handleDeleteUser = (user) => {
+    console.log(" inside handledeleteuser setselected user is ....",user);
+    setSelectedUser(user);
+    setDeleteModalOpen(true)
+  }
+
+
 
   const handleCloseModal = () => {
     setIsEditModalOpen(false);
@@ -554,13 +504,78 @@ const Dashboard = () => {
       accountActive: true
     });
   };
+  const handleUpdateUser = async (e) => {
+    if (e) e.preventDefault(); 
+ 
+    if (!editFormData.id) {
+      console.error("No user ID to update");
+      return;
+    }
+ 
+    try {
+      const updatedUser = {
+        firstName: editFormData.firstName,
+        lastName: editFormData.lastName,
+        email: editFormData.email,
+        department: editFormData.department,
+        location: editFormData.location,
+        userRole: editFormData.userRole,
+        isActive: editFormData.isActive ? 1:0, 
+      };
 
-  const handleUpdateUser = () => {
-    console.log('Updating user:', editFormData);
-    // Here you would typically make an API call to update the user
-    handleCloseModal();
-    toast.success('User updated successfully!');
+
+      console.log("______________", updatedUser);
+      
+ 
+      await axios.put(
+        `http://localhost:7001/api/users/${editFormData.id}`,
+        updatedUser
+      );
+ 
+      setUsers(); 
+      setIsEditModalOpen(false); 
+    } catch (error) {
+      console.error("Errr is ..............", error);
+      alert("Failed to update user");
+    }
   };
+ 
+  useEffect(() => {
+  const fetchUsers = async () => {
+    
+    try {
+      const response = await axios.get('http://localhost:7001/api/users');
+      const formattedUsers = response.data.map((user, index) => ({
+        id: user.id,
+        avatar: getInitials(user.name || user.firstName || ""), 
+        fullName: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        location: user.location || 'N/A',
+        userRole: user.userRole,
+        status: user.accountStatus,
+        department: user.department,
+        policies: user.policies || 0,
+        claims: user.claims || 0,
+      }));
+      setUsers(formattedUsers);
+
+
+      console.log("set users ..............",formattedUsers);
+      
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  fetchUsers();
+}, []);
+
+
+const getInitials = (name) => {
+  const names = name.trim().split(" ");
+  if (names.length === 1) return names[0][0].toUpperCase();
+  return (names[0][0] + names[1][0]).toUpperCase();
+};
 
   const handleFormChange = (field, value) => {
     setEditFormData(prev => ({
@@ -600,20 +615,55 @@ const Dashboard = () => {
     setIsCreateModalOpen(false);
   };
 
-  const handleCreateUser = () => {
-    console.log('Creating user:', formData);
-    // Handle user creation logic here
-    setIsCreateModalOpen(false);
-    toast.success('User created successfully!');
+  const handleCreateUser = async () => {
+    try {
+      console.log("Creating user:", formData);
+ 
+      const response = await axios.post(
+        "http://localhost:7001/api/users",
+        formData
+      );
+ 
+      if (response.status === 201 || response.status === 200) {
+        console.log("User created successfully:", response.data);
+        
+        setFormData({});
+        setIsCreateModalOpen(false);
+       
+      } else {
+        console.warn("Unexpected response:", response);
+      }
+      
+    } catch (error) {
+      console.error("Error creating user:", error);
+     
+    }
   };
 
+
   const handleCloseDeleteModal = () => setDeleteModalOpen(false);
-const handleConfirmDelete = () => {
-  // your delete logic here
-  // deleteUser(selectedUser.id); // Or however your function is set
-  setDeleteModalOpen(false);
-  toast.success('User deleted successfully!');
-};
+  const handleConfirmDelete = async (selectedUser) => {
+    console.log("inside handle confirm delete",selectedUser);
+  
+    
+    if (!selectedUser?.id) {
+    console.log("userid is not found");
+    return; 
+    }
+  try {
+    await axios.delete(`http://localhost:7001/api/users/${selectedUser.id}`);
+   
+ 
+    setUsers();
+ 
+    setDeleteModalOpen(false);
+    setSelectedUser(null);
+  } 
+   catch (err) {
+    console.error("Error deleting user:", err);
+    alert("Failed to delete user. Please try again.");
+  }
+}
 
 
   const companies = [
@@ -673,6 +723,8 @@ const handleConfirmDelete = () => {
         isDeleteModalOpen={isDeleteModalOpen}
         handleCloseDeleteModal={handleCloseDeleteModal}
         handleConfirmDelete={handleConfirmDelete}
+        handleDeleteUser={handleDeleteUser}
+
         /> } 
      
         {false && <Claims

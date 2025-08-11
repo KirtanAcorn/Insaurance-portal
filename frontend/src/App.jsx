@@ -2,7 +2,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/login';
-import TestPage from './pages/TestPage';
 import { Toaster } from 'react-hot-toast';
 import Dashboard from './pages/Dashboard';
 
@@ -26,7 +25,6 @@ const App = () => {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard/>} />
-        <Route path="/test" element={<TestPage/>} />
       </Routes>
     </Router>
   );
