@@ -15,7 +15,7 @@ const NavigationTabs = ({isDark, tabs, activeTabChanger}) => {
                 onClick={() => activeTabChanger(tab.name)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer w-1/4 text-center justify-center ${
                   isActive
-                    ? 'bg-purple-500 text-white'
+                    ? ` ${tab.color} text-white`
                     : isDark
                     ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'

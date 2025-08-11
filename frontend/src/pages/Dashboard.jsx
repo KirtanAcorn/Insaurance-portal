@@ -330,10 +330,10 @@ const Dashboard = () => {
   ];
 
   const tabs = [
-    { name: 'Dashboard', icon: BarChart3 },
-    { name: 'Claims', icon: FileCheck },
-    { name: 'Policies', icon: Shield },
-    { name: 'Users', icon: Users, active: true }
+    { name: 'Dashboard', icon: BarChart3, color:"bg-gradient-to-r from-purple-500 to-pink-500"},
+    { name: 'Claims', icon: FileCheck, color: "bg-gradient-to-br from-orange-600 via-red-600 to-pink-600"},
+    { name: 'Policies', icon: Shield, color:"bg-gradient-to-r from-purple-600 to-pink-600"},
+    { name: 'Users', icon: Users, active: true, color:"bg-gradient-to-r from-purple-500 to-pink-500"}
   ];
 
     // Sample claims data
@@ -653,9 +653,8 @@ const getInitials = (name) => {
   try {
     await axios.delete(`http://localhost:7001/api/users/${selectedUser.id}`);
    
- 
+    toast.success('User deleted successfully!');
     setUsers();
- 
     setDeleteModalOpen(false);
     setSelectedUser(null);
   } 

@@ -46,7 +46,7 @@ const Login = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
-      isDark ? 'bg-gray-900' : 'bg-gray-50'
+      isDark ? 'bg-gray-900' : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100'
     }`}>
       {/* Theme Selector */}
       <div className="absolute top-4 right-4 z-10">
@@ -72,8 +72,8 @@ const Login = () => {
 
       {/* Main Content */}
       <div className="flex items-center justify-center min-h-screen p-4">
-        <div className={`w-full max-w-md rounded-2xl shadow-2xl transition-colors duration-300 ${
-          isDark ? 'bg-gray-800' : 'bg-white'
+        <div className={`w-full max-w-md rounded-2xl shadow-2xl transition-colors duration-300 border-0 ${
+          isDark ? 'bg-gray-800' : ' bg-white/60'
         }`}>
           {/* Header */}
           <div className="px-8 pt-12 pb-8 text-center">
