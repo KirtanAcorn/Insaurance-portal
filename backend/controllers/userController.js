@@ -163,3 +163,26 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
+// Login
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input("email", sql.VarChar, email)
+      .input("password", sql.VarChar, password)
+      .query("SELECT * FROM Users WHERE email = @email AND password = @password");
+
+    if (result.recordset.length === 0) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    res.json(result.recordset[0]);
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
