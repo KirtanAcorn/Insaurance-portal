@@ -9,6 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loginAs, setLoginAs] = useState('Client');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,9 +31,10 @@ const Login = () => {
     }
   }, [theme]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault(); // Stop page reload
     console.log('Login attempt:', { email, password, loginAs });
-    navigate("/dashboard", {
+   navigate("/dashboard", {
       state: { role: loginAs }
     });
   };
@@ -96,7 +98,7 @@ const Login = () => {
           </div>
 
           {/* Form */}
-          <div className="px-8 pb-8">
+          <form className="px-8 pb-8" onSubmit={handleSubmit}>
             <div className="space-y-6">
               {/* Email Field */}
               <div>
@@ -110,12 +112,12 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
+                  required
                   className={`w-full px-4 py-3 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     isDark 
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
                   }`}
-                  required
                 />
               </div>
 
@@ -131,12 +133,12 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
+                  required
                   className={`w-full px-4 py-3 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     isDark 
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
                   }`}
-                  required
                 />
               </div>
 
@@ -199,14 +201,13 @@ const Login = () => {
 
               {/* Sign In Button */}
               <button
-                type="button"
-                onClick={handleSubmit}
+                type="submit" // ✅ Now triggers HTML5 validation
                 className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
               >
                 Sign In
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
 

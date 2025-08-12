@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/login';
 import { Toaster } from 'react-hot-toast';
 import Dashboard from './pages/Dashboard';
-import TestPage from "./pages/TestPage"
+// import TestPage from "./pages/TestPage"
 
 
 const App = () => {
@@ -26,7 +26,7 @@ const App = () => {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard/>} />
-        <Route path="/test" element={<TestPage/>} />
+        {/* <Route path="/test" element={<TestPage/>} /> */}
       </Routes>
     </Router>
   );
