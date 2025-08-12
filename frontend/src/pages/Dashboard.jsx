@@ -825,35 +825,35 @@ const Dashboard = () => {
     }
   };
  
-  useEffect(() => {
-  const fetchUsers = async () => {
+//   useEffect(() => {
+//   const fetchUsers = async () => {
     
-    try {
-      const response = await axios.get('http://localhost:7001/api/users');
-      const formattedUsers = response.data.map((user, index) => ({
-        id: user.id,
-        avatar: getInitials(user.name || user.firstName || ""), 
-        fullName: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        location: user.location || 'N/A',
-        userRole: user.userRole,
-        status: user.accountStatus,
-        department: user.department,
-        policies: user.policies || 0,
-        claims: user.claims || 0,
-      }));
-      setUsers(formattedUsers);
+//     try {
+//       const response = await axios.get('http://localhost:7001/api/users');
+//       const formattedUsers = response.data.map((user, index) => ({
+//         id: user.id,
+//         avatar: getInitials(user.name || user.firstName || ""), 
+//         fullName: `${user.firstName} ${user.lastName}`,
+//         email: user.email,
+//         location: user.location || 'N/A',
+//         userRole: user.userRole,
+//         status: user.accountStatus,
+//         department: user.department,
+//         policies: user.policies || 0,
+//         claims: user.claims || 0,
+//       }));
+//       setUsers(formattedUsers);
 
 
-      console.log("set users ..............",formattedUsers);
+//       console.log("set users ..............",formattedUsers);
       
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
+//     } catch (error) {
+//       console.error("Error fetching users:", error);
+//     }
+//   };
 
-  fetchUsers();
-}, []);
+//   fetchUsers();
+// }, []);
 
 
 const getInitials = (name) => {
@@ -908,6 +908,8 @@ const getInitials = (name) => {
         "http://localhost:7001/api/users",
         formData
       );
+
+      fetchUsers();
  
       if (response.status === 201 || response.status === 200) {
         console.log("User created successfully:", response.data);
@@ -955,6 +957,39 @@ const getInitials = (name) => {
     'Tech Solutions Ltd',
     'Manufacturing Co Ltd'
   ];
+
+  const changeUsers = (formattedUsers) => {
+    setUsers(formattedUsers);
+  }
+
+
+
+  const fetchUsers = async () => {
+    
+    try {
+      const response = await axios.get('http://localhost:7001/api/users');
+      const formattedUsers = response.data.map((user, index) => ({
+        id: user.id,
+        avatar: getInitials(user.name || user.firstName || ""), 
+        // name: `${user.firstName} ${user.lastName}`,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        location: user.location || 'N/A',
+        role: user.userRole,
+        status: user.accountStatus,
+        phoneNumber: user.phoneNumber,
+        department: user.department,
+        policies: user.policies || 0,
+        claims: user.claims || 0,
+      }));
+      setUsers(formattedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+  fetchUsers();
+
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
