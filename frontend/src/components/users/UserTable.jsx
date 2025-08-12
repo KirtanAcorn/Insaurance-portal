@@ -1,44 +1,36 @@
 import { User, Mail, MapPin, Shield, Clock, Edit, Trash2, Users  } from "lucide-react"
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-const UserTable = ({users ,isDark, getRoleDarkColor, getRoleColor, getStatusDarkColor, getStatusColor, handleEditUser, handleDeleteUser}) => {
+const UserTable = ({users,changeUsers,isDark, getRoleDarkColor, getRoleColor, getStatusDarkColor, getStatusColor, handleEditUser, handleDeleteUser}) => {
   // const [users, setUsers] = useState([]);
-   const [selectedUser, setSelectedUser] = useState(null);
-
-//   useEffect(() => {
-
-//   const fetchUsers = async () => {
+    const fetchUsers = async () => {
     
-//     try {
-//       const response = await axios.get('http://localhost:7001/api/users');
-//       const formattedUsers = response.data.map((user, index) => ({
-//         id: user.id,
-//         avatar: getInitials(user.name || user.firstName || ""), 
-//         // name: `${user.firstName} ${user.lastName}`,
-//         firstName: user.firstName,
-//         lastName: user.lastName,
-//         email: user.email,
-//         location: user.location || 'N/A',
-//         role: user.userRole,
-//         status: user.accountStatus,
-//         phoneNumber: user.phoneNumber,
-//         department: user.department,
-//         policies: user.policies || 0,
-//         claims: user.claims || 0,
-//       }));
-//       changeUsers(formattedUsers);
-//     } catch (error) {
-//       console.error("Error fetching users:", error);
-//     }
-//   };
+    try {
+      const response = await axios.get('http://localhost:7001/api/users');
+      const formattedUsers = response.data.map((user, index) => ({
+        id: user.id,
+        avatar: getInitials(user.name || user.firstName || ""), 
+        // name: `${user.firstName} ${user.lastName}`,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        location: user.location || 'N/A',
+        userRole: user.userRole,
+        status: user.accountStatus,
+        phoneNumber: user.phoneNumber,
+        department: user.department,
+        policies: user.policies || 0,
+        claims: user.claims || 0,
+      }));
+      changeUsers(formattedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
 
-//   fetchUsers();
-// }, []);
-
-console.log("****", users);
-
-
-
+  useEffect(() => {
+    fetchUsers();
+}, [])
 
 const getInitials = (name) => {
   const names = name.trim().split(" ");

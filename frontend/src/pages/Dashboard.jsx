@@ -7,7 +7,7 @@ import Claims from './tabs/Claims';
 import toast from 'react-hot-toast';
 import Policies from './tabs/Policies';
 import axios from "axios";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate,} from "react-router-dom";
 
 const Dashboard = () => {
   const [theme, setTheme] = useState('system');
@@ -17,33 +17,31 @@ const Dashboard = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditModalOpenClaim, setIsEditModalOpenClaim] = useState(false)
   const [activeTabClaim, setActiveTabClaim] = useState('claim')
-  const [isModalOpenNew, setIsModalOpenNew] = useState(false);
-  const [activeTabNew, setActiveTabNew] = useState(0);
   const [selectedCompany, setSelectedCompany] = useState('');
   const [selectedCompanyPolicy, setSelectedCompanyPolicy] = useState('');
   const [selectedInsuranceType, setSelectedInsuranceType] = useState('Property');
   const [policyYear, setPolicyYear] = useState('2024-2025');
+  const [isOpenNewClaim, setIsOpenNewClaim] = useState(false);
   const [users, setUsers] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
   const role = location.state?.role;
-
-  console.log("****", role);
 
    if (!role) {
     // No role found (direct access), redirect to login
     navigate("/login");
     return null;
   }
+    const [formDataNewClaim, setFormDataNewClaim] = useState({
+      selectedCompany: 'Tech Solutions Ltd',
+      selectedPolicy: 'Commercial Liability Insurance',
+      policyId: 'TS2024001',
+      claimType: '',
+      claimAmount: '',
+      incidentDescription: '',
+      incidentDate: ''
+    });
 
-  const [formDataNew, setFormDataNew] = useState({
-    company: '',
-    policy: '',
-    claimType: '',
-    claimAmount: '',
-    incidentDescription: '',
-    incidentDate: ''
-  });
   const [editFormDataClaim, setEditFormDataClaim] = useState({
     claimId: 'CLM-2024-001',
     claimType: 'Water Damage',
@@ -130,31 +128,6 @@ const Dashboard = () => {
       }
     }
   };
-    const getSelectedCompany = () => companiesData[formDataNew.company];
-
-    const tabsNew = [
-      {
-        id: 0,
-        title: 'Company & Policy',
-        icon: FileText,
-        color: 'text-blue-600',
-        bgColor: 'bg-blue-100'
-      },
-      {
-        id: 1,
-        title: 'Claim Information',
-        icon: ClipboardList,
-        color: 'text-green-600',
-        bgColor: 'bg-green-100'
-      },
-      {
-        id: 2,
-        title: 'Policy Details',
-        icon: Shield,
-        color: 'text-purple-600',
-        bgColor: 'bg-purple-100'
-      }
-    ];
 
       const policyCompanies = [
         {
@@ -281,43 +254,29 @@ const Dashboard = () => {
           default: return <BuildingIcon className="w-5 h-5" />;
         }
       };
-  
-    const handleInputChange = (field, value) => {
-      setFormDataNew(prev => {
-        // If company changes, reset policy
-        if (field === 'company') {
-          return {
-            ...prev,
-            company: value,
-            policy: ''
-          };
-        }
-        return {
-          ...prev,
-          [field]: value
-        };
-      });
-    };
-  
-    const handleCloseModalNew = () => {
-      setIsModalOpenNew(false);
-    };
-  
-    const handleSubmitNew = () => {
-      console.log('Submitting claim:', formDataNew);
-      setIsModalOpenNew(false);
-      toast.success('Claim updated successfully!');
 
-      // Handle form submission
-    };
 
-  
   const handleFormChangeClaim = (field, value) => {
     setEditFormDataClaim(prev => ({
       ...prev,
       [field]: value
     }))
   }
+
+    const handleInputChangeNewClaim = (field, value) => {
+    setFormDataNewClaim(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleCloseNewClaim = () => {
+    setIsOpenNewClaim(false);
+  };
+
+    const handleCancelNewClaim = () => {
+    setIsOpenNewClaim(false);
+  };
 
   const handleCloseModalClaim = () => {
     setIsEditModalOpenClaim(false)
@@ -328,6 +287,12 @@ const Dashboard = () => {
     handleCloseModalClaim();
     toast.success('Claim created successfully!');
   }
+
+    const handleSubmitNewClaim = () => {
+    setIsOpenNewClaim(false);
+    console.log('Submitting claim:', formData);
+    
+  };
 
   const timelineEvents = [
     {
@@ -817,7 +782,7 @@ const Dashboard = () => {
         updatedUser
       );
  
-      setUsers(); 
+       fetchUsers(); 
       setIsEditModalOpen(false); 
     } catch (error) {
       console.error("Errr is ..............", error);
@@ -884,7 +849,9 @@ const getInitials = (name) => {
       : [...prev.companyAccess, company]
   }));
 };
-
+  const changeUsers = (formattedUsers) =>{
+    fetchUsers(formattedUsers)
+  }
 
   const handlePermissionChange = (permission) => {
     setFormData(prev => ({
@@ -902,20 +869,19 @@ const getInitials = (name) => {
 
   const handleCreateUser = async () => {
     try {
+      
       console.log("Creating user:", formData);
  
       const response = await axios.post(
-        "http://localhost:7001/api/users",
-        formData
+        "http://localhost:7001/api/users", formData
       );
-
       fetchUsers();
+      setIsCreateModalOpen(false);
  
       if (response.status === 201 || response.status === 200) {
         console.log("User created successfully:", response.data);
         
         setFormData({});
-        setIsCreateModalOpen(false);
        
       } else {
         console.warn("Unexpected response:", response);
@@ -941,7 +907,7 @@ const getInitials = (name) => {
     await axios.delete(`http://localhost:7001/api/users/${selectedUser.id}`);
    
     toast.success('User deleted successfully!');
-    setUsers();
+    fetchUsers();
     setDeleteModalOpen(false);
     setSelectedUser(null);
   } 
@@ -957,13 +923,6 @@ const getInitials = (name) => {
     'Tech Solutions Ltd',
     'Manufacturing Co Ltd'
   ];
-
-  const changeUsers = (formattedUsers) => {
-    setUsers(formattedUsers);
-  }
-
-
-
   const fetchUsers = async () => {
     
     try {
@@ -988,7 +947,13 @@ const getInitials = (name) => {
       console.error("Error fetching users:", error);
     }
   };
+
+
+
+
+  useEffect(()=> {
   fetchUsers();
+  },[])
 
 
   return (
@@ -1024,6 +989,7 @@ const getInitials = (name) => {
         stats={stats}
         isDark={isDark}
         users={users}
+        changeUsers={changeUsers}
         getRoleDarkColor={getRoleDarkColor}
         getRoleColor={getRoleColor}
         getStatusDarkColor={getStatusDarkColor}
@@ -1068,17 +1034,14 @@ const getInitials = (name) => {
         handleFormChangeClaim={handleFormChangeClaim}
         timelineEvents={timelineEvents}
         handleUpdateClaim={handleUpdateClaim}
-        openEditModalOpenClaim={setIsEditModalOpenClaim}     
-        isModalOpenNew={isModalOpenNew}  
-        openIsModalOpenNew={setIsModalOpenNew}  
-        handleCloseModalNew={handleCloseModalNew} 
-        tabsNew={tabsNew}
-        openActiveTabNew={setActiveTabNew}
-        activeTabNew={activeTabNew}
-        formDataNew={formDataNew}
-        handleInputChange={handleInputChange}
-        getSelectedCompany={getSelectedCompany}
-        handleSubmitNew={handleSubmitNew}
+        openEditModalOpenClaim={setIsEditModalOpenClaim} 
+        isOpenNewClaim={isOpenNewClaim}  
+        openIsOpenNewClaim={setIsOpenNewClaim}  
+        handleSubmitNewClaim={handleSubmitNewClaim} 
+        formDataNewClaim={formDataNewClaim}
+        handleInputChangeNewClaim={handleInputChangeNewClaim}
+        handleCloseNewClaim={handleCloseNewClaim}
+        handleCancelNewClaim={handleCancelNewClaim}
         />}
 
        {activeTab === "Policies" && 

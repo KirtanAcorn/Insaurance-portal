@@ -5,7 +5,9 @@ import ClaimsOverview from '../../components/claims/ClaimsOverview'
 import StatisticsCards from '../../components/claims/StatisticsCards'
 import SubmitNewClaimModal from '../../components/claims/SubmitNewClaimModal'
 
-const Claims = ({isDark, 
+const Claims = ({
+                 role,
+                 isDark, 
                  claims, 
                  getStatusColorr, 
                  getPolicyTypeColorr, 
@@ -23,24 +25,24 @@ const Claims = ({isDark,
                  isEditModalOpenClaim,
                  isModalOpenNew,
                  openIsModalOpenNew,
-                 handleCloseModalNew,
-                 tabsNew,
-                 openActiveTabNew,
-                 activeTabNew,
-                 formDataNew,
-                 handleInputChange,
-                 getSelectedCompany,
-                 handleSubmitNew
+                 isOpenNewClaim,
+                 openIsOpenNewClaim,
+                 handleSubmitNewClaim,
+                 formDataNewClaim,
+                 handleInputChangeNewClaim,
+                 handleCloseNewClaim,
+                 handleCancelNewClaim
                 }) => {
   return (
     <>
     <ClaimsHeader
-    openIsModalOpenNew={openIsModalOpenNew}
+    openIsOpenNewClaim={openIsOpenNewClaim}
     />
 
     {/* Claims Overview Section */}
 
     <ClaimsOverview
+    role={role}
     isDark={isDark}
     claims={claims}
     getStatusColorr={getStatusColorr}
@@ -72,16 +74,14 @@ const Claims = ({isDark,
     />
 
     <SubmitNewClaimModal
-    isModalOpenNew={isModalOpenNew}
-    openIsModalOpenNew={openIsModalOpenNew}
-    handleCloseModalNew={handleCloseModalNew}
-    tabsNew={tabsNew}
-    openActiveTabNew={openActiveTabNew}
-    activeTabNew={activeTabNew}
-    formDataNew={formDataNew}
-    handleInputChange={handleInputChange}
-    getSelectedCompany={getSelectedCompany}
-    handleSubmitNew={handleSubmitNew}
+    isDark={isDark}
+    isOpenNewClaim={isOpenNewClaim}
+    openIsOpenNewClaim={openIsOpenNewClaim}
+    handleSubmitNewClaim={handleSubmitNewClaim}
+    formDataNewClaim={formDataNewClaim}
+    handleInputChangeNewClaim={handleInputChangeNewClaim}
+    handleCloseNewClaim={handleCloseNewClaim}
+    handleCancelNewClaim={handleCancelNewClaim}
     />
     </>
   )

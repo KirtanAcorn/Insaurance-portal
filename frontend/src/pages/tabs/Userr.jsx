@@ -11,6 +11,7 @@ const Userr = ({
   stats,
   isDark,
   users,
+  changeUsers,
   getRoleDarkColor,
   getRoleColor,
   getStatusDarkColor,
@@ -34,7 +35,6 @@ const Userr = ({
   handleCloseDeleteModal,
   handleConfirmDelete,
   handleDeleteUser
-
 }) => {
 
 
@@ -57,7 +57,7 @@ const Userr = ({
         <UserTable
         isDark={isDark}
         users={users}
-        // changeUsers={changeUsers}
+        changeUsers={changeUsers}
         getRoleDarkColor={getRoleDarkColor}
         getRoleColor={getRoleColor}
         getStatusDarkColor={getStatusDarkColor}
