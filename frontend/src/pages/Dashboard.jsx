@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, ChevronDownIcon, UserIcon, Sun, Moon, Monitor, ChevronDown, BarChart3, FileCheck, Shield,Users, UserPlus, Mail, MapPin, Clock, Edit, Trash2, X, User, Building, Key, Eye, Settings, ClipboardList, BuildingIcon, TruckIcon, ShipIcon } from 'lucide-react';
+import { FileText, ChevronDownIcon, UserIcon, Sun, Moon, Monitor, ChevronDown, BarChart3, FileCheck, Shield,Users, UserPlus, Mail, MapPin, Clock, Edit, Trash2, X, User, Building, Key, Eye, Settings, ClipboardList, BuildingIcon, TruckIcon, ShipIcon, AlertCircle, DollarSign, Activity, CheckCircle, Home, AlertTriangle, Truck, Globe } from 'lucide-react';
 import DashboardHeader from '../components/DashboardHeader';
 import NavigationTabs from '../components/NavigationTabs';
 import Userr from "./tabs/Userr"
@@ -7,6 +7,7 @@ import Claims from './tabs/Claims';
 import toast from 'react-hot-toast';
 import Policies from './tabs/Policies';
 import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [theme, setTheme] = useState('system');
@@ -23,6 +24,18 @@ const Dashboard = () => {
   const [selectedInsuranceType, setSelectedInsuranceType] = useState('Property');
   const [policyYear, setPolicyYear] = useState('2024-2025');
   const [users, setUsers] = useState([]);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const role = location.state?.role;
+
+  console.log("****", role);
+
+   if (!role) {
+    // No role found (direct access), redirect to login
+    navigate("/login");
+    return null;
+  }
+
   const [formDataNew, setFormDataNew] = useState({
     company: '',
     policy: '',
@@ -117,10 +130,8 @@ const Dashboard = () => {
       }
     }
   };
-
     const getSelectedCompany = () => companiesData[formDataNew.company];
 
-  
     const tabsNew = [
       {
         id: 0,
@@ -455,7 +466,7 @@ const Dashboard = () => {
   ];
 
   const tabs = [
-    { name: 'Dashboard', icon: BarChart3, color:"bg-gradient-to-r from-purple-500 to-pink-500"},
+    { name: 'Dashboard', icon: BarChart3, color:"bg-gradient-to-br from-blue-500 to-cyan-500"},
     { name: 'Claims', icon: FileCheck, color: "bg-gradient-to-br from-orange-600 via-red-600 to-pink-600"},
     { name: 'Policies', icon: Shield, color:"bg-gradient-to-r from-purple-600 to-pink-600"},
     { name: 'Users', icon: Users, active: true, color:"bg-gradient-to-r from-purple-500 to-pink-500"}
@@ -503,6 +514,155 @@ const Dashboard = () => {
       companyIcon: '🏭'
     }
   ];
+
+    const statsData = [
+    {
+      title: 'Total Policies',
+      value: '6',
+      change: '+12%',
+      changeText: 'from last month',
+      icon: FileText,
+      color: 'blue'
+    },
+    {
+      title: 'Active Claims',
+      value: '1',
+      change: '+5%',
+      changeText: 'from last month',
+      icon: AlertCircle,
+      color: 'orange'
+    },
+    {
+      title: 'Total Premium',
+      value: '£134K',
+      change: '+18%',
+      changeText: 'from last month',
+      icon: DollarSign,
+      color: 'green'
+    },
+    {
+      title: 'Registered Users',
+      value: '4',
+      change: '+8%',
+      changeText: 'from last month',
+      icon: Users,
+      color: 'purple'
+    }
+  ];
+
+  const recentActivity = [
+    {
+      type: 'warning',
+      title: 'Under Review - Water Damage',
+      subtitle: 'Sarah Johnson',
+      date: '2024-01-17',
+      icon: AlertCircle
+    },
+    {
+      type: 'info',
+      title: 'Assigned to Agent - Water Damage',
+      subtitle: 'System',
+      date: '2024-01-16',
+      icon: Activity
+    },
+    {
+      type: 'info',
+      title: 'Claim Submitted - Water Damage',
+      subtitle: 'John Smith',
+      date: '2024-01-15',
+      icon: Activity
+    },
+    {
+      type: 'success',
+      title: 'Approved - Public Liability',
+      subtitle: 'Sarah Johnson',
+      date: '2024-01-14',
+      icon: CheckCircle
+    },
+    {
+      type: 'info',
+      title: 'Payment Processed - Equipment Damage',
+      subtitle: 'Finance Team',
+      date: '2024-01-12',
+      icon: Activity
+    }
+  ];
+
+  const policies = [
+    {
+      title: 'Property Insurance',
+      status: 'Active',
+      coverage: '£2,087,097',
+      icon: Home,
+      statusColor: 'green'
+    },
+    {
+      title: 'Liability Insurance',
+      status: 'Expired',
+      coverage: 'Renewal required',
+      icon: AlertTriangle,
+      statusColor: 'red'
+    },
+    {
+      title: 'Fleet Insurance',
+      status: 'Active',
+      coverage: '£500,000',
+      icon: Truck,
+      statusColor: 'green'
+    }
+  ];
+
+  const quickStats = [
+    {
+      title: 'Global Coverage',
+      value: '98.5%',
+      icon: Globe,
+      color: 'blue'
+    },
+    {
+      title: 'Claim Success',
+      value: '94.2%',
+      icon: CheckCircle,
+      color: 'green'
+    },
+    {
+      title: 'Data Security',
+      value: '99.9%',
+      icon: Shield,
+      color: 'purple'
+    }
+  ];
+
+  const getColorClasses = (color, variant = 'bg') => {
+    const colors = {
+      blue: {
+        bg: isDark ? 'bg-blue-900/30' : 'bg-blue-50',
+        text: 'text-blue-600',
+        icon: isDark ? 'text-blue-400' : 'text-blue-500'
+      },
+      orange: {
+        bg: isDark ? 'bg-orange-900/30' : 'bg-orange-50',
+        text: 'text-orange-600',
+        icon: isDark ? 'text-orange-400' : 'text-orange-500'
+      },
+      green: {
+        bg: isDark ? 'bg-green-900/30' : 'bg-green-50',
+        text: 'text-green-600',
+        icon: isDark ? 'text-green-400' : 'text-green-500'
+      },
+      purple: {
+        bg: isDark ? 'bg-purple-900/30' : 'bg-purple-50',
+        text: 'text-purple-600',
+        icon: isDark ? 'text-purple-400' : 'text-purple-500'
+      },
+      red: {
+        bg: isDark ? 'bg-red-900/30' : 'bg-red-50',
+        text: 'text-red-600',
+        icon: isDark ? 'text-red-400' : 'text-red-500'
+      }
+    };
+    return colors[color] || colors.blue;
+  };
 
     const getStatusColorr = (status) => {
     switch (status) {
@@ -806,10 +966,12 @@ const getInitials = (name) => {
       isDark={isDark}
       theme={theme}
       setTheme={setTheme}
+      role={role}
       />
 
       {/* Navigation Tabs */}
       <NavigationTabs
+      role={role}
       isDark={isDark}
       tabs={tabs.map((tab) => ({
     ...tab,
@@ -822,7 +984,7 @@ const getInitials = (name) => {
       {/* Main Content */}
       <main className="p-6">
 
-       {activeTab === "Users" && <Userr
+       {activeTab === "Users" && (<Userr
         openCreateModal={setIsCreateModalOpen}
         stats={stats}
         isDark={isDark}
@@ -852,9 +1014,10 @@ const getInitials = (name) => {
         handleConfirmDelete={handleConfirmDelete}
         handleDeleteUser={handleDeleteUser}
 
-        /> } 
+        />) } 
      
         {activeTab === "Claims" &&  <Claims
+        role={role}
         isDark={isDark}
         claims={claims}
         getStatusColorr={getStatusColorr}

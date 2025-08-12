@@ -1,14 +1,20 @@
 
-const NavigationTabs = ({isDark, tabs, activeTabChanger}) => {
+const NavigationTabs = ({isDark, tabs, activeTabChanger, role}) => {
+
+    // Filter out "Users" tab for clients
+  const visibleTabs = role === "Client"
+    ? tabs.filter((tab) => tab.name !== "Users")
+    : tabs;
+
   return (
     <>
     <nav className={`px-6 py-4 border-b transition-colors ${
         isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
       }`}>
         <div className="flex justify-center">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = tab.active;
+          {visibleTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = tab.active;
             return (
               <button
                 key={tab.name}

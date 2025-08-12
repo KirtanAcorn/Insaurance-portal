@@ -9,7 +9,6 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loginAs, setLoginAs] = useState('Client');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +32,9 @@ const Login = () => {
 
   const handleSubmit = () => {
     console.log('Login attempt:', { email, password, loginAs });
-    navigate("/dashboard");
+    navigate("/dashboard", {
+      state: { role: loginAs }
+    });
   };
 
   const themeOptions = [

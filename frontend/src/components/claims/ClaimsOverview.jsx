@@ -1,6 +1,6 @@
 import { FileText, Calendar, Eye, Edit} from "lucide-react"
 
-const ClaimsOverview = ({isDark, claims, getStatusColorr, getPolicyTypeColorr, getClaimTypeColorr, getStatusDarkColorr, openEditModalOpenClaim}) => {
+const ClaimsOverview = ({isDark, role, claims, getStatusColorr, getPolicyTypeColorr, getClaimTypeColorr, getStatusDarkColorr, openEditModalOpenClaim}) => {
   return (
     <>
         <div className={`rounded-xl border transition-colors mb-8 ${
@@ -117,6 +117,7 @@ const ClaimsOverview = ({isDark, claims, getStatusColorr, getPolicyTypeColorr, g
                         }`}>
                           <Eye className="w-4 h-4" />
                         </button>
+                        {role !== "Client" && ( 
                         <button
                         onClick={() => openEditModalOpenClaim(true)} 
                         className={`p-2 rounded-lg transition-colors cursor-pointer ${
@@ -124,6 +125,8 @@ const ClaimsOverview = ({isDark, claims, getStatusColorr, getPolicyTypeColorr, g
                         }`}>
                           <Edit className="w-4 h-4" />
                         </button>
+                        )}
+
                       </div>
                     </td>
                   </tr>

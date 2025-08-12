@@ -1,7 +1,7 @@
 import { FileText} from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 
-const DashboardHeader = ({theme, setTheme, isDark}) => {
+const DashboardHeader = ({theme, setTheme, isDark, role}) => {
    const navigate = useNavigate();
 
      const handleLogout = () => {
@@ -27,7 +27,7 @@ const DashboardHeader = ({theme, setTheme, isDark}) => {
               </p>
             </div>
             <div className="ml-4 px-3 py-1 bg-blue-500 text-white text-xs font-medium rounded-full">
-              ADMIN
+              {role}
             </div>
           </div>
 
