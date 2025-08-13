@@ -385,7 +385,7 @@ const Dashboard = () => {
       color: 'bg-green-500'
     },
     {
-      title: 'Agents',
+      title: 'Team Members',
       value: '1',
       change: '0 from last month',
       changeType: 'neutral',
@@ -925,9 +925,33 @@ const getInitials = (name) => {
 
 
   const companies = [
-    'Astute Healthcare Limited',
-    'Tech Solutions Ltd',
-    'Manufacturing Co Ltd'
+    'Astute Healthcare limited',
+    'Beauty Magasin Ltd',
+    'The Future Center Storage and Distribution Limited',
+    'Jambo Supplies Limited',
+    'Virtual Works 360 Limited',
+    'Acme Pharma Ltd',
+    'London Luxury Product',
+    'Activecare Online',
+    'Hardlow Lubricants Limited',
+    'Safe Storage and Distribution Limited',
+    'Jambo BV',
+    'Doc Pharm GmbH',
+    'Beauty Care Global sp. Zoo',
+    'Lifexa BVBA',
+    'Beauty Store LLC',
+    'Beyondtrend USA LLC',
+    'Jambo Wholesale Corporation LLC',
+    'Global Brand Storage & Ditribution LLC',
+    'AHA Goods Wholeseller LLC',
+    'A2Z (Acorn USA)',
+    'J & D International Business',
+    'Acorn Solution Ltd',
+    'Astute Wholesale Limited',
+    'GCET Limited',
+    'The Future Center Property Management Limited',
+    'Hetasveeben & Pratibhakumari - Landlord',
+    'AUCLLP'
   ];
   const fetchUsers = async () => {
     
