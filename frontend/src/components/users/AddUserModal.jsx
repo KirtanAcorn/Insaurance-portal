@@ -93,7 +93,7 @@ const AddUserModal = ({isCreateModalOpen, isDark, handleCloseModalCreateUser, fo
                       type="email"
                       placeholder="Enter email address"
                       value={formData.email}
-                                              onChange={(e) => handleFormChangeCreateUser('email', e.target.value)}
+                      onChange={(e) => handleFormChangeCreateUser('email', e.target.value)}
                       className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         isDark 
                           ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
@@ -111,7 +111,7 @@ const AddUserModal = ({isCreateModalOpen, isDark, handleCloseModalCreateUser, fo
                       type="text"
                       placeholder="Enter phone number"
                       value={formData.phoneNumber}
-                                              onChange={(e) => handleFormChangeCreateUser('phoneNumber', e.target.value)}
+                      onChange={(e) => handleFormChangeCreateUser('phoneNumber', e.target.value)}
                       className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         isDark 
                           ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
@@ -250,7 +250,7 @@ const AddUserModal = ({isCreateModalOpen, isDark, handleCloseModalCreateUser, fo
                           type="checkbox"
                           id={company}
                           name="companyAccess"
-                          checked={formData.companyAccess.includes(company)}
+                          checked={(formData?.companyAccess || []).includes(company)}
                           onChange={() => handleCompanyAccessChange(company)}
                           className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                         />

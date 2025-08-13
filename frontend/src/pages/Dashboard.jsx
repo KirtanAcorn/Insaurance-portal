@@ -784,6 +784,7 @@ const Dashboard = () => {
  
        fetchUsers(); 
       setIsEditModalOpen(false); 
+      toast.success('User updated successfully!');
     } catch (error) {
       console.error("Errr is ..............", error);
       alert("Failed to update user");
@@ -877,6 +878,7 @@ const getInitials = (name) => {
       );
       fetchUsers();
       setIsCreateModalOpen(false);
+      toast.success('User created successfully!');
  
       if (response.status === 201 || response.status === 200) {
         console.log("User created successfully:", response.data);
@@ -896,8 +898,8 @@ const getInitials = (name) => {
 
   const handleCloseDeleteModal = () => setDeleteModalOpen(false);
   const handleConfirmDelete = async (selectedUser) => {
-    console.log("inside handle confirm delete",selectedUser);
-  
+  console.log("inside handle confirm delete",selectedUser);
+
     
     if (!selectedUser?.id) {
     console.log("userid is not found");
@@ -906,10 +908,12 @@ const getInitials = (name) => {
   try {
     await axios.delete(`http://localhost:7001/api/users/${selectedUser.id}`);
    
-    toast.success('User deleted successfully!');
+    
     fetchUsers();
     setDeleteModalOpen(false);
     setSelectedUser(null);
+    toast.success('User deleted successfully!');
+
   } 
    catch (err) {
     console.error("Error deleting user:", err);
@@ -955,6 +959,32 @@ const getInitials = (name) => {
   fetchUsers();
   },[])
 
+ const openCreateModal = (flag) => {
+  if (flag) {
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      department: '',
+      location: '',
+      userRole: '',
+      accountStatus: 'Active',
+      temporaryPassword: '',
+      companyAccess: [],
+      permissions: {
+        viewClaims: false,
+        processClaims: false,
+        createPolicies: false,
+        manageUsers: false
+      },
+      additionalNotes: ''
+    });
+  }
+  setIsCreateModalOpen(flag);
+};
+
+
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
@@ -985,7 +1015,7 @@ const getInitials = (name) => {
       <main className="p-6">
 
        {activeTab === "Users" && (<Userr
-        openCreateModal={setIsCreateModalOpen}
+        openCreateModal={openCreateModal}
         stats={stats}
         isDark={isDark}
         users={users}
