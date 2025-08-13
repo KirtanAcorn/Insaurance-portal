@@ -186,3 +186,28 @@ exports.login = async (req, res) => {
 };
 
 
+//
+exports.getUserRoleByEmail = async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input("email", sql.VarChar, email)
+      .query(`
+        SELECT userRole 
+        FROM Users 
+        WHERE email = @email AND isActive = 1
+      `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ userRole: result.recordset[0].userRole });
+  } catch (err) {
+    console.error("Error fetching user role:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+

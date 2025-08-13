@@ -33,14 +33,14 @@ const Dashboard = () => {
     navigate("/login");
     return null;
   }
-    const [formDataNewClaim, setFormDataNewClaim] = useState({
-      selectedCompany: 'Tech Solutions Ltd',
-      selectedPolicy: 'Commercial Liability Insurance',
-      policyId: 'TS2024001',
-      claimType: '',
-      claimAmount: '',
-      incidentDescription: '',
-      incidentDate: ''
+   const [formDataNewClaim, setFormDataNewClaim] = useState({
+    companyName: '',
+    policyName: '',
+    claimType: '',
+    claimAmount: '',
+    Description: '',
+    incidentDate: '',
+    supportingDocument: null
     });
 
   const [editFormDataClaim, setEditFormDataClaim] = useState({
@@ -280,7 +280,7 @@ const Dashboard = () => {
   };
 
   const handleCloseModalClaim = () => {
-    setIsEditModalOpenClaim(false)
+    setIsOpenNewClaim(false)
   }
 
   const handleUpdateClaim = () => {
@@ -288,13 +288,6 @@ const Dashboard = () => {
     handleCloseModalClaim();
     toast.success('Claim created successfully!');
   }
-
-    const handleSubmitNewClaim = () => {
-    setIsOpenNewClaim(false);
-    toast.success('Claim created successfully!');
-    console.log('Submitting claim:', formData);
-    
-  };
 
   const timelineEvents = [
     {
@@ -922,6 +915,59 @@ const getInitials = (name) => {
     alert("Failed to delete user. Please try again.");
   }
 }
+
+
+  const handleSubmitNewClaim = async (formValues, file) => {
+  try {
+    const formData = new FormData();
+    formData.append('companyName', formValues.companyName);
+    formData.append('policyName', formValues.policyName);
+    formData.append('claimType', formValues.claimType);
+ 
+    const claimAmount = formValues.claimAmount;
+    console.log("*******************", claimAmount);
+ 
+    if (!claimAmount || isNaN(Number(claimAmount))) {
+      alert('Please enter a valid claim amount.');
+      return;
+    }
+ 
+    formData.append('claimAmount', claimAmount);
+    formData.append('Description', formValues.Description);
+    formData.append('incidentDate', formValues.incidentDate);
+ 
+    if (file) {
+      formData.append('supportingDocuments', file);
+    }
+ 
+    // Send request via Axios
+    const response = await axios.post(
+      'http://localhost:7001/api/claims',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+ 
+ 
+ 
+   
+ 
+    // Axios automatically parses JSON into response.data
+    const data = response.data;
+ 
+    // Optional: do something with the returned claimId
+    toast.success('Claim created successfully!');
+      handleCloseModalClaim();
+ 
+  } catch (error) {
+    // Handle axios error correctly
+    const errorMsg = error.response?.data?.error || error.message;
+    alert('Error: ' + errorMsg);
+  }
+};
 
 
   const companies = [

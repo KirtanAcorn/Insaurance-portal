@@ -62,7 +62,7 @@ const ClaimsOverview = ({isDark, role, claims, getStatusColorr, getPolicyTypeCol
                           {claim.companyIcon}
                         </div>
                         <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          {claim.company}
+                        {claim.companyName}
                         </span>
                       </div>
                     </td>
@@ -70,12 +70,12 @@ const ClaimsOverview = ({isDark, role, claims, getStatusColorr, getPolicyTypeCol
                       <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
                         getPolicyTypeColorr(claim.policyType)
                       }`}>
-                        {claim.policyType}
+                        {claim.policyName}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                        getClaimTypeColorr(claim.type)
+                        getClaimTypeColorr(claim.claimType)
                       }`}>
                         {claim.type}
                       </span>
@@ -99,14 +99,15 @@ const ClaimsOverview = ({isDark, role, claims, getStatusColorr, getPolicyTypeCol
                     </td>
                     <td className="px-6 py-4">
                       <span className={`font-semibold text-green-600 ${isDark ? 'text-green-400' : ''}`}>
-                        {claim.netAmount}
+                        {claim.netClaimAmount}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
                         <Calendar className={`w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
                         <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {claim.date}
+                          {claim.incidentDate ? new Date(claim.incidentDate).toLocaleDateString() : 'N/A'}
+
                         </span>
                       </div>
                     </td>
