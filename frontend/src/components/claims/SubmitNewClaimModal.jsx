@@ -125,12 +125,36 @@ const SubmitNewClaimModal = ({
                               : "bg-white border-gray-300 text-gray-900"
                           }`}
                         >
-                          <option value="Tech Solutions Ltd">
-                            Tech Solutions Ltd
+                          <option value="Astute Healthcare limited">
+                          Astute Healthcare limited
                           </option>
-                          <option value="Global Corp">Global Corp</option>
-                          <option value="Innovation Inc">Innovation Inc</option>
-                        </select>
+                          <option value="Beauty Magasin Ltd">Beauty Magasin Ltd</option>
+                          <option value="The Future Center Storage and Distribution Limited">The Future Center Storage and Distribution Limited</option>
+                          <option value="Jambo Supplies Limited">Jambo Supplies Limited</option>
+                          <option value="Virtual Works 360 Limited">Virtual Works 360 Limited</option>
+                          <option value="Acme Pharma Ltd">Acme Pharma Ltd</option>
+                          <option value="London Luxury Product">London Luxury Product</option>
+                          <option value="Activecare Online">Activecare Online</option>
+                          <option value="Hardlow Lubricants Limited">Hardlow Lubricants Limited</option>
+                          <option value="Safe Storage and Distribution Limited">Safe Storage and Distribution Limited</option>
+                          <option value="Jambo BV">Jambo BV</option>                          
+                          <option value="Doc Pharm GmbH">Doc Pharm GmbH</option>
+                          <option value="Beauty Care Global sp. Zoo">Beauty Care Global sp. Zoo</option>
+                          <option value="Lifexa BVBA">Lifexa BVBA</option>
+                          <option value="Beauty Store LLC">Beauty Store LLC</option>
+                          <option value="Beyondtrend USA LLC">Beyondtrend USA LLC</option>
+                          <option value="Jambo Wholesale Corporation LLC">Jambo Wholesale Corporation LLC</option>
+                          <option value="Global Brand Storage & Ditribution LLC">Global Brand Storage & Ditribution LLC</option>
+                          <option value="AHA Goods Wholeseller LLC">AHA Goods Wholeseller LLC</option>
+                          <option value="A2Z (Acorn USA)">A2Z (Acorn USA)</option>
+                          <option value="J & D International Business">J & D International Business</option>
+                          <option value="Acorn Solution Ltd">Acorn Solution Ltd</option>
+                          <option value="Astute Wholesale Limited">Astute Wholesale Limited</option>
+                          <option value="GCET Limited">GCET Limited</option>
+                          <option value="The Future Center Property Management Limited">The Future Center Property Management Limited</option>
+                          <option value="Hetasveeben & Pratibhakumari - Landlord">Hetasveeben & Pratibhakumari - Landlord</option>
+                          <option value="AUCLLP">AUCLLP</option>
+                          </select>
                       </div>
                     </div>
 
@@ -157,15 +181,16 @@ const SubmitNewClaimModal = ({
                             : "bg-white border-gray-300 text-gray-900"
                         }`}
                       >
-                        <option value="Commercial Liability Insurance">
-                          Commercial Liability Insurance
-                        </option>
                         <option value="Property Insurance">
-                          Property Insurance
+                        Property Insurance
                         </option>
-                        <option value="Professional Indemnity">
-                          Professional Indemnity
+                        <option value="Commercial Liability Insurance">
+                        Commercial Liability Insurance
                         </option>
+                        <option value="Marine Insurance">
+                        Marine Insurance
+                        </option>
+                        <option value="Fleet Insurance">Fleet Insurance</option>
                       </select>
                       <p
                         className={`text-xs mt-1 ${
@@ -218,13 +243,17 @@ const SubmitNewClaimModal = ({
                       >
                         <option value="">Select claim type</option>
                         <option value="Property Damage">Property Damage</option>
-                        <option value="Liability">Liability</option>
-                        <option value="Professional Indemnity">
-                          Professional Indemnity
+                        <option value="Theft">Theft</option>
+                        <option value="Fire Damage">
+                        Fire Damage
                         </option>
-                        <option value="Public Liability">
-                          Public Liability
+                        <option value="Water Damage">
+                        Water Damage
                         </option>
+                        <option value="Public Liability">Public Liability</option>
+                        <option value="Product Liability">Product Liability</option>
+                        <option value="Vehicle Accident">Vehicle Accident</option>
+                        <option value="Marine Loss">Marine Loss</option>
                       </select>
                     </div>
 
@@ -619,7 +648,7 @@ const SubmitNewClaimModal = ({
               </button>
               <button
                 onClick={() => handleSubmitNewClaim(formDataNewClaim, formDataNewClaim.supportingDocument)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white"
               >
                 Submit Claim
               </button>

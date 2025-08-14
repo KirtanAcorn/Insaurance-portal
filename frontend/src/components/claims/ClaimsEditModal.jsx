@@ -1,6 +1,6 @@
-import { Edit, FileText, Calendar, X } from "lucide-react"
+import { Edit, FileText, Calendar, X, User} from "lucide-react"
 
-const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, handleCloseModalClaim, activeTabClaim, openActiveTabClaim, handleFormChangeClaim, timelineEvents, handleUpdateClaim}) => {
+const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, handleCloseModalClaim, activeTabClaim, openActiveTabClaim, handleFormChangeClaim, timelineEvents, handleUpdateClaim, users }) => {
 
   return (
     <>
@@ -112,7 +112,7 @@ const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, hand
                           Assigned To
                         </label>
                         <select
-                          value={editFormDataClaim.assignedTo}
+                          value={editFormDataClaim.assignedTo || ''}
                           onChange={(e) => handleFormChangeClaim('assignedTo', e.target.value)}
                           className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                             isDark 
@@ -120,10 +120,15 @@ const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, hand
                               : 'bg-white border-gray-300 text-gray-900'
                           }`}
                         >
-                          <option value="Sarah Johnson">Sarah Johnson</option>
-                          <option value="John Smith">John Smith</option>
-                          <option value="Emma Wilson">Emma Wilson</option>
-                          <option value="Michael Brown">Michael Brown</option>
+                          <option value="">Select a user</option>
+                          {Array.isArray(users) && users
+                            .filter(user => ['Admin', 'Team Member', 'Client'].includes(user.role))
+                            .map(user => (
+                              <option key={user.id} value={user.id}>
+                                {user.firstName} {user.lastName}
+                              </option>
+                            ))
+                          }
                         </select>
                       </div>
                     </div>

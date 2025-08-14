@@ -1,6 +1,26 @@
-import { FileText, Calendar, Eye, Edit} from "lucide-react"
+import { FileText, Calendar, Eye, Edit } from "lucide-react"
 
-const ClaimsOverview = ({isDark, role, claims, getStatusColorr, getPolicyTypeColorr, getClaimTypeColorr, getStatusDarkColorr, openEditModalOpenClaim}) => {
+const ClaimsOverview = ({
+  isDark, 
+  role, 
+  claims, 
+  getStatusColorr, 
+  getPolicyTypeColorr, 
+  getClaimTypeColorr, 
+  getStatusDarkColorr, 
+  openEditModalOpenClaim
+}) => {
+  // Format currency
+  const formatCurrency = (amount) => {
+    if (amount === null || amount === undefined) return 'N/A';
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
+
   return (
     <>
         <div className={`rounded-xl border transition-colors mb-8 ${
@@ -44,14 +64,14 @@ const ClaimsOverview = ({isDark, role, claims, getStatusColorr, getPolicyTypeCol
               </thead>
               <tbody>
                 {claims.map((claim) => (
-                  <tr key={claim.id} className={`border-b hover:bg-opacity-50 transition-colors ${
+                  <tr key={claim.claimId} className={`border-b hover:bg-opacity-50 transition-colors ${
                     isDark 
                       ? 'border-gray-700 hover:bg-gray-700' 
                       : 'border-gray-200 hover:bg-gray-50'
                   }`}>
                     <td className="px-6 py-4">
                       <span className={`font-medium text-blue-600 ${isDark ? 'text-blue-400' : ''}`}>
-                        {claim.id}
+                        {claim.claimId}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -62,22 +82,22 @@ const ClaimsOverview = ({isDark, role, claims, getStatusColorr, getPolicyTypeCol
                           {claim.companyIcon}
                         </div>
                         <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {claim.companyName}
-                        </span>
+                        {claim.companyName || 'N/A'}
+                      </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                        getPolicyTypeColorr(claim.policyType)
+                        getPolicyTypeColorr(claim.policyType || 'Property')
                       }`}>
-                        {claim.policyName}
+                        {claim.policyName || 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                        getClaimTypeColorr(claim.claimType)
+                        getClaimTypeColorr(claim.claimType || 'Property Damage')
                       }`}>
-                        {claim.type}
+                        {claim.claimType || 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -89,24 +109,24 @@ const ClaimsOverview = ({isDark, role, claims, getStatusColorr, getPolicyTypeCol
                     </td>
                     <td className="px-6 py-4">
                       <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {claim.claimAmount}
+                        {formatCurrency(claim.claimAmount)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`font-medium text-red-600 ${isDark ? 'text-red-400' : ''}`}>
-                        {claim.excess}
+                        {formatCurrency(claim.excess)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`font-semibold text-green-600 ${isDark ? 'text-green-400' : ''}`}>
-                        {claim.netClaimAmount}
+                        {formatCurrency(claim.netClaimAmount)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
                         <Calendar className={`w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
                         <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {claim.incidentDate ? new Date(claim.incidentDate).toLocaleDateString() : 'N/A'}
+                          {claim.incidentDate ? new Date(claim.incidentDate).toLocaleDateString('en-GB') : 'N/A'}
 
                         </span>
                       </div>

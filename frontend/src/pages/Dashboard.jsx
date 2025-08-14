@@ -24,6 +24,9 @@ const Dashboard = () => {
   const [policyYear, setPolicyYear] = useState('2024-2025');
   const [isOpenNewClaim, setIsOpenNewClaim] = useState(false);
   const [users, setUsers] = useState([]);
+  const [claims, setClaims] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
   const role = location.state?.role;
@@ -283,11 +286,27 @@ const Dashboard = () => {
     setIsOpenNewClaim(false)
   }
 
-  const handleUpdateClaim = () => {
-    console.log('Updating claim:', editFormDataClaim)
-    handleCloseModalClaim();
-    toast.success('Claim created successfully!');
-  }
+  const handleUpdateClaim = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.put(
+        `http://localhost:7001/api/claims/${editFormDataClaim.claimId}`,
+        editFormDataClaim
+      );
+      
+      if (response.status === 200) {
+        // Refresh claims data
+        fetchClaims();
+        // Close the modal
+        setIsEditModalOpenClaim(false);
+        // Show success message
+        toast.success('Claim updated successfully');
+      }
+    } catch (error) {
+      console.error('Error updating claim:', error);
+      toast.error('Failed to update claim');
+    }
+  };
 
   const timelineEvents = [
     {
@@ -426,49 +445,6 @@ const Dashboard = () => {
     { name: 'Claims', icon: FileCheck, color: "bg-gradient-to-br from-orange-600 via-red-600 to-pink-600"},
     { name: 'Policies', icon: Shield, color:"bg-gradient-to-r from-purple-600 to-pink-600"},
     { name: 'Users', icon: Users, active: true, color:"bg-gradient-to-r from-purple-500 to-pink-500"}
-  ];
-
-    // Sample claims data
-  const claims = [
-    {
-      id: 'CLM-2024-001',
-      company: 'Astute Healthcare Limited',
-      policyType: 'Property',
-      type: 'Water Damage',
-      status: 'Under Review',
-      claimAmount: '£15,000',
-      excess: '£1,000',
-      netAmount: '£14,000',
-      date: '2024-01-15',
-      statusColor: 'orange',
-      companyIcon: '🏥'
-    },
-    {
-      id: 'CLM-2024-002',
-      company: 'Tech Solutions Ltd',
-      policyType: 'Commercial Liability',
-      type: 'Public Liability',
-      status: 'Approved',
-      claimAmount: '£8,500',
-      excess: '£2,500',
-      netAmount: '£6,000',
-      date: '2024-01-10',
-      statusColor: 'green',
-      companyIcon: '💻'
-    },
-    {
-      id: 'CLM-2024-003',
-      company: 'Manufacturing Co Ltd',
-      policyType: 'Property',
-      type: 'Equipment Damage',
-      status: 'Paid',
-      claimAmount: '£25,000',
-      excess: '£5,000',
-      netAmount: '£20,000',
-      date: '2024-01-05',
-      statusColor: 'blue',
-      companyIcon: '🏭'
-    }
   ];
 
     const statsData = [
@@ -1053,9 +1029,26 @@ const getInitials = (name) => {
     }
   };
 
-  useEffect(()=> {
-  fetchUsers();
-  },[])
+  // Fetch all claims from the API
+  const fetchClaims = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get('http://localhost:7001/api/claims');
+      setClaims(response.data);
+    } catch (err) {
+      console.error('Error fetching claims:', err);
+      setError('Failed to load claims. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchUsers();
+    fetchClaims();
+  }, [])
 
  const openCreateModal = (flag) => {
   if (flag) {

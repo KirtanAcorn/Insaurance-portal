@@ -31,7 +31,12 @@ const Claims = ({
                  formDataNewClaim,
                  handleInputChangeNewClaim,
                  handleCloseNewClaim,
-                 handleCancelNewClaim
+                 handleCancelNewClaim,
+                 setActiveTabClaim,
+                 setIsEditModalOpenClaim,
+                 setIsOpenNewClaim,
+                 setIsModalOpenNew,
+                 users = []
                 }) => {
   return (
     <>
@@ -50,7 +55,8 @@ const Claims = ({
     getClaimTypeColorr={getClaimTypeColorr}
     getStatusDarkColorr={getStatusDarkColorr}
     openEditModalOpenClaim={openEditModalOpenClaim}
-    openIsModalOpenNew={openIsModalOpenNew}   
+    openIsModalOpenNew={openIsModalOpenNew}
+    users={users} 
     />
 
     <StatisticsCards
@@ -58,20 +64,18 @@ const Claims = ({
     statsClaim={statsClaim}
     />
 
-    <ClaimsEditModal
+  <ClaimsEditModal
     isDark={isDark}
     isEditModalOpenClaim={isEditModalOpenClaim}
     editFormDataClaim={editFormDataClaim}
     handleCloseModalClaim={handleCloseModalClaim}
     activeTabClaim={activeTabClaim}
-    openActiveTabClaim={openActiveTabClaim}
+    openActiveTabClaim={setActiveTabClaim}
     handleFormChangeClaim={handleFormChangeClaim}
     timelineEvents={timelineEvents}
     handleUpdateClaim={handleUpdateClaim}
-    openEditModalOpenClaim={openEditModalOpenClaim}
-    isModalOpenNew={isModalOpenNew}
-    openIsModalOpenNew={openIsModalOpenNew}
-    />
+    users={users}
+  />
 
     <SubmitNewClaimModal
     isDark={isDark}
