@@ -362,36 +362,32 @@ const Dashboard = () => {
     }
   }, [theme]);
 
-  const stats = [
+  const [stats, setStats] = useState([
     {
       title: 'Total Users',
-      value: '4',
-      change: '+2 from last month',
-      changeType: 'positive',
+      value: '0',
+      changeType: 'neutral',
       color: 'bg-blue-500'
     },
     {
       title: 'Active Users',
-      value: '3',
-      change: '+1 from last month',
-      changeType: 'positive',
+      value: '0',
+      changeType: 'neutral',
       color: 'bg-green-500'
     },
     {
       title: 'Team Members',
-      value: '1',
-      change: '0 from last month',
+      value: '0',
       changeType: 'neutral',
       color: 'bg-purple-500'
     },
     {
       title: 'Clients',
-      value: '2',
-      change: '+1 from last month',
-      changeType: 'positive',
+      value: '0',
+      changeType: 'neutral',
       color: 'bg-orange-500'
     }
-  ];
+  ]);
 
     // Statistics data
   const statsClaim = [
@@ -999,14 +995,46 @@ const getInitials = (name) => {
     'Hetasveeben & Pratibhakumari - Landlord',
     'AUCLLP'
   ];
+
+  const updateStats = (users) => {
+    const totalUsers = users.length;
+    console.log("All users:", users); // Debug log to see all users data
+    const activeUsers = users.filter(user => user.status === 'Active').length;
+    // Define which roles are considered team members (Admin, Agent, etc.)
+    const teamMemberRoles = ['Admin', 'Agent', 'Manager', 'Staff'];
+    const teamMembers = users.filter(user => teamMemberRoles.includes(user.role)).length;
+    const clients = users.filter(user => user.role === 'Client').length;
+
+    setStats([
+      {
+        ...stats[0],
+        value: totalUsers.toString(),
+        changeType: totalUsers > 0 ? 'positive' : 'neutral'
+      },
+      {
+        ...stats[1],
+        value: activeUsers.toString(),
+        changeType: activeUsers > 0 ? 'positive' : 'neutral'
+      },
+      {
+        ...stats[2],
+        value: teamMembers.toString(),
+        changeType: teamMembers > 0 ? 'positive' : 'neutral'
+      },
+      {
+        ...stats[3],
+        value: clients.toString(),
+        changeType: clients > 0 ? 'positive' : 'neutral'
+      }
+    ]);
+  };
+
   const fetchUsers = async () => {
-    
     try {
       const response = await axios.get('http://localhost:7001/api/users');
       const formattedUsers = response.data.map((user, index) => ({
         id: user.id,
-        avatar: getInitials(user.name || user.firstName || ""), 
-        // name: `${user.firstName} ${user.lastName}`,
+        avatar: getInitials(user.name || user.firstName || ""),
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
@@ -1019,13 +1047,11 @@ const getInitials = (name) => {
         claims: user.claims || 0,
       }));
       setUsers(formattedUsers);
+      updateStats(formattedUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   };
-
-
-
 
   useEffect(()=> {
   fetchUsers();
