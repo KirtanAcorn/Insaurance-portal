@@ -1,0 +1,22 @@
+const express = require('express');
+const router = express.Router();
+
+const upload = require('../middleware/upload');
+const claimsController = require('../controllers/claimsController');
+
+// Get all claims
+router.get('/', claimsController.getAllClaims);
+
+// Get claim by ID
+router.get('/:id', claimsController.getClaimById);
+
+// Create new claim (with file upload)
+router.post('/', upload.single('supportingDocuments'), claimsController.createClaim);
+
+// Update claim
+router.put('/:id', claimsController.updateClaim);
+
+// Delete claim
+// router.delete('/:id', claimsController.deleteClaim);
+
+module.exports = router;
