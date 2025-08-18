@@ -283,7 +283,7 @@ const Dashboard = () => {
   };
 
   const handleCloseModalClaim = () => {
-    setIsOpenNewClaim(false)
+    setIsEditModalOpenClaim(false)
   }
 
   const handleUpdateClaim = async (e) => {

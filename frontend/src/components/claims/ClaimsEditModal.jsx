@@ -27,13 +27,13 @@ const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, hand
                 </div>
               </div>
               <button
-                onClick={handleCloseModalClaim}
-                className={`p-2 rounded-lg transition-colors cursor-pointer ${
-                  isDark ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <X className="w-5 h-5" />
-              </button>
+                  onClick={handleCloseModalClaim}
+                  className={`p-2 rounded-lg transition-colors cursor-pointer ${
+                    isDark ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  ×
+                </button>
             </div>
 
             {/* Modal Content - Scrollable */}
