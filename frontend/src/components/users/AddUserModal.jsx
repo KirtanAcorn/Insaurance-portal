@@ -187,9 +187,9 @@ const AddUserModal = ({isCreateModalOpen, isDark, handleCloseModalCreateUser, fo
                       }`}
                     >
                       <option value="">Select user role</option>
-                      <option value="Client">👤 Client</option>
-                      <option value="Team Member">⚡ Team Member</option>
-                      <option value="Admin">👑 Admin</option>
+                      <option value="Client">Client</option>
+                      <option value="Team Member">Team Member</option>
+                      <option value="Admin">Admin</option>
                     </select>
                   </div>
 
@@ -207,9 +207,8 @@ const AddUserModal = ({isCreateModalOpen, isDark, handleCloseModalCreateUser, fo
                           : 'bg-white border-gray-300 text-gray-900'
                       }`}
                     >
-                      <option value="Active">🟢 Active</option>
-                      <option value="Inactive">🔴 Inactive</option>
-                      <option value="Pending">🟡 Pending</option>
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
                     </select>
                   </div>
                 </div>

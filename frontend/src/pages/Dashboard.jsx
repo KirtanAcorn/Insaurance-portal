@@ -407,6 +407,7 @@ const Dashboard = () => {
       color: 'bg-orange-500'
     }
   ]);
+  
 
     // Statistics data
   const statsClaim = [
@@ -683,20 +684,35 @@ const Dashboard = () => {
   };
 
   const handleEditUser = (user) => {
+    console.log('Editing user:', user); // Debug log
     setSelectedUser(user);
- 
+    
+    // Use userRole if available, otherwise fall back to role
+    const userRole = user.userRole || user.role;
+    // Determine account status, checking multiple possible properties
+    const accountStatus = user.accountStatus || 
+                         (user.isActive === 1 || user.isActive === true || user.status === 'Active' ? 'Active' : 'Inactive');
+    
     setEditFormData({
       id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email, 
-      phoneNumber: user.phoneNumber, 
-      department: user.department,
-      location: user.location,
-      userRole: user.userRole,
-      isActive: user.isActive === "Active" || user.isActive === 1,
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '', 
+      phoneNumber: user.phoneNumber || '', 
+      department: user.department || '',
+      location: user.location || '',
+      userRole: userRole || 'Client', // Default to 'Client' if no role is set
+      accountStatus: accountStatus,
+      isActive: accountStatus === 'Active'
     });
- 
+    
+    console.log('Edit form data set to:', {
+      ...editFormData,
+      userRole: userRole || 'Client',
+      accountStatus: accountStatus,
+      isActive: accountStatus === 'Active'
+    });
+    
     setIsEditModalOpen(true);
   };
 
@@ -722,39 +738,40 @@ const Dashboard = () => {
     });
   };
   const handleUpdateUser = async (e) => {
-    if (e) e.preventDefault(); 
- 
+    if (e) e.preventDefault();
+    
     if (!editFormData.id) {
       console.error("No user ID to update");
       return;
     }
- 
+    
     try {
+      console.log('Updating user with data:', editFormData);
+      
       const updatedUser = {
         firstName: editFormData.firstName,
         lastName: editFormData.lastName,
         email: editFormData.email,
-        department: editFormData.department,
-        location: editFormData.location,
-        userRole: editFormData.userRole,
-        isActive: editFormData.isActive ? 1:0, 
+        department: editFormData.department || null,
+        location: editFormData.location || null,
+        userRole: editFormData.userRole || 'Client',
+        isActive: editFormData.accountStatus === 'Active' ? 1 : 0
       };
-
-
-      console.log("______________", updatedUser);
       
- 
+      console.log('Sending update request with:', updatedUser);
+      
       await axios.put(
         `http://localhost:7001/api/users/${editFormData.id}`,
         updatedUser
       );
- 
-       fetchUsers(); 
-      setIsEditModalOpen(false); 
+      
+      // Refresh the users list and close the modal
+      await fetchUsers();
+      setIsEditModalOpen(false);
       toast.success('User updated successfully!');
     } catch (error) {
-      console.error("Errr is ..............", error);
-      alert("Failed to update user");
+      console.error("Error updating user:", error);
+      alert(`Failed to update user: ${error.response?.data?.message || error.message}`);
     }
   };
  
@@ -974,33 +991,39 @@ const getInitials = (name) => {
 
   const updateStats = (users) => {
     const totalUsers = users.length;
-    console.log("All users:", users); // Debug log to see all users data
+    console.log("All users:", users); 
+  
     const activeUsers = users.filter(user => user.status === 'Active').length;
-    // Define which roles are considered team members (Admin, Agent, etc.)
+  
     const teamMemberRoles = ['Admin', 'Agent', 'Manager', 'Staff'];
     const teamMembers = users.filter(user => teamMemberRoles.includes(user.role)).length;
+  
     const clients = users.filter(user => user.role === 'Client').length;
-
+  
     setStats([
       {
-        ...stats[0],
+        title: 'Total Users',
         value: totalUsers.toString(),
-        changeType: totalUsers > 0 ? 'positive' : 'neutral'
+        changeType: totalUsers > 0 ? 'positive' : 'neutral',
+        color: 'bg-blue-500'
       },
       {
-        ...stats[1],
+        title: 'Active Users',
         value: activeUsers.toString(),
-        changeType: activeUsers > 0 ? 'positive' : 'neutral'
+        changeType: activeUsers > 0 ? 'positive' : 'neutral',
+        color: 'bg-green-500'
       },
       {
-        ...stats[2],
+        title: 'Team Members',
         value: teamMembers.toString(),
-        changeType: teamMembers > 0 ? 'positive' : 'neutral'
+        changeType: teamMembers > 0 ? 'positive' : 'neutral',
+        color: 'bg-purple-500'
       },
       {
-        ...stats[3],
+        title: 'Clients',
         value: clients.toString(),
-        changeType: clients > 0 ? 'positive' : 'neutral'
+        changeType: clients > 0 ? 'positive' : 'neutral',
+        color: 'bg-orange-500'
       }
     ]);
   };
@@ -1008,28 +1031,30 @@ const getInitials = (name) => {
   const fetchUsers = async () => {
     try {
       const response = await axios.get('http://localhost:7001/api/users');
+  
       const formattedUsers = response.data.map((user, index) => ({
         id: user.id,
-        avatar: getInitials(user.name || user.firstName || ""),
+        avatar: getInitials(user.firstName || user.name || ""),
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
         location: user.location || 'N/A',
-        role: user.userRole,
-        status: user.accountStatus,
+        role: user.userRole,          
+        status: user.accountStatus,   
         phoneNumber: user.phoneNumber,
         department: user.department,
         policies: user.policies || 0,
         claims: user.claims || 0,
       }));
+  
       setUsers(formattedUsers);
       updateStats(formattedUsers);
+  
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   };
 
-  // Fetch all claims from the API
   const fetchClaims = async () => {
     setIsLoading(true);
     setError(null);
@@ -1043,12 +1068,11 @@ const getInitials = (name) => {
       setIsLoading(false);
     }
   };
-
-  // Fetch data on component mount
+  
   useEffect(() => {
     fetchUsers();
     fetchClaims();
-  }, [])
+  }, []);
 
  const openCreateModal = (flag) => {
   if (flag) {

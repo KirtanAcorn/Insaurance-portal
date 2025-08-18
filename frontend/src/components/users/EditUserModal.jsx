@@ -1,6 +1,8 @@
 import { Edit, Users,Shield } from "lucide-react"
 
 const EditUserModal = ({isEditModalOpen, isDark, selectedUser, handleCloseModal, editFormData, handleFormChange, handleUpdateUser}) => {
+  console.log("🚀 ~ EditUserModal ~ editFormData:", editFormData)
+  
   return (
     <>
     {isEditModalOpen && (
@@ -18,7 +20,7 @@ const EditUserModal = ({isEditModalOpen, isDark, selectedUser, handleCloseModal,
                   </div>
                   <div>
                     <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      Edit User: {selectedUser?.name}
+                      Edit User: {selectedUser?.firstName + " " + selectedUser?.lastName}
                     </h3>
                     <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                       Update user information, permissions, and access levels
@@ -141,17 +143,22 @@ const EditUserModal = ({isEditModalOpen, isDark, selectedUser, handleCloseModal,
                         User Role
                       </label>
                       <select
-                        value={editFormData.userRole}
-                        onChange={(e) => handleFormChange('userRole', e.target.value)}
+                        value={
+                          editFormData.userRole ?? 
+                          editFormData.role ?? 
+                          editFormData.userrole ?? 
+                          ""
+                        }
+                        onChange={(e) => handleFormChange("userRole", e.target.value)}
                         className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                           isDark 
-                            ? 'bg-gray-700 border-gray-600 text-white' 
-                            : 'bg-white border-gray-300 text-gray-900'
+                            ? "bg-gray-700 border-gray-600 text-white" 
+                            : "bg-white border-gray-300 text-gray-900"
                         }`}
                       >
-                        <option value="Client">👤 Client</option>
-                        <option value="Team Member">⚡ Team Member</option>
-                        <option value="Admin">👑 Admin</option>
+                        <option value="Client">Client</option>
+                        <option value="Team Member">Team Member</option>
+                        <option value="Admin">Admin</option>
                       </select>
                     </div>
                   </div>
@@ -171,23 +178,27 @@ const EditUserModal = ({isEditModalOpen, isDark, selectedUser, handleCloseModal,
                       <input
                         type="checkbox"
                         id="accountActive"
-                        checked={editFormData.accountActive}
-                        onChange={(e) => handleFormChange('accountActive', e.target.checked)}
+                        checked={editFormData.accountStatus === 'Active'}
+                        onChange={(e) => {
+                          const newStatus = e.target.checked ? 'Active' : 'Inactive';
+                          console.log('Toggle changed to:', newStatus);
+                          handleFormChange('accountStatus', newStatus);
+                        }}
                         className="sr-only"
                       />
                       <label
                         htmlFor="accountActive"
                         className={`block w-12 h-6 rounded-full cursor-pointer transition-colors ${
-                          editFormData.accountActive ? 'bg-blue-500' : isDark ? 'bg-gray-600' : 'bg-gray-300'
+                          editFormData.accountStatus === 'Active' ? 'bg-blue-500' : isDark ? 'bg-gray-600' : 'bg-gray-300'
                         }`}
                       >
                         <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${
-                          editFormData.accountActive ? 'translate-x-6' : 'translate-x-0.5'
+                          editFormData.accountStatus === 'Active' ? 'translate-x-6' : 'translate-x-0.5'
                         } mt-0.5`}></div>
                       </label>
                     </div>
                     <span className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Account Active
+                      {editFormData.accountStatus === 'Active' ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                 </div>
@@ -209,7 +220,7 @@ const EditUserModal = ({isEditModalOpen, isDark, selectedUser, handleCloseModal,
                 </button>
                 <button
                   onClick={handleUpdateUser}
-                  className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors cursor-pointer"
+                  className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white"
                 >
                   Update User
                 </button>
