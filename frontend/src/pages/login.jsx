@@ -160,7 +160,7 @@ const Login = () => {
                     }`}
                   >
                     <span className="flex items-center">
-                      <span className='mr-1'>👤</span>
+                      <span className='mr-1'></span>
                       {loginAs}
                     </span>
                     <ChevronDown className={`w-5 h-5 transition-transform ${
@@ -182,14 +182,13 @@ const Login = () => {
                             setLoginAs(option);
                             setIsDropdownOpen(false);
                           }}
-                          className={`w-full px-4 py-3 text-left hover:bg-opacity-50 transition-colors first:rounded-t-lg last:rounded-b-lg cursor-pointer${
+                          className={`w-full px-4 py-3 text-left transition-colors first:rounded-t-lg last:rounded-b-lg cursor-pointer ${
                             isDark 
                               ? 'text-white hover:bg-gray-600' 
                               : 'text-gray-900 hover:bg-gray-50'
-                          } ${loginAs === option ? (isDark ? 'bg-gray-600' : 'bg-gray-50') : ''}`}
+                          } ${loginAs === option ? (isDark ? 'bg-gray-600' : 'bg-gray-100') : ''}`}
                         >
-                          <span className="flex items-center mr-1">
-                            {option === 'Client' ? '👤' : option === 'Team Member' ? '⚡' : '👑'}
+                          <span className="flex items-center">
                             {option}
                           </span>
                         </button>
