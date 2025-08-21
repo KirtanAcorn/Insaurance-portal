@@ -8,15 +8,15 @@ const claimsController = require('../controllers/claimsController');
 router.get('/', claimsController.getAllClaims);
 
 // Get claim by ID
-router.get('/:id', claimsController.getClaimById);
+router.get('/:claimId', claimsController.getClaimById);
 
 // Create new claim (with file upload)
 router.post('/', upload.single('supportingDocuments'), claimsController.createClaim);
 
 // Update claim
-router.put('/:id', claimsController.updateClaim);
+router.post('/:claimId', upload.single('supportingDocuments'), claimsController.updateClaim);
 
 // Delete claim
-// router.delete('/:id', claimsController.deleteClaim);
+// router.delete('/:claimId', claimsController.deleteClaim);
 
 module.exports = router;

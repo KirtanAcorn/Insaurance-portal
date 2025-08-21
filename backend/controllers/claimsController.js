@@ -109,7 +109,7 @@ exports.createClaim = async (req, res) => {
 
 // Update claim
 exports.updateClaim = async (req, res) => {
-  const { id } = req.params;
+  const { claimId } = req.params;
   const {
     companyId, policyId, claimType, claimAmount,
     Description, incidentDate, netClaimAmount, status, supportingDocuments
@@ -117,7 +117,7 @@ exports.updateClaim = async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request()
-      .input('claimId', sql.Int, id)
+      .input('claimId', sql.Int, claimId)
       .input('companyId', sql.Int, companyId)
       .input('companyName', sql.NVarChar, companyName)
       .input('policyId', sql.Int, policyId)

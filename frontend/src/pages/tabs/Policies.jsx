@@ -3,10 +3,26 @@ import ContentGrid from "../../components/policies/ContentGrid"
 import CompanyInformation from "../../components/policies/CompanyInformation"
 import PoliciesHeader from "../../components/policies/PoliciesHeader"
 
-const Policies = ({isDark, selectedCompanyPolicy, changeSelectedCompanyPolicy, policyCompanies, policyYear, changePolicyYear, chooseSelectedInsuranceType, getInsuranceIcon, selectedInsuranceType, selectedCompanyData, currentInsuranceData, allPolicies}) => {
+const Policies = ({
+  isDark, 
+  selectedCompanyPolicy, 
+  changeSelectedCompanyPolicy, 
+  policyCompanies, 
+  policyYear, 
+  changePolicyYear, 
+  chooseSelectedInsuranceType, 
+  getInsuranceIcon, 
+  selectedInsuranceType, 
+  selectedCompanyData, 
+  policyData,
+  isLoading,
+  error,
+  allPolicies,
+  openIsModalOpenNew
+}) => {
   return (
     <>
-    <PoliciesHeader/>
+    <PoliciesHeader openIsModalOpenNew={openIsModalOpenNew}/>
 
     <CompanyInformation
     isDark={isDark}
@@ -25,7 +41,9 @@ const Policies = ({isDark, selectedCompanyPolicy, changeSelectedCompanyPolicy, p
     getInsuranceIcon={getInsuranceIcon}
     selectedInsuranceType={selectedInsuranceType}
     selectedCompanyData={selectedCompanyData}
-    currentInsuranceData={currentInsuranceData}
+    policyData={policyData}
+    isLoading={isLoading}
+    error={error}
     />
 
     <AllPolicies

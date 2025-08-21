@@ -6,19 +6,20 @@ const config = {
   server: process.env.DB_SERVER,
   database: process.env.DB_NAME,
   options: {
-    encrypt: true, // for Azure SQL
-    trustServerCertificate: true // for local dev
+    encrypt: true,
+    trustServerCertificate: true
   }
 };
 
 const poolPromise = new sql.ConnectionPool(config)
   .connect()
   .then(pool => {
-    console.log('✅ Connected to MSSQL');
+    console.log('Connected to MSSQL');
     return pool;
   })
   .catch(err => {
-    console.error('❌ MSSQL Connection Failed:', err);
+    console.error('Database connection failed: ', err);
+    throw err;
   });
 
-module.exports = { sql, poolPromise };
+module.exports = { poolPromise, sql };

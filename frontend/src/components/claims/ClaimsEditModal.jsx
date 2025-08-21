@@ -56,16 +56,31 @@ const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, hand
                         <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                           Claim Type
                         </label>
-                        <input
-                          type="text"
+                          <select
                           value={editFormDataClaim.claimType}
-                          onChange={(e) => handleFormChangeClaim('claimType', e.target.value)}
-                          className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            isDark 
-                              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                              : 'bg-white border-gray-300 text-gray-900'
+                          onChange={(e) =>
+                            handleFormChangeClaim("claimType", e.target.value)
+                          }
+                          className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                            isDark
+                              ? "bg-gray-800 border-gray-600 text-gray-400"
+                              : "bg-white border-gray-300 text-gray-500"
                           }`}
-                        />
+                        >
+                          <option value="">Select claim type</option>
+                          <option value="Property Damage">Property Damage</option>
+                          <option value="Theft">Theft</option>
+                          <option value="Fire Damage">
+                          Fire Damage
+                          </option>
+                          <option value="Water Damage">
+                          Water Damage
+                          </option>
+                          <option value="Public Liability">Public Liability</option>
+                          <option value="Product Liability">Product Liability</option>
+                          <option value="Vehicle Accident">Vehicle Accident</option>
+                          <option value="Marine Loss">Marine Loss</option>
+                        </select>
                       </div>
 
                       {/* Claim Amount */}

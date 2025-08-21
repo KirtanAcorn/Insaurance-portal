@@ -1,6 +1,6 @@
 import { FileText, Plus } from "lucide-react"
 
-const PoliciesHeader = () => {
+const PoliciesHeader = ({ openIsModalOpenNew }) => {
   return (
     <>
         <div className={`mb-6 p-6 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white`}>

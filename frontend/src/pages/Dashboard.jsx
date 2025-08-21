@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditModalOpenClaim, setIsEditModalOpenClaim] = useState(false)
+  const [selectedClaim, setSelectedClaim] = useState(null)
   const [activeTabClaim, setActiveTabClaim] = useState('claim')
   const [selectedCompany, setSelectedCompany] = useState('');
   const [selectedCompanyPolicy, setSelectedCompanyPolicy] = useState('');
@@ -26,6 +27,7 @@ const Dashboard = () => {
   const [users, setUsers] = useState([]);
   const [claims, setClaims] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUsersLoading, setIsUsersLoading] = useState(false);
   const [error, setError] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -43,21 +45,22 @@ const Dashboard = () => {
     claimAmount: '',
     Description: '',
     incidentDate: '',
+    status: 'Under Review',
     supportingDocument: null
     });
 
   const [editFormDataClaim, setEditFormDataClaim] = useState({
-    claimId: 'CLM-2024-001',
-    claimType: 'Water Damage',
-    claimAmount: '15000',
-    description: 'Water damage to building foundation due to burst pipe',
-    status: 'Under Review',
-    assignedTo: 'Sarah Johnson',
-    policyId: '45857501282A',
-    company: 'Astute Healthcare Limited',
-    claimAmountPolicy: '£15,000',
-    excess: '£1,000',
-    netAmount: '£14,000'
+    claimId: '',
+    claimType: '',
+    claimAmount: '',
+    description: '',
+    status: '',
+    assignedTo: '',
+    policyId: '',
+    company: '',
+    claimAmountPolicy: '',
+    excess: '',
+    netAmount: ''
   })
     const companiesData = {
     'manufacturing-co': {
@@ -133,46 +136,192 @@ const Dashboard = () => {
     }
   };
 
-      const policyCompanies = [
-        {
-          id: 'astute',
-          name: 'Astute Healthcare Limited',
-          regAddress: 'Unit 1 Bilton Road, Cadwell Lane Industrial Estate, Hitchin, SG40SB',
-          postalAddress: 'Unit 1 Bilton Road, Hitchin SG40SB & Unit 28 Brick Knoll Park, St. Albans AL1 5UG',
-          regNo: 'B147250',
-          vatNo: 'GB139479686',
-          directorName: 'Dhruvil Patel',
-          insuranceAgent: 'PIB INSURANCE BROKERS (CROYDON)',
-          employeeCount: '51',
-          turnover: '105,000,000'
-        },
-        {
-          id: 'manufacturing',
-          name: 'Manufacturing Co Ltd',
-          regAddress: 'Unit 5 Industrial Park, Manchester, M1 2AB',
-          postalAddress: 'Unit 5 Industrial Park, Manchester, M1 2AB',
-          regNo: 'B234567',
-          vatNo: 'GB234567890',
-          directorName: 'John Smith',
-          insuranceAgent: 'ABC INSURANCE BROKERS',
-          employeeCount: '125',
-          turnover: '85,000,000'
-        },
-        {
-          id: 'tech',
-          name: 'Tech Solutions Ltd',
-          regAddress: 'Tech Hub, London, SW1 3CD',
-          postalAddress: 'Tech Hub, London, SW1 3CD',
-          regNo: 'B345678',
-          vatNo: 'GB345678901',
-          directorName: 'Sarah Johnson',
-          insuranceAgent: 'XYZ INSURANCE BROKERS',
-          employeeCount: '75',
-          turnover: '45,000,000'
-        }
-      ];
+  // Policy data shape that matches the SQL table structure
+  const policyDataShape = {
+    // Company Information
+    companyName: '',
+    country: '',
+    regAddress: '',
+    warehouseOfficeAddress: '',
+    regNo: '',
+    regDate: '',
+    companyFirstTimePolicy: '',
+    directorOwnerName: '',
+    companyHandledBy: '',
+    vatNumber: '',
+    commodity: '',
+    currency: '',
+    turnoverGBP: '',
+    insuranceAgent: '',
+    accountHandler: '',
+    employeeCount: '',
     
-      const insuranceData = {
+    // Commercial Policy
+    commercialPolicy: '',
+    commercialRenewalDate: '',
+    commercialPolicyLink: '',
+    commercialPremiumPaid: '',
+    employeeLiabilityCover: '',
+    empLiabilityRenewalDate: '',
+    floatingStock: '',
+    stockCover: '',
+    stockLocation: '',
+    productLiability: '',
+    commercialExcessPerClaim: '',
+    noOfClaimCommercial: '',
+    
+    // Marine Policy
+    marine: '',
+    marinePolicyLink: '',
+    marineRenewal: '',
+    marinePremiumPaid: '',
+    perTransitCover: '',
+    ukUkEuEuUsaUsa: '',
+    ukEu: '',
+    ukUsaMiddleEast: '',
+    ukRowUsaRow: '',
+    crossVoyage: '',
+    airSeaRail: '',
+    road: '',
+    anyLocationInOrdinaryCourseOfTransit: '',
+    cargoExcessPerClaim: '',
+    noOfClaimCargo: '',
+    
+    // Building/Property Insurance
+    buildingInsurance: '',
+    propertyPolicyLink: '',
+    renewalDate: '',
+    buildingPremiumPaid: '',
+    sumAssuredValueOfPremises: '',
+    declareValue: '',
+    buildingLocation: '',
+    buildingExcessPerClaim: '',
+    noOfClaimBuilding: '',
+    
+    // Fleet Policy
+    fleetPolicy: '',
+    fleetPolicyLink: '',
+    renewalDate2: '',
+    fleetPremiumPaid: '',
+    regNo2: '',
+    fleetExcessPerClaim: '',
+    noOfClaimMadeFleet: '',
+    
+    // Additional Fields
+    renewalYear: ''
+  };
+
+  // State for policy data
+  const [policyData, setPolicyData] = useState({});
+  const [isLoadingPolicy, setIsLoadingPolicy] = useState(false);
+  const [policyError, setPolicyError] = useState(null);
+
+  // Fetch policy data for selected company and year
+  const fetchPolicyData = async (companyName, year) => {
+    if (!companyName) return;
+    
+    setIsLoadingPolicy(true);
+    setPolicyError(null);
+    
+    try {
+      const response = await axios.get(`http://localhost:7001/api/policies`, {
+        params: { companyName, year }
+      });
+      
+      if (response.data) {
+        // Format the data for display
+        const formatCurrency = (value) => {
+          if (!value) return 'N/A';
+          const num = parseFloat(value);
+          return isNaN(num) ? value : `£${num.toLocaleString()}`;
+        };
+
+        const formatDate = (dateString) => {
+          if (!dateString) return 'N/A';
+          const date = new Date(dateString);
+          return isNaN(date.getTime()) ? dateString : date.toLocaleDateString('en-GB');
+        };
+
+        const transformedData = {
+          ...response.data,
+          policyNumber: response.data.policyNumber || 'N/A',
+          status: response.data.status || 'Inactive',
+          startDate: formatDate(response.data.startDate),
+          endDate: formatDate(response.data.endDate),
+          premiumPaid: formatCurrency(response.data.premiumPaid),
+          sumAssured: formatCurrency(response.data.sumAssured),
+          excessPerClaim: formatCurrency(response.data.excessPerClaim),
+          location: response.data.location || 'Multiple Locations',
+          claimsMade: response.data.claimsMade || 0,
+          coverage: {
+            'Building Cover': formatCurrency(response.data.buildingInsurance),
+            'Fleet Cover': response.data.fleetPolicy || 'N/A',
+            'Sum Insured': formatCurrency(response.data.sumAssured)
+          }
+        };
+        
+        setPolicyData(transformedData);
+      } else {
+        // If no data, set default values
+        setPolicyData({
+          ...policyDataShape,
+          companyName: policyCompanies.find(c => c.name === companyName)?.name || companyName,
+          renewalYear: year
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching policy data:', error);
+      setPolicyError('Failed to load policy data');
+      // Fallback to default values if API fails
+      setPolicyData({
+        ...policyDataShape,
+        companyName: policyCompanies.find(c => c.name === companyName)?.name || companyName,
+        renewalYear: year
+      });
+    } finally {
+      setIsLoadingPolicy(false);
+    }
+  };
+
+  // Effect to fetch policy data when company or year changes
+  useEffect(() => {
+    if (selectedCompanyPolicy && policyYear) {
+      fetchPolicyData(selectedCompanyPolicy, policyYear);
+    }
+  }, [selectedCompanyPolicy, policyYear]);
+
+  // Company data with id and name for dropdown
+  const policyCompanies = [
+    { id: 'astute-healthcare', name: 'Astute Healthcare limited' },
+    { id: 'beauty-magasin', name: 'Beauty Magasin Ltd' },
+    { id: 'future-center', name: 'The Future Center Storage and Distribution Limited' },
+    { id: 'jambo-supplies', name: 'Jambo Supplies Limited' },
+    { id: 'virtual-works', name: 'Virtual Works 360 Limited' },
+    { id: 'acme-pharma', name: 'Acme Pharma Ltd' },
+    { id: 'london-luxury', name: 'London Luxury Product' },
+    { id: 'activecare', name: 'Activecare Online' },
+    { id: 'hardlow', name: 'Hardlow Lubricants Limited' },
+    { id: 'safe-storage', name: 'Safe Storage and Distribution Limited' },
+    { id: 'jambo-bv', name: 'Jambo BV' },
+    { id: 'doc-pharm', name: 'Doc Pharm GmbH' },
+    { id: 'beauty-care', name: 'Beauty Care Global sp. Zoo' },
+    { id: 'lifexa', name: 'Lifexa BVBA' },
+    { id: 'beauty-store', name: 'Beauty Store LLC' },
+    { id: 'beyondtrend', name: 'Beyondtrend USA LLC' },
+    { id: 'jambo-wholesale', name: 'Jambo Wholesale Corporation LLC' },
+    { id: 'global-brand', name: 'Global Brand Storage & Distribution LLC' },
+    { id: 'aha-goods', name: 'AHA Goods Wholeseller LLC' },
+    { id: 'a2z', name: 'A2Z (Acorn USA)' },
+    { id: 'jd-business', name: 'J & D International Business' },
+    { id: 'acorn-solution', name: 'Acorn Solution Ltd' },
+    { id: 'astute-wholesale', name: 'Astute Wholesale Limited' },
+    { id: 'gcet', name: 'GCET Limited' },
+    { id: 'future-center-property', name: 'The Future Center Property Management Limited' },
+    { id: 'landlord', name: 'Hetasveeben & Pratibhakumari - Landlord' },
+    { id: 'aucllp', name: 'AUCLLP' }
+  ];
+    
+  const insuranceData = {
         Property: {
           policyNumber: '45057501202A',
           status: 'Expired',
@@ -246,7 +395,8 @@ const Dashboard = () => {
         { id: 'LMC306726501', type: 'Marine', status: 'Expired', premium: '£99,999.88', coverage: '£46,100,000', endDate: '15 June 2025' }
       ];
     
-      const selectedCompanyData = policyCompanies.find(c => c.id === selectedCompanyPolicy);
+      // Find the selected company data using the ID
+      const selectedCompanyData = policyCompanies.find(c => c.id === selectedCompanyPolicy) || {};
       const currentInsuranceData = insuranceData[selectedInsuranceType];
     
       const getInsuranceIcon = (type) => {
@@ -283,15 +433,58 @@ const Dashboard = () => {
   };
 
   const handleCloseModalClaim = () => {
-    setIsEditModalOpenClaim(false)
-  }
+    setIsEditModalOpenClaim(false);
+    setSelectedClaim(null);
+    // Reset the form data when closing the modal
+    setEditFormDataClaim({
+      claimId: '',
+      claimType: '',
+      claimAmount: '',
+      status: 'Under Review',
+      assignedTo: '',
+      description: '',
+      policyId: '',
+      company: '',
+      policyType: '',
+      incidentDate: '',
+      excess: '',
+      netClaimAmount: ''
+    });
+  };
 
   const handleUpdateClaim = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(
+      // Prepare the form data
+      const formData = new FormData();
+      
+      // Add all the form fields that the backend expects
+      formData.append('claimId', editFormDataClaim.claimId);
+      formData.append('company', editFormDataClaim.company || '');
+      formData.append('policyId', editFormDataClaim.policyId || '');
+      formData.append('policyType', editFormDataClaim.policyType || '');
+      formData.append('claimType', editFormDataClaim.claimType || '');
+      formData.append('claimAmount', editFormDataClaim.claimAmount || 0);
+      formData.append('description', editFormDataClaim.description || '');
+      formData.append('incidentDate', editFormDataClaim.incidentDate || '');
+      formData.append('netClaimAmount', editFormDataClaim.netClaimAmount || 0);
+      formData.append('status', editFormDataClaim.status || 'Under Review');
+      
+      // If there's a supporting document, append it
+      if (editFormDataClaim.supportingDocument) {
+        formData.append('supportingDocuments', editFormDataClaim.supportingDocument);
+      }
+
+      console.log('==============', formData);
+
+      const response = await axios.post(
         `http://localhost:7001/api/claims/${editFormDataClaim.claimId}`,
-        editFormDataClaim
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
       );
       
       if (response.status === 200) {
@@ -304,7 +497,8 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('Error updating claim:', error);
-      toast.error('Failed to update claim');
+      const errorMessage = error.response?.data?.error || 'Failed to update claim';
+      toast.error(errorMessage);
     }
   };
 
@@ -362,7 +556,24 @@ const Dashboard = () => {
   });
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 
+  // Fetch users from the API
+  const fetchUsersClaim = async () => {
+    try {
+      setIsUsersLoading(true);
+      const response = await axios.get('http://localhost:7001/api/users');
+      if (response.data && Array.isArray(response.data)) {
+        setUsers(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Failed to load users');
+    } finally {
+      setIsUsersLoading(false);
+    }
+  };
+
   useEffect(() => {
+    // Set up theme
     const updateTheme = () => {
       if (theme === 'system') {
         const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -380,6 +591,11 @@ const Dashboard = () => {
       return () => mediaQuery.removeEventListener('change', updateTheme);
     }
   }, [theme]);
+
+  // Fetch users when component mounts
+  useEffect(() => {
+    fetchUsersClaim();
+  }, []);
 
   const [stats, setStats] = useState([
     {
@@ -912,23 +1128,26 @@ const getInitials = (name) => {
     formData.append('companyName', formValues.companyName);
     formData.append('policyName', formValues.policyName);
     formData.append('claimType', formValues.claimType);
- 
+    
+    // Set default status to 'Under Review' if not provided
+    const status = formValues.status || 'Under Review';
+    formData.append('status', status);
+    
     const claimAmount = formValues.claimAmount;
-    console.log("*******************", claimAmount);
- 
+    
     if (!claimAmount || isNaN(Number(claimAmount))) {
       alert('Please enter a valid claim amount.');
       return;
     }
- 
+    
     formData.append('claimAmount', claimAmount);
     formData.append('Description', formValues.Description);
     formData.append('incidentDate', formValues.incidentDate);
- 
+    
     if (file) {
       formData.append('supportingDocuments', file);
     }
- 
+    
     // Send request via Axios
     const response = await axios.post(
       'http://localhost:7001/api/claims',
@@ -939,22 +1158,43 @@ const getInitials = (name) => {
         },
       }
     );
- 
- 
- 
-   
- 
-    // Axios automatically parses JSON into response.data
-    const data = response.data;
- 
-    // Optional: do something with the returned claimId
-    toast.success('Claim created successfully!');
-      handleCloseModalClaim();
+
+    // Show success message
+    toast.success('Claim created successfully!', {
+      duration: 3000,
+      position: 'top-center'
+    });
+    
+    // Reset form data
+    setFormDataNewClaim({
+      companyName: '',
+      policyName: '',
+      claimType: '',
+      claimAmount: '',
+      Description: '',
+      incidentDate: '',
+      status: 'Under Review',
+      supportingDocument: null
+    });
+    
+    // Close the Submit New Claim modal
+    setIsOpenNewClaim(false);
+    
+    // Redirect to claims tab after a short delay
+    setTimeout(() => {
+      setActiveTab('Claims');
+    }, 500);
+    
+    // Refresh claims data
+    fetchClaims();
  
   } catch (error) {
     // Handle axios error correctly
     const errorMsg = error.response?.data?.error || error.message;
-    alert('Error: ' + errorMsg);
+    toast.error('Error: ' + errorMsg, {
+      duration: 5000,
+      position: 'top-center'
+    });
   }
 };
 
@@ -991,7 +1231,6 @@ const getInitials = (name) => {
 
   const updateStats = (users) => {
     const totalUsers = users.length;
-    console.log("All users:", users); 
   
     const activeUsers = users.filter(user => user.status === 'Active').length;
   
@@ -1351,6 +1590,7 @@ const getInitials = (name) => {
        selectedCompanyData={selectedCompanyData}
        currentInsuranceData={currentInsuranceData}
        allPolicies={allPolicies}
+       openIsModalOpenNew={setIsOpenNewClaim}
        />}
 
        {activeTab === "Dashboard" && <DashboardTab

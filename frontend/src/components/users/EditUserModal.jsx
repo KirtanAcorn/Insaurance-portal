@@ -1,7 +1,6 @@
 import { Edit, Users,Shield } from "lucide-react"
 
 const EditUserModal = ({isEditModalOpen, isDark, selectedUser, handleCloseModal, editFormData, handleFormChange, handleUpdateUser}) => {
-  console.log("🚀 ~ EditUserModal ~ editFormData:", editFormData)
   
   return (
     <>
