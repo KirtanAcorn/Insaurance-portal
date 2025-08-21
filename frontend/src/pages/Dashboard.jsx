@@ -990,36 +990,6 @@ const Dashboard = () => {
       alert(`Failed to update user: ${error.response?.data?.message || error.message}`);
     }
   };
- 
-//   useEffect(() => {
-//   const fetchUsers = async () => {
-    
-//     try {
-//       const response = await axios.get('http://localhost:7001/api/users');
-//       const formattedUsers = response.data.map((user, index) => ({
-//         id: user.id,
-//         avatar: getInitials(user.name || user.firstName || ""), 
-//         fullName: `${user.firstName} ${user.lastName}`,
-//         email: user.email,
-//         location: user.location || 'N/A',
-//         userRole: user.userRole,
-//         status: user.accountStatus,
-//         department: user.department,
-//         policies: user.policies || 0,
-//         claims: user.claims || 0,
-//       }));
-//       setUsers(formattedUsers);
-
-
-//       console.log("set users ..............",formattedUsers);
-      
-//     } catch (error) {
-//       console.error("Error fetching users:", error);
-//     }
-//   };
-
-//   fetchUsers();
-// }, []);
 
 
 const getInitials = (name) => {
@@ -1230,42 +1200,39 @@ const getInitials = (name) => {
   ];
 
   const updateStats = (users) => {
-    const totalUsers = users.length;
-  
-    const activeUsers = users.filter(user => user.status === 'Active').length;
-  
-    const teamMemberRoles = ['Admin', 'Agent', 'Manager', 'Staff'];
-    const teamMembers = users.filter(user => teamMemberRoles.includes(user.role)).length;
-  
-    const clients = users.filter(user => user.role === 'Client').length;
-  
-    setStats([
-      {
-        title: 'Total Users',
-        value: totalUsers.toString(),
-        changeType: totalUsers > 0 ? 'positive' : 'neutral',
-        color: 'bg-blue-500'
-      },
-      {
-        title: 'Active Users',
-        value: activeUsers.toString(),
-        changeType: activeUsers > 0 ? 'positive' : 'neutral',
-        color: 'bg-green-500'
-      },
-      {
-        title: 'Team Members',
-        value: teamMembers.toString(),
-        changeType: teamMembers > 0 ? 'positive' : 'neutral',
-        color: 'bg-purple-500'
-      },
-      {
-        title: 'Clients',
-        value: clients.toString(),
-        changeType: clients > 0 ? 'positive' : 'neutral',
-        color: 'bg-orange-500'
-      }
-    ]);
-  };
+  const totalUsers = users.length;
+  const activeUsers = users.filter(user => user.status === 'Active').length;
+
+  const teamMembers = users.filter(user => user.role === 'Team Member').length;
+  const clients = users.filter(user => user.role === 'Client').length;
+
+  setStats([
+    {
+      title: 'Total Users',
+      value: totalUsers.toString(),
+      changeType: totalUsers > 0 ? 'positive' : 'neutral',
+      color: 'bg-blue-500'
+    },
+    {
+      title: 'Active Users',
+      value: activeUsers.toString(),
+      changeType: activeUsers > 0 ? 'positive' : 'neutral',
+      color: 'bg-green-500'
+    },
+    {
+      title: 'Team Members',
+      value: teamMembers.toString(),
+      changeType: teamMembers > 0 ? 'positive' : 'neutral',
+      color: 'bg-purple-500'
+    },
+    {
+      title: 'Clients',
+      value: clients.toString(),
+      changeType: clients > 0 ? 'positive' : 'neutral',
+      color: 'bg-orange-500'
+    }
+  ]);
+};
 
   const fetchUsers = async () => {
     try {
