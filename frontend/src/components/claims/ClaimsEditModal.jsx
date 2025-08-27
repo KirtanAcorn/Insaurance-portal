@@ -1,6 +1,44 @@
-import { Edit, FileText, Calendar, X, User} from "lucide-react"
+import { Edit, FileText, X } from "lucide-react";
+import { useState, useEffect } from 'react';
 
-const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, handleCloseModalClaim, activeTabClaim, openActiveTabClaim, handleFormChangeClaim, timelineEvents, handleUpdateClaim, users }) => {
+const ClaimsEditModal = ({ 
+  isDark, 
+  isEditModalOpenClaim, 
+  editFormDataClaim, 
+  handleCloseModalClaim, 
+  handleFormChangeClaim, 
+  handleUpdateClaim, 
+  users 
+}) => {
+  const [formData, setFormData] = useState(editFormDataClaim);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setFormData(editFormDataClaim);
+  }, [editFormDataClaim]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await handleUpdateClaim(formData);
+      handleCloseModalClaim();
+    } catch (error) {
+      console.error('Error updating claim:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!isEditModalOpenClaim) return null;
 
   return (
     <>
@@ -19,7 +57,7 @@ const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, hand
                 </div>
                 <div>
                   <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Edit Claim: {editFormDataClaim.claimId}
+                    Edit Claim: {formData.claimId}
                   </h3>
                   <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     Update claim information and status (Admin can edit all fields, Agents can edit claims under review)
@@ -57,10 +95,10 @@ const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, hand
                           Claim Type
                         </label>
                           <select
-                          value={editFormDataClaim.claimType}
-                          onChange={(e) =>
-                            handleFormChangeClaim("claimType", e.target.value)
-                          }
+                            name="claimType"
+                            value={formData.claimType || ''}
+                            onChange={handleInputChange}
+                            required
                           className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
                             isDark
                               ? "bg-gray-800 border-gray-600 text-gray-400"
@@ -89,9 +127,11 @@ const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, hand
                           Claim Amount (£)
                         </label>
                         <input
-                          type="text"
-                          value={editFormDataClaim.claimAmount}
-                          onChange={(e) => handleFormChangeClaim('claimAmount', e.target.value)}
+                          type="number"
+                          name="claimAmount"
+                          value={formData.claimAmount || ''}
+                          onChange={handleInputChange}
+                          required
                           className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                             isDark 
                               ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
@@ -106,8 +146,10 @@ const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, hand
                           Status
                         </label>
                         <select
-                          value={editFormDataClaim.status}
-                          onChange={(e) => handleFormChangeClaim('status', e.target.value)}
+                          name="status"
+                          value={formData.status || ''}
+                          onChange={handleInputChange}
+                          required
                           className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                             isDark 
                               ? 'bg-gray-700 border-gray-600 text-white' 
@@ -127,8 +169,9 @@ const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, hand
                           Assigned To
                         </label>
                         <select
-                          value={editFormDataClaim.assignedTo || ''}
-                          onChange={(e) => handleFormChangeClaim('assignedTo', e.target.value)}
+                          name="assignedTo"
+                          value={formData.assignedTo || ''}
+                          onChange={handleInputChange}
                           className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                             isDark 
                               ? 'bg-gray-700 border-gray-600 text-white' 
@@ -154,8 +197,10 @@ const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, hand
                         Description
                       </label>
                       <textarea
-                        value={editFormDataClaim.description}
-                        onChange={(e) => handleFormChangeClaim('description', e.target.value)}
+                        name="description"
+                        value={formData.description || ''}
+                        onChange={handleInputChange}
+                        required
                         rows="4"
                         className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
                           isDark 
@@ -163,103 +208,6 @@ const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, hand
                             : 'bg-white border-gray-300 text-gray-900'
                         }`}
                       />
-                    </div>
-                  </div>
-
-                  {/* Policy Information Section */}
-                  <div className="mb-6">
-                    <div className="flex items-center space-x-2 mb-4">
-                      <span className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center text-xs text-white font-bold">P</span>
-                      <h4 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Policy Information
-                      </h4>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Policy ID */}
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Policy ID
-                        </label>
-                        <div className={`px-3 py-2 rounded-lg border ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}`}>
-                          {editFormDataClaim.policyId}
-                        </div>
-                      </div>
-
-                      {/* Company */}
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Company
-                        </label>
-                        <div className={`px-3 py-2 rounded-lg border ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}`}>
-                          {editFormDataClaim.company}
-                        </div>
-                      </div>
-
-                      {/* Policy Claim Amount */}
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Policy Claim Amount
-                        </label>
-                        <div className={`px-3 py-2 rounded-lg border ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}`}>
-                          {editFormDataClaim.claimAmountPolicy}
-                        </div>
-                      </div>
-
-                      {/* Excess */}
-                      <div>
-                        <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Excess
-                        </label>
-                        <div className={`px-3 py-2 rounded-lg border text-red-500 ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-300'}`}>
-                          {editFormDataClaim.excess}
-                        </div>
-                      </div>
-
-                      {/* Net Amount */}
-                      <div className="md:col-span-2">
-                        <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Net Amount
-                        </label>
-                        <div className={`px-3 py-2 rounded-lg border text-green-500 font-semibold text-lg ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-300'}`}>
-                          {editFormDataClaim.netAmount}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column - Timeline */}
-                <div className="w-80">
-                  <div className="mb-6">
-                    <div className="flex items-center space-x-2 mb-4">
-                      <Calendar className={`w-5 h-5 ${isDark ? 'text-orange-400' : 'text-orange-600'}`} />
-                      <h4 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Claim Timeline
-                      </h4>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      {timelineEvents.map((event, index) => (
-                        <div key={index} className="flex items-start space-x-3">
-                          <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ${
-                            event.active ? 'bg-blue-500' : isDark ? 'bg-gray-600' : 'bg-gray-300'
-                          }`}></div>
-                          <div className="flex-1">
-                            <div className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                              {event.title}
-                            </div>
-                            <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                              {event.subtitle} • {event.date}
-                            </div>
-                            {event.description && (
-                              <div className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                                {event.description}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
                     </div>
                   </div>
                 </div>
@@ -281,10 +229,11 @@ const ClaimsEditModal = ({ isDark, isEditModalOpenClaim, editFormDataClaim, hand
                 Cancel
               </button>
               <button
-                onClick={handleUpdateClaim}
+                onClick={handleSubmit}
+                disabled={isSubmitting}
                 className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white"
               >
-                Update Claim
+                {isSubmitting ? 'Updating...' : 'Update Claim'}
               </button>
             </div>
           </div>

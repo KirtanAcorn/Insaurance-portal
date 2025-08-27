@@ -56,8 +56,6 @@ const ClaimsOverview = ({
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Type</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Status</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Claim Amount</th>
-                  <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Excess</th>
-                  <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Net Amount</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Date</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Actions</th>
                 </tr>
@@ -109,16 +107,6 @@ const ClaimsOverview = ({
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`font-medium text-red-600 ${isDark ? 'text-red-400' : ''}`}>
-                        {formatCurrency(claim.excess)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`font-semibold text-green-600 ${isDark ? 'text-green-400' : ''}`}>
-                        {formatCurrency(claim.netClaimAmount)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
                         <Calendar className={`w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
                         <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -138,7 +126,7 @@ const ClaimsOverview = ({
                         <button
                         onClick={() => {
                           // Pass the claim data to the parent component
-                          openEditModalOpenClaim(true, claim);
+                          openEditModalOpenClaim(claim);
                         }} 
                         className={`p-2 rounded-lg transition-colors cursor-pointer ${
                           isDark ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, ChevronDownIcon, UserIcon, Sun, Moon, Monitor, ChevronDown, BarChart3, FileCheck, Shield,Users, UserPlus, Mail, MapPin, Clock, Edit, Trash2, X, User, Building, Key, Eye, Settings, ClipboardList, BuildingIcon, TruckIcon, ShipIcon, AlertCircle, DollarSign, Activity, CheckCircle, Home, AlertTriangle, Truck, Globe } from 'lucide-react';
+import { FileText, ChevronDownIcon, UserIcon, Sun, Moon, Monitor, ChevronDown, BarChart3, FileCheck, Shield, Users, UserPlus, Mail, MapPin, Clock, Edit, Trash2, X, User, Building, Key, Eye, Settings, ClipboardList, BuildingIcon, TruckIcon, ShipIcon, AlertCircle, DollarSign, Activity, CheckCircle, Home, AlertTriangle, Truck, Globe } from 'lucide-react';
 import DashboardHeader from '../components/DashboardHeader';
 import NavigationTabs from '../components/NavigationTabs';
 import Userr from "./tabs/Userr"
@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import Policies from './tabs/Policies';
 import DashboardTab from './tabs/DashboardTab'
 import axios from "axios";
-import { useLocation, useNavigate,} from "react-router-dom";
+import { useLocation, useNavigate, } from "react-router-dom";
 
 const Dashboard = () => {
   const [theme, setTheme] = useState('system');
@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [selectedInsuranceType, setSelectedInsuranceType] = useState('Property');
   const [policyYear, setPolicyYear] = useState('2024-2025');
   const [isOpenNewClaim, setIsOpenNewClaim] = useState(false);
+  const [isModalOpenNew, setIsModalOpenNew] = useState(false);
   const [users, setUsers] = useState([]);
   const [claims, setClaims] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -33,12 +34,12 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const role = location.state?.role;
 
-   if (!role) {
+  if (!role) {
     // No role found (direct access), redirect to login
     navigate("/login");
     return null;
   }
-   const [formDataNewClaim, setFormDataNewClaim] = useState({
+  const [formDataNewClaim, setFormDataNewClaim] = useState({
     companyName: '',
     policyName: '',
     claimType: '',
@@ -47,7 +48,7 @@ const Dashboard = () => {
     incidentDate: '',
     status: 'Under Review',
     supportingDocument: null
-    });
+  });
 
   const [editFormDataClaim, setEditFormDataClaim] = useState({
     claimId: '',
@@ -62,79 +63,8 @@ const Dashboard = () => {
     excess: '',
     netAmount: ''
   })
-    const companiesData = {
-    'manufacturing-co': {
-      name: 'Manufacturing Co Ltd',
-      policies: {
-        'property-insurance': {
-          name: 'Property Insurance',
-          id: 'MC2024001',
-          status: 'Active',
-          sumAssured: '£5,500,000',
-          excessPerClaim: '£5,000',
-          location: 'Birmingham & Coventry Sites',
-          claimsMade: 2,
-          coverageBreakdown: {
-            buildingCover: '£3,000,000',
-            contentsCover: '£2,500,000',
-            businessInterruption: '£1,000,000'
-          }
-        },
-        'liability-insurance': {
-          name: 'Public Liability Insurance',
-          id: 'MC2024002',
-          status: 'Active',
-          sumAssured: '£2,000,000',
-          excessPerClaim: '£1,000',
-          location: 'All UK Sites',
-          claimsMade: 0,
-          coverageBreakdown: {
-            publicLiability: '£2,000,000',
-            productLiability: '£1,500,000',
-            employersLiability: '£10,000,000'
-          }
-        }
-      }
-    },
-    'tech-solutions': {
-      name: 'Tech Solutions Inc',
-      policies: {
-        'cyber-insurance': {
-          name: 'Cyber Liability Insurance',
-          id: 'TS2024001',
-          status: 'Active',
-          sumAssured: '£1,000,000',
-          excessPerClaim: '£2,500',
-          location: 'London Office',
-          claimsMade: 1,
-          coverageBreakdown: {
-            dataProtection: '£500,000',
-            cyberCrime: '£300,000',
-            businessInterruption: '£200,000'
-          }
-        }
-      }
-    },
-    'retail-group': {
-      name: 'Retail Group Ltd',
-      policies: {
-        'commercial-insurance': {
-          name: 'Commercial Combined Insurance',
-          id: 'RG2024001',
-          status: 'Active',
-          sumAssured: '£3,000,000',
-          excessPerClaim: '£3,500',
-          location: 'Multiple Retail Locations',
-          claimsMade: 5,
-          coverageBreakdown: {
-            buildingCover: '£1,500,000',
-            stockCover: '£1,000,000',
-            publicLiability: '£500,000'
-          }
-        }
-      }
-    }
-  };
+
+  const companiesData = {};
 
   // Policy data shape that matches the SQL table structure
   const policyDataShape = {
@@ -155,7 +85,7 @@ const Dashboard = () => {
     insuranceAgent: '',
     accountHandler: '',
     employeeCount: '',
-    
+
     // Commercial Policy
     commercialPolicy: '',
     commercialRenewalDate: '',
@@ -169,7 +99,7 @@ const Dashboard = () => {
     productLiability: '',
     commercialExcessPerClaim: '',
     noOfClaimCommercial: '',
-    
+
     // Marine Policy
     marine: '',
     marinePolicyLink: '',
@@ -186,7 +116,7 @@ const Dashboard = () => {
     anyLocationInOrdinaryCourseOfTransit: '',
     cargoExcessPerClaim: '',
     noOfClaimCargo: '',
-    
+
     // Building/Property Insurance
     buildingInsurance: '',
     propertyPolicyLink: '',
@@ -197,7 +127,7 @@ const Dashboard = () => {
     buildingLocation: '',
     buildingExcessPerClaim: '',
     noOfClaimBuilding: '',
-    
+
     // Fleet Policy
     fleetPolicy: '',
     fleetPolicyLink: '',
@@ -206,7 +136,7 @@ const Dashboard = () => {
     regNo2: '',
     fleetExcessPerClaim: '',
     noOfClaimMadeFleet: '',
-    
+
     // Additional Fields
     renewalYear: ''
   };
@@ -219,15 +149,15 @@ const Dashboard = () => {
   // Fetch policy data for selected company and year
   const fetchPolicyData = async (companyName, year) => {
     if (!companyName) return;
-    
+
     setIsLoadingPolicy(true);
     setPolicyError(null);
-    
+
     try {
       const response = await axios.get(`http://localhost:7001/api/policies`, {
         params: { companyName, year }
       });
-      
+
       if (response.data) {
         // Format the data for display
         const formatCurrency = (value) => {
@@ -259,7 +189,7 @@ const Dashboard = () => {
             'Sum Insured': formatCurrency(response.data.sumAssured)
           }
         };
-        
+
         setPolicyData(transformedData);
       } else {
         // If no data, set default values
@@ -320,104 +250,46 @@ const Dashboard = () => {
     { id: 'landlord', name: 'Hetasveeben & Pratibhakumari - Landlord' },
     { id: 'aucllp', name: 'AUCLLP' }
   ];
-    
-  const insuranceData = {
-        Property: {
-          policyNumber: '45057501202A',
-          status: 'Expired',
-          startDate: '1 May 2024',
-          endDate: '30 April 2025',
-          premiumPaid: '£3,950.06',
-          sumAssured: '£2,087,097',
-          location: 'Unit 1 Hitchin (Bluepuffin)',
-          excessPerClaim: '£1,000',
-          claimsMade: '0',
-          coverage: {
-            'Building Cover': '£1,500,000',
-            'Contents Cover': '£587,097',
-            'Business Interruption': '£500,000'
-          }
-        },
-        'Commercial Liability': {
-          policyNumber: 'APP650950COM-24',
-          status: 'Expired',
-          startDate: '15 March 2024',
-          endDate: '22 April 2025',
-          premiumPaid: '£1,825.62',
-          sumAssured: '£4,000,000',
-          location: 'All UK Locations',
-          excessPerClaim: '£2,500',
-          claimsMade: '1',
-          coverage: {
-            'Public Liability': '£2,000,000',
-            'Products Liability': '£2,000,000',
-            'Professional Indemnity': '£1,000,000'
-          }
-        },
-        Fleet: {
-          policyNumber: 'FC380567',
-          status: 'Expired',
-          startDate: '1 January 2024',
-          endDate: '7 April 2025',
-          premiumPaid: '£16,036.98',
-          sumAssured: '£500,000',
-          location: 'UK Wide',
-          excessPerClaim: '£750',
-          claimsMade: '2',
-          coverage: {
-            'Comprehensive Cover': '£300,000',
-            'Third Party': '£150,000',
-            'Personal Accident': '£50,000'
-          }
-        },
-        Marine: {
-          policyNumber: 'LMC306726501',
-          status: 'Expired',
-          startDate: '1 June 2024',
-          endDate: '15 June 2025',
-          premiumPaid: '£99,999.88',
-          sumAssured: '£46,100,000',
-          location: 'International Waters',
-          excessPerClaim: '£10,000',
-          claimsMade: '0',
-          coverage: {
-            'Hull Cover': '£40,000,000',
-            'Cargo Cover': '£5,000,000',
-            'P&I Cover': '£1,100,000'
-          }
-        }
-      };
-    
-      const allPolicies = [
-        { id: '45057501202A', type: 'Property', status: 'Expired', premium: '£3,950.06', coverage: '£2,087,097', endDate: '30 April 2025' },
-        { id: 'APP650950COM-24', type: 'Commercial Liability', status: 'Expired', premium: '£1,825.62', coverage: '£4,000,000', endDate: '22 April 2025' },
-        { id: 'FC380567', type: 'Fleet', status: 'Expired', premium: '£16,036.98', coverage: '£500,000', endDate: '7 April 2025' },
-        { id: 'LMC306726501', type: 'Marine', status: 'Expired', premium: '£99,999.88', coverage: '£46,100,000', endDate: '15 June 2025' }
-      ];
-    
-      // Find the selected company data using the ID
-      const selectedCompanyData = policyCompanies.find(c => c.id === selectedCompanyPolicy) || {};
-      const currentInsuranceData = insuranceData[selectedInsuranceType];
-    
-      const getInsuranceIcon = (type) => {
-        switch(type) {
-          case 'Property': return <BuildingIcon className="w-5 h-5" />;
-          case 'Commercial Liability': return <UserIcon className="w-5 h-5" />;
-          case 'Fleet': return <TruckIcon className="w-5 h-5" />;
-          case 'Marine': return <ShipIcon className="w-5 h-5" />;
-          default: return <BuildingIcon className="w-5 h-5" />;
-        }
-      };
+
+  const insuranceData = {};
+
+  const allPolicies = [];
+
+  // Find the selected company data using the ID
+  const selectedCompanyData = policyCompanies.find(c => c.id === selectedCompanyPolicy) || {};
+  const currentInsuranceData = insuranceData[selectedInsuranceType];
+
+  const getInsuranceIcon = (type) => {
+    switch (type) {
+      case 'Property': return <BuildingIcon className="w-5 h-5" />;
+      case 'Commercial Liability': return <UserIcon className="w-5 h-5" />;
+      case 'Fleet': return <TruckIcon className="w-5 h-5" />;
+      case 'Marine': return <ShipIcon className="w-5 h-5" />;
+      default: return <BuildingIcon className="w-5 h-5" />;
+    }
+  };
 
 
   const handleFormChangeClaim = (field, value) => {
-    setEditFormDataClaim(prev => ({
-      ...prev,
-      [field]: value
-    }))
+    setEditFormDataClaim(prev => {
+      const updatedData = {
+        ...prev,
+        [field]: value
+      };
+      
+      // Calculate net claim amount if claim amount or excess changes
+      if ((field === 'claimAmount' || field === 'excess') && 
+          (updatedData.claimAmount !== undefined && updatedData.excess !== undefined)) {
+        const claimAmount = parseFloat(updatedData.claimAmount) || 0;
+        const excess = parseFloat(updatedData.excess) || 0;
+        updatedData.netClaimAmount = Math.max(0, claimAmount - excess).toFixed(2);
+      }
+      
+      return updatedData;
+    });
   }
 
-    const handleInputChangeNewClaim = (field, value) => {
+  const handleInputChangeNewClaim = (field, value) => {
     setFormDataNewClaim(prev => ({
       ...prev,
       [field]: value
@@ -428,7 +300,7 @@ const Dashboard = () => {
     setIsOpenNewClaim(false);
   };
 
-    const handleCancelNewClaim = () => {
+  const handleCancelNewClaim = () => {
     setIsOpenNewClaim(false);
   };
 
@@ -448,85 +320,71 @@ const Dashboard = () => {
       policyType: '',
       incidentDate: '',
       excess: '',
-      netClaimAmount: ''
+      netClaimAmount: '',
+      supportingDocument: null
     });
   };
+  
+  // Function to open edit modal with claim data
+  const handleEditClaim = (claim) => {
+    setSelectedClaim(claim);
+    setEditFormDataClaim({
+      claimId: claim.claimId,
+      claimType: claim.claimType,
+      claimAmount: claim.claimAmount,
+      status: claim.status,
+      assignedTo: claim.assignedTo || '',
+      description: claim.description || '',
+      policyId: claim.policyId || '',
+      company: claim.company || '',
+      policyType: claim.policyType || '',
+      incidentDate: claim.incidentDate || '',
+      excess: claim.excess || '',
+      netClaimAmount: claim.netClaimAmount || '',
+      supportingDocument: claim.supportingDocument || null
+    });
+    setIsEditModalOpenClaim(true);
+  };
 
-  const handleUpdateClaim = async (e) => {
-    e.preventDefault();
+  const handleUpdateClaim = async (updatedClaimData) => {
     try {
-      // Prepare the form data
-      const formData = new FormData();
-      
-      // Add all the form fields that the backend expects
-      formData.append('claimId', editFormDataClaim.claimId);
-      formData.append('company', editFormDataClaim.company || '');
-      formData.append('policyId', editFormDataClaim.policyId || '');
-      formData.append('policyType', editFormDataClaim.policyType || '');
-      formData.append('claimType', editFormDataClaim.claimType || '');
-      formData.append('claimAmount', editFormDataClaim.claimAmount || 0);
-      formData.append('description', editFormDataClaim.description || '');
-      formData.append('incidentDate', editFormDataClaim.incidentDate || '');
-      formData.append('netClaimAmount', editFormDataClaim.netClaimAmount || 0);
-      formData.append('status', editFormDataClaim.status || 'Under Review');
-      
-      // If there's a supporting document, append it
-      if (editFormDataClaim.supportingDocument) {
-        formData.append('supportingDocuments', editFormDataClaim.supportingDocument);
-      }
-
-      console.log('==============', formData);
-
-      const response = await axios.post(
-        `http://localhost:7001/api/claims/${editFormDataClaim.claimId}`,
-        formData,
+      const response = await axios.put(
+        `http://localhost:7001/api/claims/${updatedClaimData.claimId}`,
+        updatedClaimData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            'Content-Type': 'application/json',
           },
         }
       );
-      
+
       if (response.status === 200) {
-        // Refresh claims data
-        fetchClaims();
-        // Close the modal
-        setIsEditModalOpenClaim(false);
+        // Update the claims list with the updated claim
+        setClaims(prevClaims => 
+          prevClaims.map(claim => 
+            claim.claimId === updatedClaimData.claimId 
+              ? { ...claim, ...updatedClaimData } 
+              : claim
+          )
+        );
+        
         // Show success message
         toast.success('Claim updated successfully');
+        return true;
       }
     } catch (error) {
       console.error('Error updating claim:', error);
       const errorMessage = error.response?.data?.error || 'Failed to update claim';
       toast.error(errorMessage);
+      return false;
     }
   };
 
-  const timelineEvents = [
-    {
-      title: 'Claim Submitted',
-      subtitle: 'John Smith',
-      date: '2024-01-15',
-      active: true
-    },
-    {
-      title: 'Assigned to Agent',
-      subtitle: 'System',
-      date: '2024-01-16',
-      description: 'Assigned to Sarah Johnson',
-      active: true
-    },
-    {
-      title: 'Under Review',
-      subtitle: 'Sarah Johnson',
-      date: '2024-01-17',
-      active: true
-    }
-  ]
-  
+  const timelineEvents = []
+
   const [editFormData, setEditFormData] = useState({
-    firstName:'',
-    lastName:'',
+    firstName: '',
+    lastName: '',
     email: '',
     phoneNumber: '',
     department: '',
@@ -584,7 +442,7 @@ const Dashboard = () => {
     };
 
     updateTheme();
-    
+
     if (theme === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       mediaQuery.addEventListener('change', updateTheme);
@@ -623,164 +481,25 @@ const Dashboard = () => {
       color: 'bg-orange-500'
     }
   ]);
-  
 
-    // Statistics data
-  const statsClaim = [
-    {
-      title: 'Pending Claims',
-      value: '1',
-      subtitle: 'Awaiting review',
-      color: 'bg-orange-500',
-      // icon: Clock
-    },
-    {
-      title: 'Approved Claims',
-      value: '2',
-      subtitle: 'This month',
-      color: 'bg-green-500',
-      // icon: CheckCircle
-    },
-    {
-      title: 'Total Payout',
-      value: '£20K',
-      subtitle: 'Net amount paid',
-      color: 'bg-blue-500',
-      // icon: DollarSign
-    },
-    {
-      title: 'Total Excess',
-      value: '£9K',
-      subtitle: 'Collected excess',
-      color: 'bg-pink-500',
-      // icon: AlertCircle
-    }
-  ];
+
+  // Statistics data
+  const statsClaim = [];
 
   const tabs = [
-    { name: 'Dashboard', icon: BarChart3, color:"bg-gradient-to-br from-blue-500 to-cyan-500"},
-    { name: 'Claims', icon: FileCheck, color: "bg-gradient-to-br from-orange-600 via-red-600 to-pink-600"},
-    { name: 'Policies', icon: Shield, color:"bg-gradient-to-r from-purple-600 to-pink-600"},
-    { name: 'Users', icon: Users, active: true, color:"bg-gradient-to-r from-purple-500 to-pink-500"}
+    { name: 'Dashboard', icon: BarChart3, color: "bg-gradient-to-br from-blue-500 to-cyan-500" },
+    { name: 'Claims', icon: FileCheck, color: "bg-gradient-to-br from-orange-600 via-red-600 to-pink-600" },
+    { name: 'Policies', icon: Shield, color: "bg-gradient-to-r from-purple-600 to-pink-600" },
+    { name: 'Users', icon: Users, active: true, color: "bg-gradient-to-r from-purple-500 to-pink-500" }
   ];
 
-    const statsData = [
-    {
-      title: 'Total Policies',
-      value: '6',
-      change: '+12%',
-      changeText: 'from last month',
-      icon: FileText,
-      color: 'blue'
-    },
-    {
-      title: 'Active Claims',
-      value: '1',
-      change: '+5%',
-      changeText: 'from last month',
-      icon: AlertCircle,
-      color: 'orange'
-    },
-    {
-      title: 'Total Premium',
-      value: '£134K',
-      change: '+18%',
-      changeText: 'from last month',
-      icon: DollarSign,
-      color: 'green'
-    },
-    {
-      title: 'Registered Users',
-      value: '4',
-      change: '+8%',
-      changeText: 'from last month',
-      icon: Users,
-      color: 'purple'
-    }
-  ];
+  const statsData = [];
 
-  const recentActivity = [
-    {
-      type: 'warning',
-      title: 'Under Review - Water Damage',
-      subtitle: 'Sarah Johnson',
-      date: '2024-01-17',
-      icon: AlertCircle
-    },
-    {
-      type: 'info',
-      title: 'Assigned to Agent - Water Damage',
-      subtitle: 'System',
-      date: '2024-01-16',
-      icon: Activity
-    },
-    {
-      type: 'info',
-      title: 'Claim Submitted - Water Damage',
-      subtitle: 'John Smith',
-      date: '2024-01-15',
-      icon: Activity
-    },
-    {
-      type: 'success',
-      title: 'Approved - Public Liability',
-      subtitle: 'Sarah Johnson',
-      date: '2024-01-14',
-      icon: CheckCircle
-    },
-    {
-      type: 'info',
-      title: 'Payment Processed - Equipment Damage',
-      subtitle: 'Finance Team',
-      date: '2024-01-12',
-      icon: Activity
-    }
-  ];
+  const recentActivity = [];
 
-  const policies = [
-    {
-      title: 'Property Insurance',
-      status: 'Active',
-      coverage: '£2,087,097',
-      icon: Home,
-      statusColor: 'green'
-    },
-    {
-      title: 'Liability Insurance',
-      status: 'Expired',
-      coverage: 'Renewal required',
-      icon: AlertTriangle,
-      statusColor: 'red'
-    },
-    {
-      title: 'Fleet Insurance',
-      status: 'Active',
-      coverage: '£500,000',
-      icon: Truck,
-      statusColor: 'green'
-    }
-  ];
+  const policies = [];
 
-  const quickStats = [
-    {
-      title: 'Global Coverage',
-      value: '98.5%',
-      icon: Globe,
-      color: 'blue'
-    },
-    {
-      title: 'Claim Success',
-      value: '94.2%',
-      icon: CheckCircle,
-      color: 'green'
-    },
-    {
-      title: 'Data Security',
-      value: '99.9%',
-      icon: Shield,
-      color: 'purple'
-    }
-  ];
+  const quickStats = [];
 
   const getColorClasses = (color, variant = 'bg') => {
     const colors = {
@@ -813,7 +532,7 @@ const Dashboard = () => {
     return colors[color] || colors.blue;
   };
 
-    const getStatusColorr = (status) => {
+  const getStatusColorr = (status) => {
     switch (status) {
       case 'Under Review':
         return 'bg-orange-100 text-orange-800 border-orange-200';
@@ -888,52 +607,52 @@ const Dashboard = () => {
   };
 
   const getStatusColor = (status) => {
-    return status === 'Active' 
-      ? 'text-green-600 bg-green-50 border-green-200' 
+    return status === 'Active'
+      ? 'text-green-600 bg-green-50 border-green-200'
       : 'text-red-600 bg-red-50 border-red-200';
   };
 
   const getStatusDarkColor = (status) => {
-    return status === 'Active' 
-      ? 'text-green-400 bg-green-900 border-green-700' 
+    return status === 'Active'
+      ? 'text-green-400 bg-green-900 border-green-700'
       : 'text-red-400 bg-red-900 border-red-700';
   };
 
   const handleEditUser = (user) => {
     console.log('Editing user:', user); // Debug log
     setSelectedUser(user);
-    
+
     // Use userRole if available, otherwise fall back to role
     const userRole = user.userRole || user.role;
     // Determine account status, checking multiple possible properties
-    const accountStatus = user.accountStatus || 
-                         (user.isActive === 1 || user.isActive === true || user.status === 'Active' ? 'Active' : 'Inactive');
-    
+    const accountStatus = user.accountStatus ||
+      (user.isActive === 1 || user.isActive === true || user.status === 'Active' ? 'Active' : 'Inactive');
+
     setEditFormData({
       id: user.id,
       firstName: user.firstName || '',
       lastName: user.lastName || '',
-      email: user.email || '', 
-      phoneNumber: user.phoneNumber || '', 
+      email: user.email || '',
+      phoneNumber: user.phoneNumber || '',
       department: user.department || '',
       location: user.location || '',
       userRole: userRole || 'Client', // Default to 'Client' if no role is set
       accountStatus: accountStatus,
       isActive: accountStatus === 'Active'
     });
-    
+
     console.log('Edit form data set to:', {
       ...editFormData,
       userRole: userRole || 'Client',
       accountStatus: accountStatus,
       isActive: accountStatus === 'Active'
     });
-    
+
     setIsEditModalOpen(true);
   };
 
   const handleDeleteUser = (user) => {
-    console.log(" inside handledeleteuser setselected user is ....",user);
+    console.log(" inside handledeleteuser setselected user is ....", user);
     setSelectedUser(user);
     setDeleteModalOpen(true)
   }
@@ -955,15 +674,15 @@ const Dashboard = () => {
   };
   const handleUpdateUser = async (e) => {
     if (e) e.preventDefault();
-    
+
     if (!editFormData.id) {
       console.error("No user ID to update");
       return;
     }
-    
+
     try {
       console.log('Updating user with data:', editFormData);
-      
+
       const updatedUser = {
         firstName: editFormData.firstName,
         lastName: editFormData.lastName,
@@ -973,14 +692,14 @@ const Dashboard = () => {
         userRole: editFormData.userRole || 'Client',
         isActive: editFormData.accountStatus === 'Active' ? 1 : 0
       };
-      
+
       console.log('Sending update request with:', updatedUser);
-      
+
       await axios.put(
         `http://localhost:7001/api/users/${editFormData.id}`,
         updatedUser
       );
-      
+
       // Refresh the users list and close the modal
       await fetchUsers();
       setIsEditModalOpen(false);
@@ -992,11 +711,11 @@ const Dashboard = () => {
   };
 
 
-const getInitials = (name) => {
-  const names = name.trim().split(" ");
-  if (names.length === 1) return names[0][0].toUpperCase();
-  return (names[0][0] + names[1][0]).toUpperCase();
-};
+  const getInitials = (name) => {
+    const names = name.trim().split(" ");
+    if (names.length === 1) return names[0][0].toUpperCase();
+    return (names[0][0] + names[1][0]).toUpperCase();
+  };
 
   const handleFormChange = (field, value) => {
     setEditFormData(prev => ({
@@ -1013,14 +732,14 @@ const getInitials = (name) => {
   };
 
   const handleCompanyAccessChange = (company) => {
-  setFormData(prev => ({
-    ...prev,
-    companyAccess: prev.companyAccess.includes(company)
-      ? prev.companyAccess.filter(c => c !== company)
-      : [...prev.companyAccess, company]
-  }));
-};
-  const changeUsers = (formattedUsers) =>{
+    setFormData(prev => ({
+      ...prev,
+      companyAccess: prev.companyAccess.includes(company)
+        ? prev.companyAccess.filter(c => c !== company)
+        : [...prev.companyAccess, company]
+    }));
+  };
+  const changeUsers = (formattedUsers) => {
     fetchUsers(formattedUsers)
   }
 
@@ -1040,133 +759,133 @@ const getInitials = (name) => {
 
   const handleCreateUser = async () => {
     try {
-      
+
       console.log("Creating user:", formData);
- 
+
       const response = await axios.post(
         "http://localhost:7001/api/users", formData
       );
       fetchUsers();
       setIsCreateModalOpen(false);
       toast.success('User created successfully!');
- 
+
       if (response.status === 201 || response.status === 200) {
         console.log("User created successfully:", response.data);
-        
+
         setFormData({});
-       
+
       } else {
         console.warn("Unexpected response:", response);
       }
-      
+
     } catch (error) {
       console.error("Error creating user:", error);
-     
+
     }
   };
 
 
   const handleCloseDeleteModal = () => setDeleteModalOpen(false);
   const handleConfirmDelete = async (selectedUser) => {
-  console.log("inside handle confirm delete",selectedUser);
+    console.log("inside handle confirm delete", selectedUser);
 
-    
+
     if (!selectedUser?.id) {
-    console.log("userid is not found");
-    return; 
+      console.log("userid is not found");
+      return;
     }
-  try {
-    await axios.delete(`http://localhost:7001/api/users/${selectedUser.id}`);
-   
-    
-    fetchUsers();
-    setDeleteModalOpen(false);
-    setSelectedUser(null);
-    toast.success('User deleted successfully!');
+    try {
+      await axios.delete(`http://localhost:7001/api/users/${selectedUser.id}`);
 
-  } 
-   catch (err) {
-    console.error("Error deleting user:", err);
-    alert("Failed to delete user. Please try again.");
+
+      fetchUsers();
+      setDeleteModalOpen(false);
+      setSelectedUser(null);
+      toast.success('User deleted successfully!');
+
+    }
+    catch (err) {
+      console.error("Error deleting user:", err);
+      alert("Failed to delete user. Please try again.");
+    }
   }
-}
 
 
   const handleSubmitNewClaim = async (formValues, file) => {
-  try {
-    const formData = new FormData();
-    formData.append('companyName', formValues.companyName);
-    formData.append('policyName', formValues.policyName);
-    formData.append('claimType', formValues.claimType);
-    
-    // Set default status to 'Under Review' if not provided
-    const status = formValues.status || 'Under Review';
-    formData.append('status', status);
-    
-    const claimAmount = formValues.claimAmount;
-    
-    if (!claimAmount || isNaN(Number(claimAmount))) {
-      alert('Please enter a valid claim amount.');
-      return;
-    }
-    
-    formData.append('claimAmount', claimAmount);
-    formData.append('Description', formValues.Description);
-    formData.append('incidentDate', formValues.incidentDate);
-    
-    if (file) {
-      formData.append('supportingDocuments', file);
-    }
-    
-    // Send request via Axios
-    const response = await axios.post(
-      'http://localhost:7001/api/claims',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
+    try {
+      const formData = new FormData();
+      formData.append('companyName', formValues.companyName);
+      formData.append('policyName', formValues.policyName);
+      formData.append('claimType', formValues.claimType);
 
-    // Show success message
-    toast.success('Claim created successfully!', {
-      duration: 3000,
-      position: 'top-center'
-    });
-    
-    // Reset form data
-    setFormDataNewClaim({
-      companyName: '',
-      policyName: '',
-      claimType: '',
-      claimAmount: '',
-      Description: '',
-      incidentDate: '',
-      status: 'Under Review',
-      supportingDocument: null
-    });
-    
-    // Close the Submit New Claim modal
-    setIsOpenNewClaim(false);
-    
-    // Redirect to claims tab after a short delay
-    setTimeout(() => {
-      setActiveTab('Claims');
-    }, 500);
-    
-    // Refresh claims data
-    fetchClaims();
- 
-  } catch (error) {
-    // Handle axios error correctly
-    const errorMsg = error.response?.data?.error || error.message;
-    toast.error('Error: ' + errorMsg, {
-      duration: 5000,
-      position: 'top-center'
-    });
-  }
-};
+      // Set default status to 'Under Review' if not provided
+      const status = formValues.status || 'Under Review';
+      formData.append('status', status);
+
+      const claimAmount = formValues.claimAmount;
+
+      if (!claimAmount || isNaN(Number(claimAmount))) {
+        alert('Please enter a valid claim amount.');
+        return;
+      }
+
+      formData.append('claimAmount', claimAmount);
+      formData.append('Description', formValues.Description);
+      formData.append('incidentDate', formValues.incidentDate);
+
+      if (file) {
+        formData.append('supportingDocuments', file);
+      }
+
+      // Send request via Axios
+      const response = await axios.post(
+        'http://localhost:7001/api/claims',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      // Show success message
+      toast.success('Claim created successfully!', {
+        duration: 3000,
+        position: 'top-center'
+      });
+
+      // Reset form data
+      setFormDataNewClaim({
+        companyName: '',
+        policyName: '',
+        claimType: '',
+        claimAmount: '',
+        Description: '',
+        incidentDate: '',
+        status: 'Under Review',
+        supportingDocument: null
+      });
+
+      // Close the Submit New Claim modal
+      setIsOpenNewClaim(false);
+
+      // Redirect to claims tab after a short delay
+      setTimeout(() => {
+        setActiveTab('Claims');
+      }, 500);
+
+      // Refresh claims data
+      fetchClaims();
+
+    } catch (error) {
+      // Handle axios error correctly
+      const errorMsg = error.response?.data?.error || error.message;
+      toast.error('Error: ' + errorMsg, {
+        duration: 5000,
+        position: 'top-center'
+      });
+    }
+  };
 
 
   const companies = [
@@ -1200,44 +919,44 @@ const getInitials = (name) => {
   ];
 
   const updateStats = (users) => {
-  const totalUsers = users.length;
-  const activeUsers = users.filter(user => user.status === 'Active').length;
+    const totalUsers = users.length;
+    const activeUsers = users.filter(user => user.status === 'Active').length;
 
-  const teamMembers = users.filter(user => user.role === 'Team Member').length;
-  const clients = users.filter(user => user.role === 'Client').length;
+    const teamMembers = users.filter(user => user.role === 'Team Member').length;
+    const clients = users.filter(user => user.role === 'Client').length;
 
-  setStats([
-    {
-      title: 'Total Users',
-      value: totalUsers.toString(),
-      changeType: totalUsers > 0 ? 'positive' : 'neutral',
-      color: 'bg-blue-500'
-    },
-    {
-      title: 'Active Users',
-      value: activeUsers.toString(),
-      changeType: activeUsers > 0 ? 'positive' : 'neutral',
-      color: 'bg-green-500'
-    },
-    {
-      title: 'Team Members',
-      value: teamMembers.toString(),
-      changeType: teamMembers > 0 ? 'positive' : 'neutral',
-      color: 'bg-purple-500'
-    },
-    {
-      title: 'Clients',
-      value: clients.toString(),
-      changeType: clients > 0 ? 'positive' : 'neutral',
-      color: 'bg-orange-500'
-    }
-  ]);
-};
+    setStats([
+      {
+        title: 'Total Users',
+        value: totalUsers.toString(),
+        changeType: totalUsers > 0 ? 'positive' : 'neutral',
+        color: 'bg-blue-500'
+      },
+      {
+        title: 'Active Users',
+        value: activeUsers.toString(),
+        changeType: activeUsers > 0 ? 'positive' : 'neutral',
+        color: 'bg-green-500'
+      },
+      {
+        title: 'Team Members',
+        value: teamMembers.toString(),
+        changeType: teamMembers > 0 ? 'positive' : 'neutral',
+        color: 'bg-purple-500'
+      },
+      {
+        title: 'Clients',
+        value: clients.toString(),
+        changeType: clients > 0 ? 'positive' : 'neutral',
+        color: 'bg-orange-500'
+      }
+    ]);
+  };
 
   const fetchUsers = async () => {
     try {
       const response = await axios.get('http://localhost:7001/api/users');
-  
+
       const formattedUsers = response.data.map((user, index) => ({
         id: user.id,
         avatar: getInitials(user.firstName || user.name || ""),
@@ -1245,17 +964,17 @@ const getInitials = (name) => {
         lastName: user.lastName,
         email: user.email,
         location: user.location || 'N/A',
-        role: user.userRole,          
-        status: user.accountStatus,   
+        role: user.userRole,
+        status: user.accountStatus,
         phoneNumber: user.phoneNumber,
         department: user.department,
         policies: user.policies || 0,
         claims: user.claims || 0,
       }));
-  
+
       setUsers(formattedUsers);
       updateStats(formattedUsers);
-  
+
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -1274,156 +993,46 @@ const getInitials = (name) => {
       setIsLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchUsers();
     fetchClaims();
   }, []);
 
- const openCreateModal = (flag) => {
-  if (flag) {
-    setFormData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phoneNumber: '',
-      department: '',
-      location: '',
-      userRole: '',
-      accountStatus: 'Active',
-      temporaryPassword: '',
-      companyAccess: [],
-      permissions: {
-        viewClaims: false,
-        processClaims: false,
-        createPolicies: false,
-        manageUsers: false
-      },
-      additionalNotes: ''
-    });
-  }
-  setIsCreateModalOpen(flag);
-};
-  
-
-  const statsDataDashboard = [
-    {
-      title: 'Total Policies',
-      value: '6',
-      change: '+12%',
-      changeText: 'from last month',
-      icon: FileText,
-      color: 'blue'
-    },
-    {
-      title: 'Active Claims',
-      value: '1',
-      change: '+5%',
-      changeText: 'from last month',
-      icon: AlertCircle,
-      color: 'orange'
-    },
-    {
-      title: 'Total Premium',
-      value: '£134K',
-      change: '+18%',
-      changeText: 'from last month',
-      icon: DollarSign,
-      color: 'green'
-    },
-    {
-      title: 'Registered Users',
-      value: '4',
-      change: '+8%',
-      changeText: 'from last month',
-      icon: Users,
-      color: 'purple'
+  const openCreateModal = (flag) => {
+    if (flag) {
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phoneNumber: '',
+        department: '',
+        location: '',
+        userRole: '',
+        accountStatus: 'Active',
+        temporaryPassword: '',
+        companyAccess: [],
+        permissions: {
+          viewClaims: false,
+          processClaims: false,
+          createPolicies: false,
+          manageUsers: false
+        },
+        additionalNotes: ''
+      });
     }
-  ];
+    setIsCreateModalOpen(flag);
+  };
 
-  const recentActivityDashboard = [
-    {
-      type: 'warning',
-      title: 'Under Review - Water Damage',
-      subtitle: 'Sarah Johnson',
-      date: '2024-01-17',
-      icon: AlertCircle
-    },
-    {
-      type: 'info',
-      title: 'Assigned to Agent - Water Damage',
-      subtitle: 'System',
-      date: '2024-01-16',
-      icon: Activity
-    },
-    {
-      type: 'info',
-      title: 'Claim Submitted - Water Damage',
-      subtitle: 'John Smith',
-      date: '2024-01-15',
-      icon: Activity
-    },
-    {
-      type: 'success',
-      title: 'Approved - Public Liability',
-      subtitle: 'Sarah Johnson',
-      date: '2024-01-14',
-      icon: CheckCircle
-    },
-    {
-      type: 'info',
-      title: 'Payment Processed - Equipment Damage',
-      subtitle: 'Finance Team',
-      date: '2024-01-12',
-      icon: Activity
-    }
-  ];
 
-  const policiesDashboard = [
-    {
-      title: 'Property Insurance',
-      status: 'Active',
-      coverage: '£2,087,097',
-      icon: Home,
-      statusColor: 'green'
-    },
-    {
-      title: 'Liability Insurance',
-      status: 'Expired',
-      coverage: 'Renewal required',
-      icon: AlertTriangle,
-      statusColor: 'red'
-    },
-    {
-      title: 'Fleet Insurance',
-      status: 'Active',
-      coverage: '£500,000',
-      icon: Truck,
-      statusColor: 'green'
-    }
-  ];
+  const statsDataDashboard = [];
 
-  const quickStatsDashboard = [
-    {
-      title: 'Global Coverage',
-      value: '98.5%',
-      icon: Globe,
-      color: 'blue'
-    },
-    {
-      title: 'Claim Success',
-      value: '94.2%',
-      icon: CheckCircle,
-      color: 'green'
-    },
-    {
-      title: 'Data Security',
-      value: '99.9%',
-      icon: Shield,
-      color: 'purple'
-    }
-  ];
+  const recentActivityDashboard = [];
+   
+  const policiesDashboard = [];
 
+  const quickStatsDashboard = [];
+    
   const getColorClassesDashbaord = (color, variant = 'bg') => {
     const colors = {
       blue: {
@@ -1457,68 +1066,67 @@ const getInitials = (name) => {
 
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${
-      isDark ? 'bg-gray-900' : 'bg-gray-50'
-    }`}>
-      
+    <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-gray-900' : 'bg-gray-50'
+      }`}>
+
       {/* Header */}
       <DashboardHeader
-      isDark={isDark}
-      theme={theme}
-      setTheme={setTheme}
-      role={role}
+        isDark={isDark}
+        theme={theme}
+        setTheme={setTheme}
+        role={role}
       />
 
       {/* Navigation Tabs */}
       <NavigationTabs
-      role={role}
-      isDark={isDark}
-      tabs={tabs.map((tab) => ({
-    ...tab,
-    active: activeTab === tab.name
-  }))}
-  activeTabChanger={setActiveTab}
+        role={role}
+        isDark={isDark}
+        tabs={tabs.map((tab) => ({
+          ...tab,
+          active: activeTab === tab.name
+        }))}
+        activeTabChanger={setActiveTab}
 
       />
 
       {/* Main Content */}
       <main className="p-6">
 
-       {activeTab === "Users" && (<Userr
-        openCreateModal={openCreateModal}
-        stats={stats}
-        isDark={isDark}
-        users={users}
-        changeUsers={changeUsers}
-        getRoleDarkColor={getRoleDarkColor}
-        getRoleColor={getRoleColor}
-        getStatusDarkColor={getStatusDarkColor}
-        getStatusColor={getStatusColor}
-        handleEditUser={handleEditUser}
-        openDeleteModal={setDeleteModalOpen}
-        isCreateModalOpen={isCreateModalOpen}
-        handleCloseModalCreateUser={handleCloseModalCreateUser}
-        formData={formData}
-        handleFormChangeCreateUser={handleFormChangeCreateUser}
-        companies={companies}
-        handleCompanyAccessChange={handleCompanyAccessChange}
-        handlePermissionChange={handlePermissionChange}
-        handleCreateUser={handleCreateUser}
-        isEditModalOpen={isEditModalOpen}
-        selectedUser={selectedUser}
-        handleCloseModal={handleCloseModal}
-        editFormData={editFormData}
-        handleFormChange={handleFormChange}
-        handleUpdateUser={handleUpdateUser}
-        isDeleteModalOpen={isDeleteModalOpen}
-        handleCloseDeleteModal={handleCloseDeleteModal}
-        handleConfirmDelete={handleConfirmDelete}
-        handleDeleteUser={handleDeleteUser}
+        {activeTab === "Users" && (<Userr
+          openCreateModal={openCreateModal}
+          stats={stats}
+          isDark={isDark}
+          users={users}
+          changeUsers={changeUsers}
+          getRoleDarkColor={getRoleDarkColor}
+          getRoleColor={getRoleColor}
+          getStatusDarkColor={getStatusDarkColor}
+          getStatusColorr={getStatusColorr}
+          handleEditUser={handleEditUser}
+          openDeleteModal={setDeleteModalOpen}
+          isCreateModalOpen={isCreateModalOpen}
+          handleCloseModalCreateUser={handleCloseModalCreateUser}
+          formData={formData}
+          handleFormChangeCreateUser={handleFormChangeCreateUser}
+          companies={companies}
+          handleCompanyAccessChange={handleCompanyAccessChange}
+          handlePermissionChange={handlePermissionChange}
+          handleCreateUser={handleCreateUser}
+          isEditModalOpen={isEditModalOpen}
+          selectedUser={selectedUser}
+          handleCloseModal={handleCloseModal}
+          editFormData={editFormData}
+          handleFormChange={handleFormChange}
+          handleUpdateUser={handleUpdateUser}
+          isDeleteModalOpen={isDeleteModalOpen}
+          handleCloseDeleteModal={handleCloseDeleteModal}
+          handleConfirmDelete={handleConfirmDelete}
+          handleDeleteUser={handleDeleteUser}
 
-        />) } 
-     
-        {activeTab === "Claims" &&  <Claims
-        role={role}
+        />)}
+
+        {activeTab === "Claims" && <Claims 
+        role={role} 
         isDark={isDark}
         claims={claims}
         getStatusColorr={getStatusColorr}
@@ -1526,49 +1134,56 @@ const getInitials = (name) => {
         getClaimTypeColorr={getClaimTypeColorr}
         getStatusDarkColorr={getStatusDarkColorr}
         statsClaim={statsClaim}
-        isEditModalOpenClaim={isEditModalOpenClaim}
         editFormDataClaim={editFormDataClaim}
         handleCloseModalClaim={handleCloseModalClaim}
-        activeTabClaim={activeTabClaim} 
+        activeTabClaim={activeTabClaim}
         openActiveTabClaim={setActiveTabClaim}
         handleFormChangeClaim={handleFormChangeClaim}
         timelineEvents={timelineEvents}
         handleUpdateClaim={handleUpdateClaim}
-        openEditModalOpenClaim={setIsEditModalOpenClaim} 
-        isOpenNewClaim={isOpenNewClaim}  
-        openIsOpenNewClaim={setIsOpenNewClaim}  
-        handleSubmitNewClaim={handleSubmitNewClaim} 
+        openEditModalOpenClaim={handleEditClaim}
+        isEditModalOpenClaim={isEditModalOpenClaim}
+        isModalOpenNew={isModalOpenNew}
+        openIsModalOpenNew={setIsModalOpenNew}
+        isOpenNewClaim={isOpenNewClaim}
+        openIsOpenNewClaim={setIsOpenNewClaim}
+        handleSubmitNewClaim={handleSubmitNewClaim}
         formDataNewClaim={formDataNewClaim}
         handleInputChangeNewClaim={handleInputChangeNewClaim}
         handleCloseNewClaim={handleCloseNewClaim}
         handleCancelNewClaim={handleCancelNewClaim}
+        setActiveTabClaim={setActiveTabClaim}
+        setIsEditModalOpenClaim={setIsEditModalOpenClaim}
+        setIsOpenNewClaim={setIsOpenNewClaim}
+        setIsModalOpenNew={setIsModalOpenNew}
+        users={users}
         />}
 
-       {activeTab === "Policies" && <Policies
-       isDark={isDark}
-       selectedCompanyPolicy={selectedCompanyPolicy}
-       changeSelectedCompanyPolicy={setSelectedCompanyPolicy}
-       policyCompanies={policyCompanies}
-       policyYear={policyYear}
-       changePolicyYear={setPolicyYear}
-       chooseSelectedInsuranceType={setSelectedInsuranceType}
-       getInsuranceIcon={getInsuranceIcon}
-       selectedInsuranceType={selectedInsuranceType}
-       selectedCompanyData={selectedCompanyData}
-       currentInsuranceData={currentInsuranceData}
-       allPolicies={allPolicies}
-       openIsModalOpenNew={setIsOpenNewClaim}
-       />}
+        {activeTab === "Policies" && <Policies
+          isDark={isDark}
+          selectedCompanyPolicy={selectedCompanyPolicy}
+          changeSelectedCompanyPolicy={setSelectedCompanyPolicy}
+          policyCompanies={policyCompanies}
+          policyYear={policyYear}
+          changePolicyYear={setPolicyYear}
+          chooseSelectedInsuranceType={setSelectedInsuranceType}
+          getInsuranceIcon={getInsuranceIcon}
+          selectedInsuranceType={selectedInsuranceType}
+          selectedCompanyData={selectedCompanyData}
+          currentInsuranceData={currentInsuranceData}
+          allPolicies={allPolicies}
+          openIsModalOpenNew={setIsOpenNewClaim}
+        />}
 
-       {activeTab === "Dashboard" && <DashboardTab
-       isDark={isDark}
-       statsDataDashboard={statsDataDashboard}
-       recentActivityDashboard={recentActivityDashboard}
-       policiesDashboard={policiesDashboard}
-       quickStatsDashboard={quickStatsDashboard}
-       getColorClassesDashbaord={getColorClassesDashbaord}
-       />}
-        
+        {activeTab === "Dashboard" && <DashboardTab
+          isDark={isDark}
+          statsDataDashboard={statsDataDashboard}
+          recentActivityDashboard={recentActivityDashboard}
+          policiesDashboard={policiesDashboard}
+          quickStatsDashboard={quickStatsDashboard}
+          getColorClassesDashbaord={getColorClassesDashbaord}
+        />}
+
       </main>
     </div>
   );
