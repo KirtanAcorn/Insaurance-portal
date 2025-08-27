@@ -351,14 +351,21 @@ const Dashboard = () => {
       // Extract claimId and create a new object without it for the request body
       const { claimId, ...claimData } = updatedClaimData;
       
+      // Prepare the data with proper number conversions
+      const requestData = {
+        ...claimData,
+        // Convert numeric fields to numbers
+        claimAmount: parseFloat(claimData.claimAmount) || 0,
+        excess: parseFloat(claimData.excess) || 0,
+        netAmount: parseFloat(claimData.netAmount) || 0,
+        // Make sure required fields are included
+        companyId: parseInt(claimData.companyId) || 1,
+        policyId: parseInt(claimData.policyId) || 1,
+      };
+      
       const response = await axios.put(
         `http://localhost:7001/api/claims/${claimId}`,
-        {
-          ...claimData,
-          // Make sure required fields are included
-          companyId: claimData.companyId || 1, // Provide a default if needed
-          policyId: claimData.policyId || 1,   // Provide a default if needed
-        },
+        requestData,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -371,7 +378,7 @@ const Dashboard = () => {
         setClaims(prevClaims => 
           prevClaims.map(claim => 
             claim.claimId === claimId 
-              ? { ...claim, ...claimData, claimId } 
+              ? { ...claim, ...requestData, claimId } 
               : claim
           )
         );
