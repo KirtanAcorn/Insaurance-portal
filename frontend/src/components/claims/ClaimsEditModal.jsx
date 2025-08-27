@@ -19,10 +19,15 @@ const ClaimsEditModal = ({
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
+    const updatedData = {
+      ...formData,
       [name]: value
-    }));
+    };
+    setFormData(updatedData);
+    // Also update parent component's state
+    if (handleFormChangeClaim) {
+      handleFormChangeClaim(updatedData);
+    }
   };
 
   const handleSubmit = async (e) => {

@@ -32,10 +32,17 @@ exports.getClaimById = async (req, res) => {
 // Create a new claim
 exports.createClaim = async (req, res) => {
   try {
+    // For form-data, we need to parse the fields from req.body
     const {
       claimType, claimAmount, companyName, policyName,
       description, incidentDate, excess, netAmount, status
     } = req.body;
+
+    console.log('Received claim data:', {
+      claimType, claimAmount, companyName, policyName,
+      description, incidentDate, excess, netAmount, status,
+      hasFile: !!req.file
+    });
 
     // Handle file upload
     const supportingDocuments = req.file ? req.file.filename : null;
@@ -76,63 +83,69 @@ exports.createClaim = async (req, res) => {
 
 // Update an existing claim
 exports.updateClaim = async (req, res) => {
-  const { claimId } = req.params;
-  const {
-    companyId, policyId, companyName, policyName, claimType, claimAmount,
-    description, incidentDate, excess, netAmount, status
-  } = req.body;
-
-  // Handle file upload for supporting documents if present, otherwise keep the existing one
-  const supportingDocuments = req.file ? req.file.filename : req.body.supportingDocuments;
-
   try {
-    const pool = await poolPromise;
-    
-    // Validate and format incidentDate to prevent "Invalid date" error
-    const incidentDateForDB = incidentDate ? new Date(incidentDate) : null;
+    const { claimId } = req.params;
+    const updateFields = [];
+    const request = (await poolPromise).request();
 
-    const request = pool.request()
-      .input('claimId', sql.Int, claimId)
-      .input('companyId', sql.Int, companyId)
-      .input('companyName', sql.VarChar, companyName)
-      .input('policyId', sql.Int, policyId)
-      .input('policyName', sql.VarChar, policyName)
-      .input('claimType', sql.VarChar, claimType)
-      .input('claimAmount', sql.Decimal(10, 2), claimAmount)
-      .input('description', sql.VarChar, description)
-      .input('incidentDate', sql.Date, incidentDateForDB)
-      .input('excess', sql.Decimal(10, 2), excess)
-      .input('netAmount', sql.Decimal(10, 2), netAmount)
-      .input('status', sql.VarChar, status)
-      .input('supportingDocuments', sql.VarChar, supportingDocuments);
+    // Add claimId to inputs
+    request.input('claimId', sql.Int, claimId);
+
+    // Handle file upload for supporting documents if present, otherwise keep the existing one
+    if (req.file) {
+      updateFields.push('supportingDocuments = @supportingDocuments');
+      request.input('supportingDocuments', sql.VarChar, req.file.filename);
+    } else if (req.body.supportingDocuments !== undefined) {
+      updateFields.push('supportingDocuments = @supportingDocuments');
+      request.input('supportingDocuments', sql.VarChar, req.body.supportingDocuments);
+    }
+
+    // Helper function to add field to update
+    const addField = (field, type, value) => {
+      if (value !== undefined && value !== null) {
+        updateFields.push(`${field} = @${field}`);
+        request.input(field, type, value);
+      }
+    };
+
+    // Add fields that are present in the request body
+    if (req.body.companyId !== undefined) addField('companyId', sql.Int, parseInt(req.body.companyId));
+    if (req.body.policyId !== undefined) addField('policyId', sql.Int, parseInt(req.body.policyId));
+    if (req.body.companyName !== undefined) addField('companyName', sql.VarChar, req.body.companyName);
+    if (req.body.policyName !== undefined) addField('policyName', sql.VarChar, req.body.policyName);
+    if (req.body.claimType !== undefined) addField('claimType', sql.VarChar, req.body.claimType);
+    if (req.body.claimAmount !== undefined) addField('claimAmount', sql.Decimal(10, 2), parseFloat(req.body.claimAmount));
+    if (req.body.description !== undefined) addField('description', sql.VarChar, req.body.description);
+    if (req.body.incidentDate !== undefined) {
+      const dateValue = req.body.incidentDate ? new Date(req.body.incidentDate) : null;
+      addField('incidentDate', sql.Date, dateValue);
+    }
+    if (req.body.excess !== undefined) addField('excess', sql.Decimal(10, 2), parseFloat(req.body.excess) || 0);
+    if (req.body.netAmount !== undefined) addField('netAmount', sql.Decimal(10, 2), parseFloat(req.body.netAmount) || 0);
+    if (req.body.status !== undefined) addField('status', sql.VarChar, req.body.status);
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    // Add updatedAt
+    updateFields.push('updatedAt = GETDATE()');
 
     const query = `
       UPDATE Claims
-      SET
-        companyId = @companyId,
-        policyId = @policyId,
-        companyName = @companyName,
-        policyName = @policyName,
-        claimType = @claimType,
-        claimAmount = @claimAmount,
-        description = @description,
-        incidentDate = @incidentDate,
-        excess = @excess,
-        netAmount = @netAmount,
-        status = @status,
-        supportingDocuments = @supportingDocuments,
-        updatedAt = GETDATE()
+      SET ${updateFields.join(', ')}
       WHERE claimId = @claimId;
     `;
-    
+
     const result = await request.query(query);
 
     if (result.rowsAffected[0] === 0) {
       return res.status(404).json({ error: 'Claim not found' });
     }
+    
     res.json({ message: 'Claim updated successfully' });
   } catch (err) {
-    console.error(err);
+    console.error('Error updating claim:', err);
     res.status(500).json({ error: 'Failed to update claim', details: err.message });
   }
 };

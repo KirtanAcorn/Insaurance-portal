@@ -44,7 +44,7 @@ const Dashboard = () => {
     policyName: '',
     claimType: '',
     claimAmount: '',
-    Description: '',
+    description: '',
     incidentDate: '',
     status: 'Under Review',
     supportingDocument: null
@@ -270,24 +270,19 @@ const Dashboard = () => {
   };
 
 
-  const handleFormChangeClaim = (field, value) => {
+  const handleFormChangeClaim = (fieldOrData, value) => {
     setEditFormDataClaim(prev => {
-      const updatedData = {
-        ...prev,
-        [field]: value
-      };
-      
-      // Calculate net claim amount if claim amount or excess changes
-      if ((field === 'claimAmount' || field === 'excess') && 
-          (updatedData.claimAmount !== undefined && updatedData.excess !== undefined)) {
-        const claimAmount = parseFloat(updatedData.claimAmount) || 0;
-        const excess = parseFloat(updatedData.excess) || 0;
-        updatedData.netClaimAmount = Math.max(0, claimAmount - excess).toFixed(2);
+      // Handle case where an object is passed (from ClaimsEditModal)
+      if (typeof fieldOrData === 'object' && fieldOrData !== null) {
+        return { ...prev, ...fieldOrData };
       }
-      
-      return updatedData;
+      // Handle case where field and value are passed separately
+      return {
+        ...prev,
+        [fieldOrData]: value
+      };
     });
-  }
+  };
 
   const handleInputChangeNewClaim = (field, value) => {
     setFormDataNewClaim(prev => ({
@@ -316,12 +311,12 @@ const Dashboard = () => {
       assignedTo: '',
       description: '',
       policyId: '',
-      company: '',
+      companyName: '',
       policyType: '',
       incidentDate: '',
       excess: '',
-      netClaimAmount: '',
-      supportingDocument: null
+      netAmount: '',
+      supportingDocuments: null
     });
   };
   
@@ -336,36 +331,65 @@ const Dashboard = () => {
       assignedTo: claim.assignedTo || '',
       description: claim.description || '',
       policyId: claim.policyId || '',
-      company: claim.company || '',
+      companyName: claim.companyName || claim.company || '', // Handle both old and new field names
       policyType: claim.policyType || '',
       incidentDate: claim.incidentDate || '',
       excess: claim.excess || '',
-      netClaimAmount: claim.netClaimAmount || '',
-      supportingDocument: claim.supportingDocument || null
+      netAmount: claim.netAmount || claim.netClaimAmount || '', // Handle both old and new field names
+      supportingDocuments: claim.supportingDocuments || claim.supportingDocument || null // Handle both old and new field names
     });
     setIsEditModalOpenClaim(true);
   };
 
   const handleUpdateClaim = async (updatedClaimData) => {
     try {
-      // Extract claimId and create a new object without it for the request body
       const { claimId, ...claimData } = updatedClaimData;
       
-      // Prepare the data with proper number conversions
-      const requestData = {
-        ...claimData,
-        // Convert numeric fields to numbers
-        claimAmount: parseFloat(claimData.claimAmount) || 0,
-        excess: parseFloat(claimData.excess) || 0,
-        netAmount: parseFloat(claimData.netAmount) || 0,
-        // Make sure required fields are included
-        companyId: parseInt(claimData.companyId) || 1,
-        policyId: parseInt(claimData.policyId) || 1,
-      };
+      // Get the original claim to compare changes
+      const originalClaim = claims.find(c => c.claimId === claimId) || {};
+      
+      // Only include fields that have changed
+      const changedFields = {};
+      
+      // Check each field for changes
+      Object.keys(claimData).forEach(key => {
+        const newValue = claimData[key];
+        const oldValue = originalClaim[key];
+        
+        // Handle different data types and empty strings
+        const hasChanged = (
+          (newValue !== oldValue) && 
+          (newValue !== '' || oldValue !== '') && // Don't treat empty string as a change if both are empty
+          (newValue !== undefined) &&
+          (newValue !== null)
+        );
+
+        if (hasChanged) {
+          // Convert numeric fields
+          if (['claimAmount', 'excess', 'netAmount', 'companyId', 'policyId'].includes(key)) {
+            const value = parseFloat(newValue);
+            if (!isNaN(value)) {
+              changedFields[key] = key.includes('Id') ? parseInt(newValue, 10) : value;
+            } else if (newValue === '') {
+              // Handle empty numeric fields by setting them to null or 0 as needed
+              changedFields[key] = key.includes('Id') ? null : 0;
+            }
+          } else {
+            // For non-numeric fields, preserve empty strings
+            changedFields[key] = newValue === '' ? '' : newValue;
+          }
+        }
+      });
+      
+      // If no fields were changed, return early
+      if (Object.keys(changedFields).length === 0) {
+        toast.info('No changes detected');
+        return false;
+      }
       
       const response = await axios.put(
         `http://localhost:7001/api/claims/${claimId}`,
-        requestData,
+        changedFields,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -374,17 +398,18 @@ const Dashboard = () => {
       );
 
       if (response.status === 200) {
-        // Update the claims list with the updated claim
+        // Update the claims list with only the changed fields
         setClaims(prevClaims => 
           prevClaims.map(claim => 
             claim.claimId === claimId 
-              ? { ...claim, ...requestData, claimId } 
+              ? { ...claim, ...changedFields, claimId } 
               : claim
           )
         );
         
-        // Show success message
-        toast.success('Claim updated successfully');
+        // Show success message with number of fields updated
+        const updatedFieldsCount = Object.keys(changedFields).length;
+        toast.success(`Successfully updated ${updatedFieldsCount} field${updatedFieldsCount > 1 ? 's' : ''}`);
         return true;
       }
     } catch (error) {
@@ -845,7 +870,8 @@ const Dashboard = () => {
       }
 
       formData.append('claimAmount', claimAmount);
-      formData.append('Description', formValues.Description);
+      // Use the correct case that matches the form field name (Description with capital D)
+      formData.append('description', formValues.Description || '');
       formData.append('incidentDate', formValues.incidentDate);
 
       if (file) {
@@ -875,7 +901,7 @@ const Dashboard = () => {
         policyName: '',
         claimType: '',
         claimAmount: '',
-        Description: '',
+        description: '', // Changed from Description to description
         incidentDate: '',
         status: 'Under Review',
         supportingDocument: null

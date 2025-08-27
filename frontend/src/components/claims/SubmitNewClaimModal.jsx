@@ -297,9 +297,9 @@ const SubmitNewClaimModal = ({
                     <textarea
                       rows={4}
                       placeholder="Provide detailed description of the incident"
-                      value={formDataNewClaim.Description}
+                      value={formDataNewClaim.description}
                       onChange={(e) =>
-                        handleInputChangeNewClaim("Description", e.target.value)
+                        handleInputChangeNewClaim("description", e.target.value)
                       }
                       className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-colors ${
                         isDark
