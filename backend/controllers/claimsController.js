@@ -1,8 +1,6 @@
 const sql = require('mssql');
 const { poolPromise } = require('../db');
 
-
-
 // Get all claims
 exports.getAllClaims = async (req, res) => {
   try {
@@ -31,70 +29,40 @@ exports.getClaimById = async (req, res) => {
   }
 };
 
-// Create new claim
-// exports.createClaim = async (req, res) => {
-//   const {
-//     claimType, claimAmount,companyName,policyName,
-//     Description, incidentDate
-//   } = req.body;
-
-//   const parsedClaimAmount = Number(claimAmount);
-//   if (!claimAmount || isNaN(parsedClaimAmount)) {
-//     return res.status(400).json({ error: "Invalid claimAmount. Must be a valid number or decimal." });
-//   }
-
-//   console.log('claimAmount:', claimAmount, typeof claimAmount);
-//   // If a file was uploaded, use its path; otherwise, use the value from the body
-//   let supportingDocuments = req.body.supportingDocuments;
-//   if (req.file) {
-//     // Store relative path for portability
-//     supportingDocuments = `/uploads/claims/${req.file.filename}`;
-//   }
-//   try {
-//     const pool = await poolPromise;
-//     const result = await pool.request()
-//       .input('companyName', sql.NVarChar, companyName)
-//       .input('policyName', sql.NVarChar, policyName)
-//       .input('claimType', sql.NVarChar, claimType)
-//       .input('claimAmount', sql.Decimal(18,2), parsedClaimAmount)
-//       .input('Description', sql.NVarChar, Description)
-//       .input('incidentDate', sql.DateTime, incidentDate)
-//       .input('supportingDocuments', sql.NVarChar, supportingDocuments)
-//       .query(`INSERT INTO Claims (companyName,policyName,claimType, claimAmount, Description, incidentDate, supportingDocuments, createdAt, updatedAt)
-//         VALUES (@policyName, @companyName, @claimType, @claimAmount, @Description, @incidentDate, @supportingDocuments, GETDATE(), GETDATE());
-//         SELECT SCOPE_IDENTITY() AS claimId;`);
-//     res.status(200).json({ message: "claim created successfully" });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
+// Create a new claim
 exports.createClaim = async (req, res) => {
   try {
     const {
       claimType, claimAmount, companyName, policyName,
-      Description, incidentDate
+      description, incidentDate, excess, netAmount, status
     } = req.body;
 
+    // Handle file upload
     const supportingDocuments = req.file ? req.file.filename : null;
+
+    // Validate and format incidentDate
+    const incidentDateForDB = incidentDate ? new Date(incidentDate) : null;
 
     const pool = await poolPromise;
 
-    // Insert into DB here...
+    // Insert into DB
     const result = await pool.request()
       .input('claimType', sql.VarChar, claimType)
       .input('claimAmount', sql.Decimal(10, 2), claimAmount)
       .input('companyName', sql.VarChar, companyName)
       .input('policyName', sql.VarChar, policyName)
-      .input('Description', sql.VarChar, Description)
-      .input('incidentDate', sql.Date, incidentDate)
+      .input('description', sql.VarChar, description)
+      .input('incidentDate', sql.Date, incidentDateForDB)
+      .input('excess', sql.Decimal(10, 2), excess)
+      .input('netAmount', sql.Decimal(10, 2), netAmount)
+      .input('status', sql.VarChar, status)
       .input('supportingDocuments', sql.VarChar, supportingDocuments)
-      .query(`INSERT INTO Claims 
-              (claimType, claimAmount, companyName, policyName, Description, incidentDate, supportingDocuments) 
+      .query(`INSERT INTO Claims
+              (claimType, claimAmount, companyName, policyName, description, incidentDate, supportingDocuments, excess, netAmount, status)
               OUTPUT INSERTED.claimID
-              VALUES (@claimType, @claimAmount, @companyName, @policyName, @Description, @incidentDate, @supportingDocuments)`);
+              VALUES (@claimType, @claimAmount, @companyName, @policyName, @description, @incidentDate, @supportingDocuments, @excess, @netAmount, @status)`);
 
-    const insertedId = result.recordset[0].id;
+    const insertedId = result.recordset[0].claimID;
 
     res.status(201).json({
       message: 'Claim created successfully',
@@ -102,56 +70,86 @@ exports.createClaim = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to create claim' });
+    res.status(500).json({ error: 'Failed to create claim', details: err.message });
   }
 };
 
-
-// Update claim
+// Update an existing claim
 exports.updateClaim = async (req, res) => {
   const { claimId } = req.params;
   const {
-    companyId, policyId, claimType, claimAmount,
-    Description, incidentDate, netClaimAmount, status, supportingDocuments
+    companyId, policyId, companyName, policyName, claimType, claimAmount,
+    description, incidentDate, excess, netAmount, status
   } = req.body;
+
+  // Handle file upload for supporting documents if present, otherwise keep the existing one
+  const supportingDocuments = req.file ? req.file.filename : req.body.supportingDocuments;
+
   try {
     const pool = await poolPromise;
-    const result = await pool.request()
+    
+    // Validate and format incidentDate to prevent "Invalid date" error
+    const incidentDateForDB = incidentDate ? new Date(incidentDate) : null;
+
+    const request = pool.request()
       .input('claimId', sql.Int, claimId)
       .input('companyId', sql.Int, companyId)
-      .input('companyName', sql.NVarChar, companyName)
+      .input('companyName', sql.VarChar, companyName)
       .input('policyId', sql.Int, policyId)
-      .input('policyName', sql.NVarChar, policyName)
-      .input('claimType', sql.NVarChar, claimType)
-      .input('claimAmount', sql.Decimal(18,2), claimAmount)
-      .input('Description', sql.NVarChar, Description)
-      .input('incidentDate', sql.DateTime, incidentDate)
-      .input('netClaimAmount', sql.Decimal(18,2), netClaimAmount)
-      .input('status', sql.NVarChar, status)
-      .input('supportingDocuments', sql.NVarChar, supportingDocuments)
-      .query(`UPDATE Claims SET companyId=@companyId, policyId=@policyId, companyName=@companyName, claimType=@claimType, claimAmount=@claimAmount, Description=@Description, incidentDate=@incidentDate, netClaimAmount=@netClaimAmount, status=@status, supportingDocuments=@supportingDocuments, updatedAt=GETDATE() WHERE claimId=@claimId`);
+      .input('policyName', sql.VarChar, policyName)
+      .input('claimType', sql.VarChar, claimType)
+      .input('claimAmount', sql.Decimal(10, 2), claimAmount)
+      .input('description', sql.VarChar, description)
+      .input('incidentDate', sql.Date, incidentDateForDB)
+      .input('excess', sql.Decimal(10, 2), excess)
+      .input('netAmount', sql.Decimal(10, 2), netAmount)
+      .input('status', sql.VarChar, status)
+      .input('supportingDocuments', sql.VarChar, supportingDocuments);
+
+    const query = `
+      UPDATE Claims
+      SET
+        companyId = @companyId,
+        policyId = @policyId,
+        companyName = @companyName,
+        policyName = @policyName,
+        claimType = @claimType,
+        claimAmount = @claimAmount,
+        description = @description,
+        incidentDate = @incidentDate,
+        excess = @excess,
+        netAmount = @netAmount,
+        status = @status,
+        supportingDocuments = @supportingDocuments,
+        updatedAt = GETDATE()
+      WHERE claimId = @claimId;
+    `;
+    
+    const result = await request.query(query);
+
     if (result.rowsAffected[0] === 0) {
       return res.status(404).json({ error: 'Claim not found' });
     }
     res.json({ message: 'Claim updated successfully' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update claim', details: err.message });
   }
 };
 
-// // Delete claim
-// exports.deleteClaim = async (req, res) => {
-//   const { id } = req.params;
-//   try {
-//     const pool = await poolPromise;
-//     const result = await pool.request()
-//       .input('claimId', sql.Int, id)
-//       .query('DELETE FROM Claims WHERE claimId = @claimId');
-//     if (result.rowsAffected[0] === 0) {
-//       return res.status(404).json({ error: 'Claim not found' });
-//     }
-//     res.json({ message: 'Claim deleted successfully' });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
+// Delete a claim
+exports.deleteClaim = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('claimId', sql.Int, id)
+      .query('DELETE FROM Claims WHERE claimId = @claimId');
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).json({ error: 'Claim not found' });
+    }
+    res.json({ message: 'Claim deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

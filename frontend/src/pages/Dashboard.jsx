@@ -348,9 +348,17 @@ const Dashboard = () => {
 
   const handleUpdateClaim = async (updatedClaimData) => {
     try {
+      // Extract claimId and create a new object without it for the request body
+      const { claimId, ...claimData } = updatedClaimData;
+      
       const response = await axios.put(
-        `http://localhost:7001/api/claims/${updatedClaimData.claimId}`,
-        updatedClaimData,
+        `http://localhost:7001/api/claims/${claimId}`,
+        {
+          ...claimData,
+          // Make sure required fields are included
+          companyId: claimData.companyId || 1, // Provide a default if needed
+          policyId: claimData.policyId || 1,   // Provide a default if needed
+        },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -362,8 +370,8 @@ const Dashboard = () => {
         // Update the claims list with the updated claim
         setClaims(prevClaims => 
           prevClaims.map(claim => 
-            claim.claimId === updatedClaimData.claimId 
-              ? { ...claim, ...updatedClaimData } 
+            claim.claimId === claimId 
+              ? { ...claim, ...claimData, claimId } 
               : claim
           )
         );
@@ -1101,7 +1109,7 @@ const Dashboard = () => {
           getRoleDarkColor={getRoleDarkColor}
           getRoleColor={getRoleColor}
           getStatusDarkColor={getStatusDarkColor}
-          getStatusColorr={getStatusColorr}
+          getStatusColor={getStatusColorr}
           handleEditUser={handleEditUser}
           openDeleteModal={setDeleteModalOpen}
           isCreateModalOpen={isCreateModalOpen}

@@ -14,7 +14,7 @@ router.get('/:claimId', claimsController.getClaimById);
 router.post('/', upload.single('supportingDocuments'), claimsController.createClaim);
 
 // Update claim
-router.post('/:claimId', upload.single('supportingDocuments'), claimsController.updateClaim);
+router.put('/:claimId', upload.single('supportingDocuments'), claimsController.updateClaim);
 
 // Delete claim
 // router.delete('/:claimId', claimsController.deleteClaim);
