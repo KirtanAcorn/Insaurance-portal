@@ -1,5 +1,7 @@
 const sql = require('mssql');
 const { poolPromise } = require('../db');
+const path = require('path');
+const fs = require('fs');
 
 // Get all claims
 exports.getAllClaims = async (req, res) => {
@@ -152,17 +154,56 @@ exports.updateClaim = async (req, res) => {
 
 // Delete a claim
 exports.deleteClaim = async (req, res) => {
-  const { id } = req.params;
+  const { claimId } = req.params;
   try {
     const pool = await poolPromise;
-    const result = await pool.request()
-      .input('claimId', sql.Int, id)
+    await pool.request()
+      .input('claimId', sql.Int, claimId)
       .query('DELETE FROM Claims WHERE claimId = @claimId');
-    if (result.rowsAffected[0] === 0) {
-      return res.status(404).json({ error: 'Claim not found' });
-    }
+    
     res.json({ message: 'Claim deleted successfully' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error deleting claim:', err);
+    res.status(500).json({ error: 'Failed to delete claim', details: err.message });
+  }
+};
+
+// Serve document file
+exports.serveDocument = (req, res) => {
+  const { filename } = req.params;
+  const { preview } = req.query;
+  
+  if (!filename) {
+    return res.status(400).json({ error: 'Filename is required' });
+  }
+
+  const documentsPath = 'C:\\Users\\Priyal.Makwana\\Acorn Solution\\IT - PRIYAL MAKWANA\\Documents\\InsurancePortalDocuments';
+  const filePath = path.join(documentsPath, filename);
+  
+  // Check if file exists
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+
+  if (preview === 'true') {
+    // For preview, send the file with appropriate headers for inline viewing
+    const fileStream = fs.createReadStream(filePath);
+    const stat = fs.statSync(filePath);
+    
+    res.setHeader('Content-Length', stat.size);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(filename)}"`);
+    
+    fileStream.pipe(res);
+  } else {
+    // Default to download behavior
+    res.download(filePath, filename, (err) => {
+      if (err) {
+        console.error('Error downloading file:', err);
+        if (!res.headersSent) {
+          res.status(500).json({ error: 'Error downloading file' });
+        }
+      }
+    });
   }
 };

@@ -1,4 +1,5 @@
 import { FileText, Calendar, Eye, Edit } from "lucide-react"
+import { useState } from 'react';
 
 const ClaimsOverview = ({
   isDark, 
@@ -10,6 +11,30 @@ const ClaimsOverview = ({
   getStatusDarkColorr, 
   openEditModalOpenClaim
 }) => {
+  const [documentUrl, setDocumentUrl] = useState(null);
+
+  const handleViewDocument = async (documentName) => {
+    if (!documentName) {
+      alert('No document available for this claim');
+      return;
+    }
+    
+    try {
+      const documentUrl = `http://localhost:7001/api/claims/documents/${encodeURIComponent(documentName)}?preview=true`;
+      const response = await fetch(documentUrl);
+      if (!response.ok) throw new Error('Failed to fetch document');
+      
+      const blob = await response.blob();
+      const fileURL = URL.createObjectURL(blob);
+      window.open(fileURL, '_blank');
+      
+      // Clean up the object URL after the window opens
+      setTimeout(() => URL.revokeObjectURL(fileURL), 100);
+    } catch (error) {
+      console.error('Error opening document:', error);
+      alert('Failed to open document. Please try again.');
+    }
+  };
   // Format currency
   const formatCurrency = (amount) => {
     if (amount === null || amount === undefined) return 'N/A';
@@ -117,20 +142,27 @@ const ClaimsOverview = ({
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
-                        <button className={`p-2 rounded-lg transition-colors cursor-pointer ${
-                          isDark ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                        }`}>
+                        <button
+                          onClick={() => handleViewDocument(claim.supportingDocuments)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            isDark
+                              ? 'text-green-400 hover:bg-gray-700'
+                              : 'text-green-600 hover:bg-gray-100'
+                          }`}
+                          title="View Document"
+                        >
                           <Eye className="w-4 h-4" />
                         </button>
-                        {role !== "Client" && ( 
+                        {role !== "Client" && (
                         <button
-                        onClick={() => {
-                          // Pass the claim data to the parent component
-                          openEditModalOpenClaim(claim);
-                        }} 
-                        className={`p-2 rounded-lg transition-colors cursor-pointer ${
-                          isDark ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                        }`}>
+                          onClick={() => openEditModalOpenClaim(claim)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            isDark
+                              ? 'text-blue-400 hover:bg-gray-700 hover:text-white'
+                              : 'text-blue-600 hover:bg-gray-100 hover:text-gray-700'
+                          }`}
+                          title="Edit Claim"
+                        >
                           <Edit className="w-4 h-4" />
                         </button>
                         )}

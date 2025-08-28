@@ -19,4 +19,7 @@ router.put('/:claimId', upload.single('supportingDocuments'), claimsController.u
 // Delete claim
 // router.delete('/:claimId', claimsController.deleteClaim);
 
+// Serve uploaded files
+router.get('/documents/:filename', claimsController.serveDocument);
+
 module.exports = router;
