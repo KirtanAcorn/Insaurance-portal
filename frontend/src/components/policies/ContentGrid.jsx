@@ -35,8 +35,8 @@ const ContentGrid = ({isDark, getInsuranceIcon, selectedInsuranceType, selectedC
                     <BuildingIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
                   </div>
                   <div className="flex-1">
-                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>POSTAL ADDRESS</p>
-                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{selectedCompanyData.postalAddress}</p>
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>WAREHOUSE ADDRESS</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{selectedCompanyData.warehouseAddress}</p>
                   </div>
                 </div>
 
