@@ -1,4 +1,3 @@
-import AllPolicies from "../../components/policies/AllPolicies"
 import ContentGrid from "../../components/policies/ContentGrid"
 import CompanyInformation from "../../components/policies/CompanyInformation"
 import PoliciesHeader from "../../components/policies/PoliciesHeader"
@@ -17,7 +16,6 @@ const Policies = ({
   policyData,
   isLoading,
   error,
-  allPolicies,
   openIsModalOpenNew
 }) => {
   return (
@@ -44,12 +42,6 @@ const Policies = ({
     policyData={policyData}
     isLoading={isLoading}
     error={error}
-    />
-
-    <AllPolicies
-    isDark={isDark}
-    getInsuranceIcon={getInsuranceIcon}
-    allPolicies={allPolicies}
     />
     </>
   )
