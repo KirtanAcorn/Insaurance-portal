@@ -1,6 +1,27 @@
-import {BuildingIcon, ChevronDownIcon} from 'lucide-react'
+import {BuildingIcon, ChevronDownIcon, MapPin, Calendar, Hash, User, Briefcase, Users, CreditCard} from 'lucide-react'
 
-const CompanyInformation = ({ isDark,selectedCompanyPolicy, changeSelectedCompanyPolicy, policyCompanies, policyYear, changePolicyYear, chooseSelectedInsuranceType, getInsuranceIcon, selectedInsuranceType }) => {
+const CompanyInformation = ({ 
+  isDark,
+  selectedCompanyPolicy, 
+  changeSelectedCompanyPolicy, 
+  policyCompanies, 
+  policyYear, 
+  changePolicyYear, 
+  chooseSelectedInsuranceType, 
+  getInsuranceIcon, 
+  selectedInsuranceType,
+  policyData = {}
+}) => {
+  
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return isNaN(date.getTime()) ? dateString : date.toLocaleDateString('en-GB');
+    } catch (e) {
+      return dateString;
+    }
+  };
   return (
     <>
     <div className={`rounded-lg shadow-sm border p-6 mb-6 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -47,6 +68,81 @@ const CompanyInformation = ({ isDark,selectedCompanyPolicy, changeSelectedCompan
                 </div>
               </div>
     
+              {/* Company Details */}
+              {policyData && policyData['Company Name'] && (
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                    <h4 className={`text-sm font-medium mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Company Information
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-start space-x-2">
+                        <MapPin className={`w-4 h-4 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                        <div>
+                          <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Registered Address</p>
+                          <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            {policyData['Reg Address'] || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <Hash className={`w-4 h-4 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                        <div>
+                          <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Registration Number</p>
+                          <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            {policyData['Reg No'] || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <Calendar className={`w-4 h-4 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                        <div>
+                          <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Registration Date</p>
+                          <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            {formatDate(policyData['Reg Date'])}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                    <h4 className={`text-sm font-medium mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Contact Information
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-start space-x-2">
+                        <User className={`w-4 h-4 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                        <div>
+                          <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Director</p>
+                          <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            {policyData['Director/Owner Name'] || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <Briefcase className={`w-4 h-4 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                        <div>
+                          <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Insurance Agent</p>
+                          <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            {policyData['Insurance Agent'] || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <Users className={`w-4 h-4 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                        <div>
+                          <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Employees</p>
+                          <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            {policyData['Emp Count'] || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Insurance Type Selection */}
               <div className="mt-6">
                 <div className="flex space-x-4">

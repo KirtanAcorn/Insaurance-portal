@@ -34,38 +34,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const role = location.state?.role;
 
-  if (!role) {
-    // No role found (direct access), redirect to login
-    navigate("/login");
-    return null;
-  }
-  const [formDataNewClaim, setFormDataNewClaim] = useState({
-    companyName: '',
-    policyName: '',
-    claimType: '',
-    claimAmount: '',
-    description: '',
-    incidentDate: '',
-    status: 'Under Review',
-    supportingDocument: null
-  });
-
-  const [editFormDataClaim, setEditFormDataClaim] = useState({
-    claimId: '',
-    claimType: '',
-    claimAmount: '',
-    description: '',
-    status: '',
-    assignedTo: '',
-    policyId: '',
-    company: '',
-    claimAmountPolicy: '',
-    excess: '',
-    netAmount: ''
-  })
-
-  const companiesData = {};
-
   // Policy data shape that matches the SQL table structure
   const policyDataShape = {
     // Company Information
@@ -85,7 +53,7 @@ const Dashboard = () => {
     insuranceAgent: '',
     accountHandler: '',
     employeeCount: '',
-
+  
     // Commercial Policy
     commercialPolicy: '',
     commercialRenewalDate: '',
@@ -99,7 +67,7 @@ const Dashboard = () => {
     productLiability: '',
     commercialExcessPerClaim: '',
     noOfClaimCommercial: '',
-
+  
     // Marine Policy
     marine: '',
     marinePolicyLink: '',
@@ -116,7 +84,7 @@ const Dashboard = () => {
     anyLocationInOrdinaryCourseOfTransit: '',
     cargoExcessPerClaim: '',
     noOfClaimCargo: '',
-
+  
     // Building/Property Insurance
     buildingInsurance: '',
     propertyPolicyLink: '',
@@ -127,7 +95,7 @@ const Dashboard = () => {
     buildingLocation: '',
     buildingExcessPerClaim: '',
     noOfClaimBuilding: '',
-
+  
     // Fleet Policy
     fleetPolicy: '',
     fleetPolicyLink: '',
@@ -136,89 +104,10 @@ const Dashboard = () => {
     regNo2: '',
     fleetExcessPerClaim: '',
     noOfClaimMadeFleet: '',
-
+  
     // Additional Fields
     renewalYear: ''
   };
-
-  // State for policy data
-  const [policyData, setPolicyData] = useState({});
-  const [isLoadingPolicy, setIsLoadingPolicy] = useState(false);
-  const [policyError, setPolicyError] = useState(null);
-
-  // Fetch policy data for selected company and year
-  const fetchPolicyData = async (companyName, year) => {
-    if (!companyName) return;
-
-    setIsLoadingPolicy(true);
-    setPolicyError(null);
-
-    try {
-      const response = await axios.get(`http://localhost:7001/api/policies`, {
-        params: { companyName, year }
-      });
-
-      if (response.data) {
-        // Format the data for display
-        const formatCurrency = (value) => {
-          if (!value) return 'N/A';
-          const num = parseFloat(value);
-          return isNaN(num) ? value : `£${num.toLocaleString()}`;
-        };
-
-        const formatDate = (dateString) => {
-          if (!dateString) return 'N/A';
-          const date = new Date(dateString);
-          return isNaN(date.getTime()) ? dateString : date.toLocaleDateString('en-GB');
-        };
-
-        const transformedData = {
-          ...response.data,
-          policyNumber: response.data.policyNumber || 'N/A',
-          status: response.data.status || 'Inactive',
-          startDate: formatDate(response.data.startDate),
-          endDate: formatDate(response.data.endDate),
-          premiumPaid: formatCurrency(response.data.premiumPaid),
-          sumAssured: formatCurrency(response.data.sumAssured),
-          excessPerClaim: formatCurrency(response.data.excessPerClaim),
-          location: response.data.location || 'Multiple Locations',
-          claimsMade: response.data.claimsMade || 0,
-          coverage: {
-            'Building Cover': formatCurrency(response.data.buildingInsurance),
-            'Fleet Cover': response.data.fleetPolicy || 'N/A',
-            'Sum Insured': formatCurrency(response.data.sumAssured)
-          }
-        };
-
-        setPolicyData(transformedData);
-      } else {
-        // If no data, set default values
-        setPolicyData({
-          ...policyDataShape,
-          companyName: policyCompanies.find(c => c.name === companyName)?.name || companyName,
-          renewalYear: year
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching policy data:', error);
-      setPolicyError('Failed to load policy data');
-      // Fallback to default values if API fails
-      setPolicyData({
-        ...policyDataShape,
-        companyName: policyCompanies.find(c => c.name === companyName)?.name || companyName,
-        renewalYear: year
-      });
-    } finally {
-      setIsLoadingPolicy(false);
-    }
-  };
-
-  // Effect to fetch policy data when company or year changes
-  useEffect(() => {
-    if (selectedCompanyPolicy && policyYear) {
-      fetchPolicyData(selectedCompanyPolicy, policyYear);
-    }
-  }, [selectedCompanyPolicy, policyYear]);
 
   // Company data with id and name for dropdown
   const policyCompanies = [
@@ -251,9 +140,248 @@ const Dashboard = () => {
     { id: 'aucllp', name: 'AUCLLP' }
   ];
 
+  const [policyData, setPolicyData] = useState(policyDataShape);
+  // Log policyData changes
+  useEffect(() => {
+    console.log('Dashboard - policyData updated:', policyData);
+  }, [policyData]);
+
+  const [isLoadingPolicy, setIsLoadingPolicy] = useState(false);
+  const [policyError, setPolicyError] = useState(null);
+
+  if (!role) {
+    // No role found (direct access), redirect to login
+    navigate("/login");
+    return null;
+  }
+  const [formDataNewClaim, setFormDataNewClaim] = useState({
+    companyName: '',
+    policyName: '',
+    claimType: '',
+    claimAmount: '',
+    description: '',
+    incidentDate: '',
+    status: 'Under Review',
+    supportingDocument: null
+  });
+
+  const [editFormDataClaim, setEditFormDataClaim] = useState({
+    claimId: '',
+    claimType: '',
+    claimAmount: '',
+    description: '',
+    status: '',
+    assignedTo: '',
+    policyId: '',
+    company: '',
+    claimAmountPolicy: '',
+    excess: '',
+    netAmount: ''
+  })
+
+  const companiesData = {};
+
+  // Fetch policy data for selected company and year
+    // Function to fetch policy data
+    const fetchPolicyData = async (companyName, year) => {
+      console.log('fetchPolicyData called with:', { companyName, year });
+      if (!companyName || !year) {
+        console.error("Company name or year is missing.");
+        setPolicyData(policyDataShape); 
+        setIsLoadingPolicy(false);
+        setPolicyError(null);
+        return;
+      }
+  
+      setIsLoadingPolicy(true);
+      setPolicyError(null);
+  
+      try {
+          // Convert the year format from '2024-2025' to '2025-2026' to match the database
+          const [startYear] = year.split('-').map(Number);
+          const nextYear = `${startYear + 1}-${startYear + 2}`;
+          
+          // Try with both year formats
+          let apiUrl = `http://localhost:7001/api/policies/company-details?companyName=${encodeURIComponent(companyName)}&renewalYear=${nextYear}`;
+          console.log('Making API call to:', apiUrl);
+  
+          let response = await axios.get(apiUrl);
+          
+          // If no data found with the next year, try with the original year
+          if (!response.data || response.data.length === 0) {
+            apiUrl = `http://localhost:7001/api/policies/company-details?companyName=${encodeURIComponent(companyName)}&renewalYear=${year}`;
+            console.log('No data found, trying with original year:', apiUrl);
+            response = await axios.get(apiUrl);
+          }
+          
+          console.log('API response:', response.data);
+  
+          if (response.data && response.data.length > 0) {
+              const apiData = response.data[0];
+              console.log('API data received:', apiData);
+
+              // Helper functions for data formatting
+              const formatCurrency = (value) => {
+                  if (value === null || value === undefined) return 'N/A';
+                  const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]+/g, "")) : value;
+                  return isNaN(num) ? value : `£${num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+              };
+
+              const formatDate = (dateString) => {
+                  if (!dateString) return 'N/A';
+                  const date = new Date(dateString);
+                  return isNaN(date.getTime()) ? dateString : date.toLocaleDateString('en-GB');
+              };
+
+              // Map API data to the frontend state shape
+              console.log('Transforming API data...');
+              const transformedData = {
+                  companyName: apiData['Company Name'] || 'N/A',
+                  country: apiData['Country'] || 'N/A',
+                  regAddress: apiData['Reg Address'] || 'N/A',
+                  warehouseOfficeAddress: apiData['Warehouse/Office Address/es'] || 'N/A',
+                  regNo: apiData['Reg No'] || 'N/A',
+                  regDate: formatDate(apiData['Reg Date']),
+                  companyFirstTimePolicy: apiData['Company first Time Policy'] || 'N/A',
+                  directorOwnerName: apiData['Director/Owner Name'] || 'N/A',
+                  companyHandledBy: apiData['Company Handle By'] || 'N/A',
+                  vatNumber: apiData['VAT Number'] || 'N/A',
+                  commodity: apiData['Comodity'] || 'N/A',
+                  currency: apiData['Currency'] || 'N/A',
+                  turnoverGBP: formatCurrency(apiData['Turnover in £ Mn']),
+                  insuranceAgent: apiData['Insurance Agent'] || 'N/A',
+                  accountHandler: apiData['A/C HANDLER'] || 'N/A',
+                  employeeCount: apiData['Emp Count'] || 'N/A',
+                  commercialPolicy: apiData['Commercial Policy'] || 'N/A',
+                  commercialRenewalDate: formatDate(apiData['Commercial Renewal Date']),
+                  commercialPolicyLink: apiData['Commercial Policy Link'] || 'N/A',
+                  commercialPremiumPaid: formatCurrency(apiData['Commercial Premium Paid']),
+                  employeeLiabilityCover: apiData['Employee Liability Cover'] || 'N/A',
+                  empLiabilityRenewalDate: formatDate(apiData['Emp_Liabality Renewal Date']),
+                  floatingStock: apiData['Floting stock'] || 'N/A',
+                  stockCover: apiData['Stock Cover'] || 'N/A',
+                  stockLocation: apiData['Stock Location'] || 'N/A',
+                  productLiability: apiData['Product Liability'] || 'N/A',
+                  commercialExcessPerClaim: formatCurrency(apiData['Commercial Excess Per claim']),
+                  noOfClaimCommercial: apiData['No Of claim Commercial'] || 'N/A',
+                  marine: apiData['Marine'] || 'N/A',
+                  marinePolicyLink: apiData['Marine Policy Link'] || 'N/A',
+                  marineRenewal: formatDate(apiData['Marine Renewal']),
+                  marinePremiumPaid: formatCurrency(apiData['Marine Premium Paid']),
+                  perTransitCover: apiData['Per Transit Cover'] || 'N/A',
+                  ukUkEuEuUsaUsa: apiData['UK-UK/EU-EU/USA-USA'] || 'N/A',
+                  ukEu: apiData['UK-EU'] || 'N/A',
+                  ukUsaMiddleEast: apiData['UK-USA/MiddelEast'] || 'N/A',
+                  ukRowUsaRow: apiData['UK-ROW/USA-ROW'] || 'N/A',
+                  crossVoyage: apiData['CROSS VOYAGE'] || 'N/A',
+                  airSeaRail: apiData['AIR/SEA/RAIL'] || 'N/A',
+                  road: apiData['ROAD'] || 'N/A',
+                  anyLocationInOrdinaryCourseOfTransit: apiData['ANYONE LOACTION IN ORDINARY COURSE OF TRANSIT'] || 'N/A',
+                  cargoExcessPerClaim: apiData['Cargo Excess Excess Per claim'] || 'N/A',
+                  noOfClaimCargo: apiData['No Of claim Cargo'] || 'N/A',
+                  buildingInsurance: apiData['Building Insurance'] || 'N/A',
+                  propertyPolicyLink: apiData['Property Policy Link'] || 'N/A',
+                  renewalDate: formatDate(apiData['Renewal Date']),
+                  buildingPremiumPaid: formatCurrency(apiData['Building Premium Paid']),
+                  sumAssuredValueOfPremises: apiData['Sume Assure(Value of )Premises'] || 'N/A',
+                  declareValue: apiData['Declare Value'] || 'N/A',
+                  buildingLocation: apiData['Building Location'] || 'N/A',
+                  buildingExcessPerClaim: apiData['Building Excess Per claim'] || 'N/A',
+                  noOfClaimBuilding: apiData['No Of claim Building'] || 'N/A',
+                  fleetPolicy: apiData['Fleet Policy'] || 'N/A',
+                  fleetPolicyLink: apiData['Fleet Policy Link'] || 'N/A',
+                  renewalDate2: formatDate(apiData['Renewal Date2']),
+                  fleetPremiumPaid: formatCurrency(apiData['Fleet Premium Paid']),
+                  regNo2: apiData['Reg No2'] || 'N/A',
+                  fleetExcessPerClaim: apiData['Fleet Excess Per claim '] || 'N/A',
+                  noOfClaimMadeFleet: apiData['No Of claim made fleet'] || 'N/A',
+                  renewalYear: apiData['Renewal Year'] || 'N/A'
+              };
+
+              console.log('Transformed data before setting state:', transformedData);
+              setPolicyData(transformedData);
+              console.log('State updated with policy data');
+          } else {
+              setPolicyData({
+                  ...policyDataShape,
+                  companyName: companyName,
+                  renewalYear: year
+              });
+          }
+      } catch (error) {
+          console.error('Error fetching policy data:', error);
+          setPolicyError('Failed to load policy data');
+          setPolicyData({
+              ...policyDataShape,
+              companyName: companyName,
+              renewalYear: year
+          });
+      } finally {
+          setIsLoadingPolicy(false);
+      }
+  };
+
+  // Effect to fetch policy data when company or year changes
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchData = async () => {
+        console.log('useEffect - Policy data fetch effect running', {
+            selectedCompanyPolicy,
+            policyYear
+        });
+        
+        if (selectedCompanyPolicy && policyYear) {
+            // policyCompanies is accessible here because it's in a higher scope
+            const company = policyCompanies.find(c => c.id === selectedCompanyPolicy);
+            console.log('Found company:', company ? company.name : 'Not found');
+            
+            if (company) {
+                console.log('Calling fetchPolicyData with:', { 
+                    companyName: company.name, 
+                    year: policyYear 
+                });
+                
+                try {
+                    await fetchPolicyData(company.name, policyYear);
+                } catch (error) {
+                    if (isMounted) {
+                        console.error('Error in fetchPolicyData:', error);
+                        setPolicyError('Failed to fetch policy data');
+                    }
+                }
+            } else if (isMounted) {
+                console.error("Selected company not found in list.");
+                setPolicyData(policyDataShape);
+            }
+        } else if (isMounted) {
+            console.log('Missing required data for fetch:', { 
+                hasSelectedCompany: !!selectedCompanyPolicy, 
+                hasPolicyYear: !!policyYear 
+            });
+        }
+    };
+    
+    fetchData();
+    
+    // Cleanup function
+    return () => {
+        isMounted = false;
+    };
+}, [selectedCompanyPolicy, policyYear]);
+
   const insuranceData = {};
 
   const allPolicies = [];
+
+  // Log when policyData changes
+  useEffect(() => {
+    console.log('Dashboard - policyData changed:', {
+      policyData,
+      hasData: !!policyData && Object.keys(policyData).length > 0,
+      keys: policyData ? Object.keys(policyData) : []
+    });
+  }, [policyData]);
 
   // Find the selected company data using the ID
   const selectedCompanyData = policyCompanies.find(c => c.id === selectedCompanyPolicy) || {};
@@ -1211,8 +1339,9 @@ const Dashboard = () => {
           getInsuranceIcon={getInsuranceIcon}
           selectedInsuranceType={selectedInsuranceType}
           selectedCompanyData={selectedCompanyData}
-          currentInsuranceData={currentInsuranceData}
-          allPolicies={allPolicies}
+          policyData={policyData}
+          isLoading={isLoadingPolicy}
+          error={policyError}
           openIsModalOpenNew={setIsOpenNewClaim}
         />}
 
