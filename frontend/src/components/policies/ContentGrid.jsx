@@ -8,13 +8,6 @@ const ContentGrid = ({
   isLoading,
   error,
 }) => {
-  console.log('ContentGrid - Received props:', {
-    selectedInsuranceType,
-    policyData,
-    isLoading,
-    error,
-    hasPolicyData: !!policyData && Object.keys(policyData).length > 0
-  });
   // Handle loading state
   if (isLoading) {
     return (
@@ -44,87 +37,333 @@ const ContentGrid = ({
     );
   }
 
-  // Function to get the correct data for the selected insurance type
-  const getInsuranceDetails = (type) => {
-    if (!policyData || Object.keys(policyData).length === 0) return {};
+  // Helper function to format dates and calculate policy periods
+  const formatDate = (dateInput, subtractDays = 0) => {
+    console.log('formatDate input:', { dateInput, subtractDays, type: typeof dateInput });
     
-    console.log('getInsuranceDetails - policyData:', policyData);
+    // Handle invalid inputs
+    if (!dateInput || dateInput === 'N/A' || dateInput === 'Invalid Date') {
+      console.log('formatDate: Invalid input -', dateInput);
+      return 'Not Available';
+    }
     
-    switch (type) {
-      case 'Commercial':
-        return {
-          policyNumber: policyData['Commercial Policy'] || 'N/A',
-          status: 'Active',
-          startDate: policyData['Commercial Renewal Date'] ? new Date(policyData['Commercial Renewal Date']).toLocaleDateString('en-GB') : 'N/A',
-          endDate: policyData['Commercial Renewal Date'] ? new Date(policyData['Commercial Renewal Date']).toLocaleDateString('en-GB') : 'N/A',
-          premiumPaid: policyData['Commercial Premium Paid'] || 'N/A',
-          sumAssured: policyData.stockCover || 'N/A',
-          location: policyData.stockLocation || 'N/A',
-          excessPerClaim: policyData.commercialExcessPerClaim || 'N/A',
-          claimsMade: policyData.noOfClaimCommercial || 'N/A',
-          coverage: {
-            'Employee Liability Cover': policyData.employeeLiabilityCover || 'N/A',
-            'Floating Stock': policyData.floatingStock || 'N/A',
-            'Product Liability': policyData.productLiability || 'N/A'
+    try {
+      let date;
+      
+      // If input is already a Date object
+      if (dateInput instanceof Date) {
+        date = new Date(dateInput);
+      } 
+      // If input is a timestamp (number)
+      else if (typeof dateInput === 'number') {
+        date = new Date(dateInput);
+      }
+      // If input is a string
+      else if (typeof dateInput === 'string') {
+        // Try parsing as ISO string
+        if (dateInput.includes('T') || dateInput.includes('Z')) {
+          date = new Date(dateInput);
+        } 
+        // Try parsing as DD/MM/YYYY or MM/DD/YYYY
+        else if (dateInput.includes('/')) {
+          const [day, month, year] = dateInput.split('/').map(Number);
+          // Try both DD/MM/YYYY and MM/DD/YYYY formats
+          date = new Date(year, month - 1, day);
+          if (isNaN(date.getTime())) {
+            date = new Date(year, day - 1, month);
           }
-        };
-      case 'Marine':
-        return {
-          policyNumber: policyData['Marine'] || 'N/A',
-          status: 'Active',
-          startDate: policyData['Marine Renewal'] ? new Date(policyData['Marine Renewal']).toLocaleDateString('en-GB') : 'N/A',
-          endDate: policyData['Marine Renewal'] ? new Date(policyData['Marine Renewal']).toLocaleDateString('en-GB') : 'N/A',
-          premiumPaid: policyData['Marine Premium Paid'] || 'N/A',
-          sumAssured: policyData['Per Transit Cover'] || 'N/A',
-          location: 'Multiple Locations',
-          excessPerClaim: policyData['Cargo Excess Excess Per claim'] || 'N/A',
-          claimsMade: policyData['No Of claim Cargo'] || 'N/A',
-          coverage: {
-            'Per Transit Cover': policyData['Per Transit Cover'] || 'N/A',
-            'UK-UK/EU-EU/USA-USA': policyData['UK-UK/EU-EU/USA-USA'] || 'N/A',
-            'UK-EU': policyData['UK-EU'] || 'N/A',
-            'Cross Voyage': policyData['CROSS VOYAGE'] || 'N/A',
-            'Air/Sea/Rail': policyData['AIR/SEA/RAIL'] || 'N/A',
-            'Road': policyData['ROAD'] || 'N/A'
-          }
-        };
-      case 'Property':
-        return {
-          policyNumber: policyData['Building Insurance'] || 'N/A',
-          status: 'Active',
-          startDate: policyData['Renewal Date'] ? new Date(policyData['Renewal Date']).toLocaleDateString('en-GB') : 'N/A',
-          endDate: policyData['Renewal Date'] ? new Date(policyData['Renewal Date']).toLocaleDateString('en-GB') : 'N/A',
-          premiumPaid: policyData['Building Premium Paid'] || 'N/A',
-          sumAssured: policyData['Sume Assure(Value of )Premises'] || 'N/A',
-          location: policyData['Building Location'] || 'N/A',
-          excessPerClaim: policyData['Building Excess Per claim'] || 'N/A',
-          claimsMade: policyData['No Of claim Building'] || 'N/A',
-          coverage: {
-            'Declare Value': policyData['Declare Value'] || 'N/A',
-            'Property Type': policyData['Building Location'] || 'N/A'
-          }
-        };
-      case 'Fleet':
-        return {
-          policyNumber: policyData['Fleet Policy'] || 'N/A',
-          status: 'Active',
-          startDate: policyData['Renewal Date2'] ? new Date(policyData['Renewal Date2']).toLocaleDateString('en-GB') : 'N/A',
-          endDate: policyData['Renewal Date2'] ? new Date(policyData['Renewal Date2']).toLocaleDateString('en-GB') : 'N/A',
-          premiumPaid: policyData['Fleet Premium Paid'] || 'N/A',
-          sumAssured: 'N/A',
-          location: 'N/A',
-          excessPerClaim: policyData['Fleet Excess Per claim '] || 'N/A',
-          claimsMade: policyData['No Of claim made fleet'] || 'N/A',
-          coverage: {
-            'Registered Vehicles': policyData['Reg No2'] || 'N/A',
-          }
-        };
-      default:
-        return null;
+        }
+        // Try parsing as YYYY-MM-DD
+        else if (dateInput.includes('-')) {
+          date = new Date(dateInput);
+        }
+        
+        // If still not a valid date, try the default Date constructor
+        if (!date || isNaN(date.getTime())) {
+          date = new Date(dateInput);
+        }
+      }
+      
+      // If we couldn't parse the date
+      if (!date || isNaN(date.getTime())) {
+        console.log('formatDate: Could not parse date -', dateInput);
+        return 'Not Available';
+      }
+      
+      // Subtract days if needed
+      if (subtractDays > 0) {
+        date.setDate(date.getDate() - subtractDays);
+      }
+      
+      // Format the date
+      const options = { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric',
+        timeZone: 'UTC' // Ensure consistent timezone handling
+      };
+      
+      const formattedDate = date.toLocaleDateString('en-GB', options);
+      
+      console.log('formatDate result:', { 
+        input: dateInput, 
+        parsedDate: date.toString(),
+        formattedDate,
+        timestamp: date.getTime()
+      });
+      
+      return formattedDate;
+    } catch (error) {
+      console.error('formatDate error:', { 
+        error: error.message, 
+        input: dateInput,
+        type: typeof dateInput
+      });
+      return 'Not Available';
     }
   };
 
-  const insuranceDetails = getInsuranceDetails(selectedInsuranceType);
+  // Function to get the correct data for the selected insurance type
+  const getInsuranceDetails = (type) => {
+    console.log('getInsuranceDetails called with type:', type);
+    console.log('Current policyData:', JSON.stringify(policyData, null, 2));
+    
+    if (!policyData || Object.keys(policyData).length === 0) {
+      console.log('No policy data available');
+      return {
+        policyNumber: 'N/A',
+        status: 'Inactive',
+        startDate: 'Not Available',
+        endDate: 'Not Available',
+        premiumPaid: 'N/A',
+        sumAssured: 'N/A',
+        location: 'N/A',
+        excessPerClaim: 'N/A',
+        claimsMade: 'N/A',
+        coverage: {}
+      };
+    }
+    
+    // Helper function to format a date range from a single date
+    const formatDateRange = (dateString) => {
+      try {
+        // Try to parse the date
+        const parsedDate = new Date(dateString);
+        
+        if (isNaN(parsedDate.getTime())) {
+          console.log('Could not parse date:', dateString);
+          return {
+            startDate: 'Not Available',
+            endDate: 'Not Available'
+          };
+        }
+        
+        const formattedStartDate = formatDate(parsedDate, 364); // 364 days before end date
+        const formattedEndDate = formatDate(parsedDate);
+        
+        console.log('Formatted date range:', {
+          input: dateString,
+          parsed: parsedDate.toString(),
+          formattedStartDate,
+          formattedEndDate
+        });
+        
+        return {
+          startDate: formattedStartDate,
+          endDate: formattedEndDate
+        };
+      } catch (error) {
+        console.error('Error in formatDateRange:', { 
+          error: error.message,
+          dateString,
+          type: typeof dateString 
+        });
+        return {
+          startDate: 'Not Available',
+          endDate: 'Not Available'
+        };
+      }
+    };
+
+    // Helper function to get policy period
+    const getPolicyPeriod = (policyType) => {
+      // Map policy types to their respective date fields in the API response
+      const dateFieldMap = {
+        'Commercial Liability': 'commercialRenewalDate',
+        'Marine': 'marineRenewal',
+        'Property': 'renewalDate',
+        'Fleet': 'renewalDate2'
+      };
+      
+      const fieldName = dateFieldMap[policyType];
+      console.log('getPolicyPeriod:', { 
+        policyType, 
+        fieldName, 
+        availableFields: Object.keys(policyData || {}) 
+      });
+      
+      // Check if the field exists and has a value
+      const fieldValue = policyData[fieldName];
+      console.log('Raw date value from API:', { fieldName, fieldValue, type: typeof fieldValue });
+      
+      // If the field is empty or invalid, try alternative field names
+      if (!fieldValue || fieldValue.trim() === '' || fieldValue === 'N/A' || fieldValue === 'Invalid Date') {
+        console.log(`Field '${fieldName}' is empty or invalid, trying alternatives...`);
+        
+        // Define alternative field names for each policy type
+        const alternativeFields = {
+          'Commercial Liability': ['commercialRenewalDate', 'empLiabilityRenewalDate'],
+          'Marine': ['marineRenewalDate', 'marineRenewal'],
+          'Property': ['renewalDate', 'buildingRenewalDate'],
+          'Fleet': ['renewalDate2', 'fleetRenewalDate']
+        };
+        
+        // Try each alternative field until we find a valid date
+        const alternatives = alternativeFields[policyType] || [];
+        for (const altField of alternatives) {
+          const altValue = policyData[altField];
+          if (altValue && altValue.trim() !== '' && altValue !== 'N/A' && altValue !== 'Invalid Date') {
+            console.log(`Found valid date in alternative field '${altField}':`, altValue);
+            return formatDateRange(altValue);
+          }
+        }
+        
+        console.log('No valid date found in any field');
+        return {
+          startDate: 'Not Available',
+          endDate: 'Not Available'
+        };
+      }
+      
+      // If we have a valid field value, format it
+      return formatDateRange(fieldValue);
+    };
+    
+    switch (type) {
+      case 'Commercial Liability': {
+        const { startDate, endDate } = getPolicyPeriod('Commercial Liability');
+        console.log('Commercial Liability policy data:', {
+          policyNumber: policyData['commercialPolicy'],
+          premiumPaid: policyData['commercialPremiumPaid'] || 'N/A',
+          sumAssured: policyData['employeeLiabilityCover'] || 'N/A',
+          location: policyData['stockLocation'] || 'N/A',
+          excessPerClaim: policyData['commercialExcessPerClaim'] || 'N/A',
+          claimsMade: policyData['noOfClaimCommercial'] || '0',
+        });
+        
+        return {
+          policyNumber: policyData['commercialPolicy'] || 'N/A',
+          status: 'Active',
+          startDate,
+          endDate,
+          premiumPaid: policyData['commercialPremiumPaid'] || 'N/A',
+          sumAssured: policyData['employeeLiabilityCover'] || 'N/A',
+          location: policyData['stockLocation'] || 'N/A',
+          excessPerClaim: policyData['commercialExcessPerClaim'] || 'N/A',
+          claimsMade: policyData['noOfClaimCommercial'] || '0',
+          coverage: {
+            'Employee Liability Cover': policyData['employeeLiabilityCover'] || 'N/A',
+            'Floating Stock': policyData['floatingStock'] || 'N/A',
+            'Product Liability': policyData['productLiability'] || 'N/A'
+          }
+        };
+      }
+      case 'Marine': {
+        const { startDate, endDate } = getPolicyPeriod('Marine');
+        console.log('Marine policy data:', {
+          policyNumber: policyData['marine'],
+          premiumPaid: policyData['marinePremiumPaid'] || 'N/A',
+          sumAssured: policyData['perTransitCover'] || 'N/A',
+          location: 'N/A',
+          excessPerClaim: policyData['cargoExcessPerClaim'] || 'N/A',
+          claimsMade: policyData['noOfClaimCargo'] || '0',
+        });
+        
+        return {
+          policyNumber: policyData['marine'] || 'N/A',
+          status: 'Active',
+          startDate,
+          endDate,
+          premiumPaid: policyData['marinePremiumPaid'] || 'N/A',
+          sumAssured: policyData['perTransitCover'] || 'N/A',
+          location: 'Multiple Locations',
+          excessPerClaim: policyData['cargoExcessPerClaim'] || 'N/A',
+          claimsMade: policyData['noOfClaimCargo'] || '0',
+          coverage: {
+            'Per Transit Cover': policyData['perTransitCover'] || 'N/A',
+            'UK-UK/EU-EU/USA-USA': policyData['ukUkEuEuUsaUsa'] || 'N/A',
+            'UK-EU': policyData['ukEu'] || 'N/A',
+            'Cross Voyage': policyData['crossVoyage'] || 'N/A',
+            'Air/Sea/Rail': policyData['airSeaRail'] || 'N/A',
+            'Road': policyData['road'] || 'N/A'
+          }
+        };
+      }
+      case 'Property': {
+        const { startDate, endDate } = getPolicyPeriod('Property');
+        console.log('Property policy data:', {
+          policyNumber: policyData['buildingInsurance'],
+          premiumPaid: policyData['buildingPremiumPaid'] || 'N/A',
+          sumAssured: policyData['sumAssuredValueOfPremises'] || 'N/A',
+          location: policyData['buildingLocation'] || 'N/A',
+          excessPerClaim: policyData['buildingExcessPerClaim'] || 'N/A',
+          claimsMade: policyData['noOfClaimBuilding'] || '0',
+        });
+        
+        return {
+          policyNumber: policyData['buildingInsurance'] || 'N/A',
+          status: 'Active',
+          startDate,
+          endDate,
+          premiumPaid: policyData['buildingPremiumPaid'] || 'N/A',
+          sumAssured: policyData['sumAssuredValueOfPremises'] || 'N/A',
+          location: policyData['buildingLocation'] || 'N/A',
+          excessPerClaim: policyData['buildingExcessPerClaim'] || 'N/A',
+          claimsMade: policyData['noOfClaimBuilding'] || '0',
+          coverage: {
+            'Building Value': policyData['sumAssuredValueOfPremises'] || 'N/A',
+            'Declared Value': policyData['declareValue'] || 'N/A',
+            'Location': policyData['buildingLocation'] || 'N/A'
+          }
+        };
+      }
+      case 'Fleet': {
+        const { startDate, endDate } = getPolicyPeriod('Fleet');
+        console.log('Fleet policy data:', {
+          policyNumber: policyData['fleetPolicy'],
+          premiumPaid: 'N/A', // Add correct field once known
+          sumAssured: 'N/A',  // Add correct field once known
+          location: 'N/A',    // Add correct field once known
+          excessPerClaim: 'N/A', // Add correct field once known
+          claimsMade: 'N/A'     // Add correct field once known
+        });
+        
+        return {
+          policyNumber: policyData['fleetPolicy'] || 'N/A',
+          status: 'Active',
+          startDate,
+          endDate,
+          premiumPaid: policyData['fleetPremiumPaid'] || 'N/A',
+          sumAssured: 'N/A',
+          location: 'Multiple Locations',
+          excessPerClaim: policyData['fleetExcessPerClaim'] || 'N/A',
+          claimsMade: policyData['noOfClaimMadeFleet'] || 'N/A',
+          coverage: {
+            'Registration Numbers': policyData['regNo2'] || 'N/A',
+            'Coverage Type': 'Comprehensive',
+            'Policy Type': 'Fleet'
+          }
+        };
+      }
+      default:
+        return {};
+    }
+  };
+
+  // Get the insurance details based on the selected type with a default empty object
+  const insuranceDetails = selectedInsuranceType 
+    ? (getInsuranceDetails(selectedInsuranceType) || {}) 
+    : {};
 
   return (
     <>
@@ -192,6 +431,31 @@ const ContentGrid = ({
 
               <div className="flex items-start space-x-3">
                 <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                  <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>COMMODITIES</p>
+                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.commodity}</p>
+                </div>
+              </div>
+
+
+              <div className="flex items-start space-x-3">
+                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                  <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>REG DATE</p>
+                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.regDate}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
                   <UserIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
                 </div>
                 <div className="flex-1">
@@ -209,6 +473,18 @@ const ContentGrid = ({
                   <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.insuranceAgent}</p>
                 </div>
               </div>
+
+              <div className="flex items-start space-x-3">
+                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                  <BuildingIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                </div>
+                <div className="flex-1">
+                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>COUNTRY</p>
+                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.country}</p>
+                </div>
+              </div>
+
+              
 
               <div className="flex items-start space-x-3">
                 <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
@@ -254,10 +530,16 @@ const ContentGrid = ({
               <div className={`flex justify-between items-center p-3 rounded-lg border-l-4 ${isDark ? 'bg-red-900/20 border-red-500' : 'bg-red-50 border-red-400'}`}>
                 <span className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Policy Number</span>
                 <div className="flex items-center space-x-2">
-                  <span className={`text-sm font-semibold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{insuranceDetails.policyNumber}</span>
-                  <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${isDark ? 'bg-red-900/50 text-red-300' : 'bg-red-100 text-red-800'}`}>
+                  <span className={`text-sm font-semibold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{
+                    selectedInsuranceType === 'Property' ? policyData.buildingInsurance :
+                    selectedInsuranceType === 'Commercial Liability' ? policyData.commercialPolicy :
+                    selectedInsuranceType === 'Marine' ? policyData.marine :
+                    selectedInsuranceType === 'Fleet' ? policyData.fleetPolicy :
+                    'N/A'
+                  }</span>
+                  {/* <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${isDark ? 'bg-red-900/50 text-red-300' : 'bg-red-100 text-red-800'}`}>
                     {insuranceDetails.status}
-                  </span>
+                  </span> */}
                 </div>
               </div>
 
@@ -271,7 +553,9 @@ const ContentGrid = ({
                   </div>
                   <div>
                     <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Policy Start Date</p>
-                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{insuranceDetails.startDate}</p>
+                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                      {insuranceDetails.startDate || 'Not Available'}
+                    </p>
                   </div>
                 </div>
 
@@ -283,7 +567,9 @@ const ContentGrid = ({
                   </div>
                   <div>
                     <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Policy End Date</p>
-                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{insuranceDetails.endDate}</p>
+                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                      {insuranceDetails.endDate || 'Not Available'}
+                    </p>
                   </div>
                 </div>
 
@@ -295,7 +581,7 @@ const ContentGrid = ({
                   </div>
                   <div>
                     <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Premium Paid</p>
-                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{insuranceDetails.premiumPaid}</p>
+                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.buildingPremiumPaid}</p>
                   </div>
                 </div>
 
@@ -358,7 +644,7 @@ const ContentGrid = ({
                   Coverage Breakdown
                 </h4>
                 <div className="space-y-3">
-                  {Object.entries(insuranceDetails.coverage).map(([type, amount]) => (
+                  {insuranceDetails.coverage && Object.entries(insuranceDetails.coverage).map(([type, amount]) => (
                     <div key={type} className={`flex justify-between items-center p-3 rounded-lg ${isDark ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
                       <span className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{type}:</span>
                       <span className={`text-sm font-semibold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{amount}</span>

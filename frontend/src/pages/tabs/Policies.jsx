@@ -21,15 +21,6 @@ const Policies = ({
 }) => {
   // Log all props when they change
   useEffect(() => {
-    console.log('Policies - Props updated:', {
-      selectedCompanyPolicy,
-      policyYear,
-      selectedInsuranceType,
-      policyData: policyData || {},
-      isLoading,
-      error,
-      hasPolicyData: policyData && Object.keys(policyData).length > 0
-    });
   }, [selectedCompanyPolicy, policyYear, selectedInsuranceType, policyData, isLoading, error]);
   return (
     <>
@@ -49,13 +40,13 @@ const Policies = ({
     />
 
     <ContentGrid
-    isDark={isDark}
-    getInsuranceIcon={getInsuranceIcon}
-    selectedInsuranceType={selectedInsuranceType}
-    selectedCompanyData={selectedCompanyData}
-    policyData={policyData}
-    isLoading={isLoading}
-    error={error}
+      isDark={isDark}
+      getInsuranceIcon={getInsuranceIcon}
+      selectedInsuranceType={selectedInsuranceType}
+      selectedCompanyData={selectedCompanyData}
+      policyData={policyData}
+      isLoading={isLoading}
+      error={error}
     />
     </>
   )

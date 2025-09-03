@@ -141,13 +141,19 @@ const Dashboard = () => {
   ];
 
   const [policyData, setPolicyData] = useState(policyDataShape);
-  // Log policyData changes
-  useEffect(() => {
-    console.log('Dashboard - policyData updated:', policyData);
-  }, [policyData]);
-
   const [isLoadingPolicy, setIsLoadingPolicy] = useState(false);
   const [policyError, setPolicyError] = useState(null);
+  
+  // Log policyData changes
+  useEffect(() => {
+  }, [policyData]);
+  
+  // Fetch data when selected company or year changes
+  useEffect(() => {
+    if (selectedCompanyPolicy && policyYear) {
+      fetchPolicyData(selectedCompanyPolicy, policyYear);
+    }
+  }, [selectedCompanyPolicy, policyYear]);
 
   if (!role) {
     // No role found (direct access), redirect to login
@@ -182,43 +188,26 @@ const Dashboard = () => {
   const companiesData = {};
 
   // Fetch policy data for selected company and year
-    // Function to fetch policy data
-    const fetchPolicyData = async (companyName, year) => {
-      console.log('fetchPolicyData called with:', { companyName, year });
-      if (!companyName || !year) {
-        console.error("Company name or year is missing.");
-        setPolicyData(policyDataShape); 
-        setIsLoadingPolicy(false);
-        setPolicyError(null);
-        return;
-      }
-  
-      setIsLoadingPolicy(true);
+  const fetchPolicyData = async (companyName, year) => {
+    if (!companyName || !year) {
+      console.error("Company name or year is missing.");
+      setPolicyData(policyDataShape); 
+      setIsLoadingPolicy(false);
       setPolicyError(null);
+      return;
+    }
   
-      try {
-          // Convert the year format from '2024-2025' to '2025-2026' to match the database
-          const [startYear] = year.split('-').map(Number);
-          const nextYear = `${startYear + 1}-${startYear + 2}`;
-          
-          // Try with both year formats
-          let apiUrl = `http://localhost:7001/api/policies/company-details?companyName=${encodeURIComponent(companyName)}&renewalYear=${nextYear}`;
-          console.log('Making API call to:', apiUrl);
+    setIsLoadingPolicy(true);
+    setPolicyError(null);
   
-          let response = await axios.get(apiUrl);
-          
-          // If no data found with the next year, try with the original year
-          if (!response.data || response.data.length === 0) {
-            apiUrl = `http://localhost:7001/api/policies/company-details?companyName=${encodeURIComponent(companyName)}&renewalYear=${year}`;
-            console.log('No data found, trying with original year:', apiUrl);
-            response = await axios.get(apiUrl);
-          }
-          
-          console.log('API response:', response.data);
+    try {
+      // Use the year as is from the dropdown
+      const apiUrl = `http://localhost:7001/api/policies/company-details?companyName=${encodeURIComponent(companyName)}&renewalYear=${year}`;
+
+      const response = await axios.get(apiUrl);
   
-          if (response.data && response.data.length > 0) {
-              const apiData = response.data[0];
-              console.log('API data received:', apiData);
+      if (response.status === 200 && response.data && response.data.length > 0) {
+          const apiData = response.data[0];
 
               // Helper functions for data formatting
               const formatCurrency = (value) => {
@@ -234,7 +223,6 @@ const Dashboard = () => {
               };
 
               // Map API data to the frontend state shape
-              console.log('Transforming API data...');
               const transformedData = {
                   companyName: apiData['Company Name'] || 'N/A',
                   country: apiData['Country'] || 'N/A',
@@ -295,21 +283,21 @@ const Dashboard = () => {
                   regNo2: apiData['Reg No2'] || 'N/A',
                   fleetExcessPerClaim: apiData['Fleet Excess Per claim '] || 'N/A',
                   noOfClaimMadeFleet: apiData['No Of claim made fleet'] || 'N/A',
-                  renewalYear: apiData['Renewal Year'] || 'N/A'
+                  renewalYear: apiData['Renewal Year'] || year // Use the selected year if not available in the response
               };
-
-              console.log('Transformed data before setting state:', transformedData);
               setPolicyData(transformedData);
-              console.log('State updated with policy data');
+              setPolicyError(null);
           } else {
-              setPolicyData({
-                  ...policyDataShape,
-                  companyName: companyName,
-                  renewalYear: year
-              });
+              console.log('No policy data found for the selected company and year');
+              setPolicyData(policyDataShape);
+              setPolicyError(new Error('No policy data found for the selected company and year'));
+              toast.error('No policy data found for the selected company and year');
           }
       } catch (error) {
           console.error('Error fetching policy data:', error);
+          setPolicyError(error);
+          setPolicyData(policyDataShape);
+          toast.error(`Error loading policy data: ${error.message}`);
           setPolicyError('Failed to load policy data');
           setPolicyData({
               ...policyDataShape,
@@ -326,16 +314,10 @@ const Dashboard = () => {
     let isMounted = true;
     
     const fetchData = async () => {
-        console.log('useEffect - Policy data fetch effect running', {
-            selectedCompanyPolicy,
-            policyYear
-        });
         
         if (selectedCompanyPolicy && policyYear) {
             // policyCompanies is accessible here because it's in a higher scope
-            const company = policyCompanies.find(c => c.id === selectedCompanyPolicy);
-            console.log('Found company:', company ? company.name : 'Not found');
-            
+            const company = policyCompanies.find(c => c.id === selectedCompanyPolicy);            
             if (company) {
                 console.log('Calling fetchPolicyData with:', { 
                     companyName: company.name, 
@@ -376,11 +358,6 @@ const Dashboard = () => {
 
   // Log when policyData changes
   useEffect(() => {
-    console.log('Dashboard - policyData changed:', {
-      policyData,
-      hasData: !!policyData && Object.keys(policyData).length > 0,
-      keys: policyData ? Object.keys(policyData) : []
-    });
   }, [policyData]);
 
   // Find the selected company data using the ID
