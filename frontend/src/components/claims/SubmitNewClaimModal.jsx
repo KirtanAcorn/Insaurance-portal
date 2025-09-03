@@ -379,79 +379,115 @@ const SubmitNewClaimModal = ({
                 </div> */}
                 <div className="mb-8">
                   <div className="flex items-center space-x-2 mb-4">
-                    <Upload
-                      className={`w-5 h-5 ${
-                        isDark ? "text-orange-400" : "text-orange-600"
-                      }`}
-                    />
-                    <h3
-                      className={`text-lg font-medium ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
+                    <div className={`p-1.5 rounded-lg ${isDark ? 'bg-orange-900/30' : 'bg-orange-100'}`}>
+                      <Upload className={`w-4 h-4 ${isDark ? 'text-orange-400' : 'text-orange-600'}`} />
+                    </div>
+                    <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       Supporting Documents
                     </h3>
                   </div>
 
-                  <label
-                    htmlFor="supportingDocument"
-                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
-                      isDark
-                        ? "border-gray-600 hover:border-gray-500"
-                        : "border-gray-300 hover:border-gray-400"
-                    }`}
-                  >
-                    <Upload
-                      className={`w-12 h-12 mx-auto mb-4 ${
-                        isDark ? "text-gray-500" : "text-gray-400"
-                      }`}
-                    />
-                    <p
-                      className={`mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-600"
-                      }`}
-                    >
-                      Drag and drop files here, or click to select files
-                    </p>
-                    <p
-                      className={`text-sm mb-4 ${
-                        isDark ? "text-gray-500" : "text-gray-500"
-                      }`}
-                    >
-                      Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB
-                      each)
-                    </p>
-                    <span
-                      className={`px-4 py-2 rounded-lg transition-colors ${
+                  <div className="space-y-3">
+                    <label
+                      htmlFor="supportingDocument"
+                      className={`group relative flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 cursor-pointer hover:shadow-sm ${
                         isDark
-                          ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
+                          ? 'border-gray-700 hover:border-orange-500/50 bg-gray-800/50 hover:bg-gray-800/70'
+                          : 'border-gray-200 hover:border-orange-400 bg-gray-50 hover:bg-gray-100/50'
+                      } ${formDataNewClaim.supportingDocument ? 'border-orange-500/50' : ''}`}
                     >
-                      Choose File
-                    </span>
-                    <input
-                      id="supportingDocument"
-                      name="supportingDocument"
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                      style={{ display: "none" }}
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          // Call your handler to store the file in state
-                          handleInputChangeNewClaim(
-                            "supportingDocument",
-                            e.target.files[0]
-                          );
-                        }
-                      }}
-                    />
-                  </label>
-                  {formDataNewClaim.supportingDocument && (
-                    <div className="mt-2 text-sm text-gray-600">
-                      Selected: {formDataNewClaim.supportingDocument.name}
-                    </div>
-                  )}
+                      {formDataNewClaim.supportingDocument ? (
+                        <div className="w-full">
+                          <div className="flex flex-col items-center justify-center space-y-3">
+                            <div className="p-2 rounded-full bg-blue-50 dark:bg-blue-900/30">
+                              <FileText className={`w-6 h-6 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />
+                            </div>
+                            <div className="text-center">
+                              <p className={`text-sm font-medium truncate max-w-[250px] ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                                {formDataNewClaim.supportingDocument.name}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {(formDataNewClaim.supportingDocument.size / (1024 * 1024)).toFixed(2)} MB
+                              </p>
+                            </div>
+                            <div className="flex space-x-2 mt-2">
+                              <span className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                                isDark
+                                  ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                              } shadow-sm`}>
+                                Change File
+                              </span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleInputChangeNewClaim("supportingDocument", null);
+                                }}
+                                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                                  isDark
+                                    ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50'
+                                    : 'bg-red-50 text-red-600 hover:bg-red-100'
+                                }`}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className={`p-3 rounded-full mb-3 transition-colors ${
+                            isDark ? 'bg-gray-700/50 group-hover:bg-orange-900/20' : 'bg-gray-100 group-hover:bg-orange-50'
+                          }`}>
+                            <Upload className={`w-6 h-6 ${isDark ? 'text-orange-400' : 'text-orange-500'}`} />
+                          </div>
+                          
+                          <div className="space-y-1">
+                            <p className={`text-sm font-medium ${
+                              isDark ? 'text-gray-200' : 'text-gray-700'
+                            }`}>
+                              Drag and drop files here, or click to select
+                            </p>
+                            <p className={`text-xs ${
+                              isDark ? 'text-gray-500' : 'text-gray-400'
+                            }`}>
+                              PDF, JPG, PNG, DOC, DOCX (Max 10MB)
+                            </p>
+                          </div>
+                          
+                          <span className={`mt-4 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                            isDark
+                              ? 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                          } shadow-sm`}>
+                            Select File
+                          </span>
+                        </>
+                      )}
+                      
+                      <input
+                        id="supportingDocument"
+                        name="supportingDocument"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                        className="sr-only"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            const file = e.target.files[0];
+                            const fileSizeMB = file.size / (1024 * 1024);
+                            
+                            if (fileSizeMB > 10) {
+                              alert('File size exceeds 10MB limit');
+                              return;
+                            }
+                            
+                            handleInputChangeNewClaim("supportingDocument", file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
