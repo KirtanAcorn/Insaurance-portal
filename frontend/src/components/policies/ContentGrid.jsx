@@ -132,12 +132,9 @@ const ContentGrid = ({
     }
     
     // Parse the end date from the renewal date string
-    console.log('Raw renewal date string:', renewalDateStr);
     const endDateObj = parseDate(renewalDateStr);
-    console.log('Parsed end date object:', endDateObj);
     
     if (!endDateObj) {
-      console.log('Invalid end date object');
       return { startDate: 'Not Available', endDate: 'Not Available' };
     }
     
@@ -182,11 +179,8 @@ const ContentGrid = ({
 
   // Function to get the correct data for the selected insurance type
   const getInsuranceDetails = (type) => {
-    console.log('getInsuranceDetails called with type:', type);
-    console.log('Current policyData:', JSON.stringify(policyData, null, 2));
     
     if (!policyData || Object.keys(policyData).length === 0) {
-      console.log('No policy data available');
       return {
         policyNumber: 'N/A',
         status: 'Inactive',
@@ -253,19 +247,12 @@ const ContentGrid = ({
       };
       
       const fieldName = dateFieldMap[policyType];
-      console.log('getPolicyPeriod:', { 
-        policyType, 
-        fieldName, 
-        availableFields: Object.keys(policyData || {}) 
-      });
       
       // Check if the field exists and has a value
       const fieldValue = policyData[fieldName];
-      console.log('Raw date value from API:', { fieldName, fieldValue, type: typeof fieldValue });
       
       // If the field is empty or invalid, try alternative field names
       if (!fieldValue || fieldValue.trim() === '' || fieldValue === 'N/A' || fieldValue === 'Invalid Date') {
-        console.log(`Field '${fieldName}' is empty or invalid, trying alternatives...`);
         
         // Define alternative field names for each policy type
         const alternativeFields = {
@@ -285,7 +272,6 @@ const ContentGrid = ({
           }
         }
         
-        console.log('No valid date found in any field');
         return {
           startDate: 'Not Available',
           endDate: 'Not Available'
