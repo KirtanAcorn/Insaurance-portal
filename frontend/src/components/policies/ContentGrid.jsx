@@ -37,91 +37,148 @@ const ContentGrid = ({
     );
   }
 
-  // Helper function to format dates and calculate policy periods
-  const formatDate = (dateInput, subtractDays = 0) => {
-    console.log('formatDate input:', { dateInput, subtractDays, type: typeof dateInput });
-    
-    // Handle invalid inputs
-    if (!dateInput || dateInput === 'N/A' || dateInput === 'Invalid Date') {
-      console.log('formatDate: Invalid input -', dateInput);
-      return 'Not Available';
-    }
+  // Helper function to parse date string in DD/MM/YYYY format
+  const parseDate = (dateStr) => {
+    if (!dateStr || dateStr === 'N/A') return null;
     
     try {
-      let date;
+      console.log('Parsing date string:', dateStr);
       
-      // If input is already a Date object
-      if (dateInput instanceof Date) {
-        date = new Date(dateInput);
-      } 
-      // If input is a timestamp (number)
-      else if (typeof dateInput === 'number') {
-        date = new Date(dateInput);
-      }
-      // If input is a string
-      else if (typeof dateInput === 'string') {
-        // Try parsing as ISO string
-        if (dateInput.includes('T') || dateInput.includes('Z')) {
-          date = new Date(dateInput);
-        } 
-        // Try parsing as DD/MM/YYYY or MM/DD/YYYY
-        else if (dateInput.includes('/')) {
-          const [day, month, year] = dateInput.split('/').map(Number);
-          // Try both DD/MM/YYYY and MM/DD/YYYY formats
-          date = new Date(year, month - 1, day);
-          if (isNaN(date.getTime())) {
-            date = new Date(year, day - 1, month);
-          }
-        }
-        // Try parsing as YYYY-MM-DD
-        else if (dateInput.includes('-')) {
-          date = new Date(dateInput);
-        }
-        
-        // If still not a valid date, try the default Date constructor
-        if (!date || isNaN(date.getTime())) {
-          date = new Date(dateInput);
+      // Handle DD/MM/YYYY format
+      if (typeof dateStr === 'string' && dateStr.includes('/')) {
+        const parts = dateStr.split('/').map(Number);
+        if (parts.length === 3) {
+          const [day, month, year] = parts;
+          // Create date in UTC to avoid timezone issues
+          const date = new Date(Date.UTC(year, month - 1, day));
+          console.log('Parsed from DD/MM/YYYY:', { day, month, year, date });
+          return isNaN(date.getTime()) ? null : date;
         }
       }
       
-      // If we couldn't parse the date
-      if (!date || isNaN(date.getTime())) {
-        console.log('formatDate: Could not parse date -', dateInput);
-        return 'Not Available';
+      // Try ISO format
+      let date = new Date(dateStr);
+      if (!isNaN(date.getTime())) {
+        console.log('Parsed from ISO format:', date);
+        return date;
       }
       
-      // Subtract days if needed
-      if (subtractDays > 0) {
-        date.setDate(date.getDate() - subtractDays);
+      // Try timestamp
+      if (!isNaN(dateStr)) {
+        date = new Date(Number(dateStr));
+        if (!isNaN(date.getTime())) {
+          console.log('Parsed from timestamp:', date);
+          return date;
+        }
       }
       
-      // Format the date
-      const options = { 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric',
-        timeZone: 'UTC' // Ensure consistent timezone handling
-      };
-      
-      const formattedDate = date.toLocaleDateString('en-GB', options);
-      
-      console.log('formatDate result:', { 
-        input: dateInput, 
-        parsedDate: date.toString(),
-        formattedDate,
-        timestamp: date.getTime()
-      });
-      
-      return formattedDate;
+      console.log('Failed to parse date:', dateStr);
+      return null;
     } catch (error) {
-      console.error('formatDate error:', { 
-        error: error.message, 
-        input: dateInput,
-        type: typeof dateInput
+      console.error('Error parsing date:', error, 'Input:', dateStr);
+      return null;
+    }
+  };
+
+  // Format date to display string
+  const formatDateForDisplay = (date) => {
+    if (!date) return 'Not Available';
+    
+    try {
+      // Ensure we have a valid Date object
+      const dateObj = new Date(date);
+      if (isNaN(dateObj.getTime())) return 'Invalid Date';
+      
+      // Format in UTC to avoid timezone issues
+      return dateObj.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+        timeZoneName: 'short'
       });
+    } catch (error) {
+      console.error('Error formatting date:', error);
       return 'Not Available';
     }
   };
+
+  // Get policy dates based on insurance type and company details
+  const getPolicyDates = (insuranceType) => {
+    if (!policyData) return { startDate: 'Not Available', endDate: 'Not Available' };
+    
+    let renewalDateStr;
+    
+    // Get the renewal date string based on insurance type
+    switch(insuranceType) {
+      case 'Property':
+        renewalDateStr = policyData.RenewalDate || policyData.renewalDate;
+        break;
+        
+      case 'Commercial Liability':
+        renewalDateStr = policyData.CommercialRenewalDate || policyData.commercialRenewalDate;
+        break;
+        
+      case 'Marine':
+        renewalDateStr = policyData.MarineRenewal || policyData.marineRenewal;
+        break;
+        
+      case 'Fleet':
+        renewalDateStr = policyData.RenewalDate2 || policyData.renewalDate2;
+        break;
+        
+      default:
+        return { startDate: 'Not Available', endDate: 'Not Available' };
+    }
+    
+    // Parse the end date from the renewal date string
+    console.log('Raw renewal date string:', renewalDateStr);
+    const endDateObj = parseDate(renewalDateStr);
+    console.log('Parsed end date object:', endDateObj);
+    
+    if (!endDateObj) {
+      console.log('Invalid end date object');
+      return { startDate: 'Not Available', endDate: 'Not Available' };
+    }
+    
+    // Calculate start date (end date - 364 days)
+    const startDateObj = new Date(endDateObj);
+    console.log('Before subtraction - startDateObj (local):', startDateObj.toString());
+    console.log('Before subtraction - startDateObj (ISO):', startDateObj.toISOString());
+    
+    // Use UTC methods to avoid timezone issues
+    const utcYear = startDateObj.getUTCFullYear();
+    const utcMonth = startDateObj.getUTCMonth();
+    const utcDate = startDateObj.getUTCDate();
+    
+    // Create new date in UTC
+    const calculatedStartDate = new Date(Date.UTC(utcYear, utcMonth, utcDate - 364));
+    
+    console.log('After subtraction - calculatedStartDate (local):', calculatedStartDate.toString());
+    console.log('After subtraction - calculatedStartDate (ISO):', calculatedStartDate.toISOString());
+    
+    // Use the calculated date
+    startDateObj.setTime(calculatedStartDate.getTime());
+    
+    const formattedStartDate = formatDateForDisplay(startDateObj);
+    const formattedEndDate = formatDateForDisplay(endDateObj);
+    
+    console.log('Final dates:', {
+      formattedStartDate,
+      formattedEndDate,
+      startDateObj,
+      endDateObj,
+      startTimestamp: startDateObj.getTime(),
+      endTimestamp: endDateObj.getTime(),
+      startDateISO: startDateObj.toISOString(),
+      endDateISO: endDateObj.toISOString()
+    });
+    
+    return { startDate: formattedStartDate, endDate: formattedEndDate };
+  };
+  
+  // Get dates based on selected insurance type
+  const policyDates = getPolicyDates(selectedInsuranceType);
 
   // Function to get the correct data for the selected insurance type
   const getInsuranceDetails = (type) => {
@@ -554,7 +611,7 @@ const ContentGrid = ({
                   <div>
                     <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Policy Start Date</p>
                     <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-                      {insuranceDetails.startDate || 'Not Available'}
+                      {policyDates.startDate}
                     </p>
                   </div>
                 </div>
@@ -568,7 +625,7 @@ const ContentGrid = ({
                   <div>
                     <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Policy End Date</p>
                     <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-                      {insuranceDetails.endDate || 'Not Available'}
+                      {policyDates.endDate}
                     </p>
                   </div>
                 </div>

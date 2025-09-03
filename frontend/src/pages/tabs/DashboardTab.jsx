@@ -45,10 +45,10 @@ const DashboardTab = ({isDark, statsDataDashboard, recentActivityDashboard, poli
           {/* Right Column */}
           <div className="space-y-8">
             {/* Policy Overview */}
-            <PolicyOverview
+            {/* <PolicyOverview
             isDark={isDark}
             policiesDashboard={policiesDashboard}
-            />
+            /> */}
 
             {/* Quick Stats */}
             <QuickStats
