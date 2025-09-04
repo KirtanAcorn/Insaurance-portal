@@ -186,23 +186,111 @@ exports.deleteUser = async (req, res) => {
 
 // Login
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
+
+  if (!email || !password || !role) {
+    console.log('Missing required fields:', { email: !!email, password: !!password, role: !!role });
+    return res.status(400).json({ 
+      success: false,
+      message: "Email, password, and role are required" 
+    });
+  }
 
   try {
-    const pool = await poolPromise;
-    const result = await pool.request()
-      .input("email", sql.VarChar, email)
-      .input("password", sql.VarChar, password)
-      .query("SELECT * FROM Users_ WHERE email = @email AND password = @password");
-
-    if (result.recordset.length === 0) {
-      return res.status(401).json({ error: "Invalid email or password" });
+    // Get database connection pool
+    let pool;
+    try {
+      pool = await poolPromise;
+      console.log('Database connection pool created');
+    } catch (poolError) {
+      console.error('Database connection error:', poolError);
+      return res.status(500).json({
+        success: false,
+        message: 'Database connection failed',
+        error: poolError.message
+      });
+    }
+    
+    // First, check if user exists with the given email
+    const query = `
+      SELECT 
+        id, firstName, lastName, email, 
+        temporaryPassword,  -- Using temporaryPassword instead of password
+        userRole, isActive, department, location
+      FROM Users_ 
+      WHERE email = @email
+    `;
+    
+    const cleanQuery = query.replace(/\s+/g, ' ').trim();
+    
+    // Query the database for the user by email
+    let userResult;
+    try {
+      const request = pool.request();
+      request.input('email', sql.VarChar, email);
+      
+      userResult = await request.query(query);
+      
+      if (userResult.recordset.length === 0) {
+        console.log('No user found with email:', email);
+        return res.status(401).json({ 
+          success: false,
+          message: "Invalid email or password" 
+        });
+      }
+    } catch (dbError) {
+      console.error('Database query error:', dbError);
+      return res.status(500).json({
+        success: false,
+        message: "Database error during login"
+      });
+    }
+    
+    if (userResult.recordset.length === 0) {
+      console.log('No user found with email:', email);
+      return res.status(401).json({ 
+        success: false,
+        message: "Invalid email or password" 
+      });
     }
 
-    res.json(result.recordset[0]);
+    const user = userResult.recordset[0];
+
+    // Check password (case-sensitive)
+    const storedPassword = user.temporaryPassword;
+
+    // Compare passwords
+    const isPasswordMatch = password === storedPassword;
+    
+    if (!isPasswordMatch) {
+      return res.status(401).json({ 
+        success: false,
+        message: "Invalid email or password" 
+      });
+    }
+    
+    // Check if user's role matches the selected role (case-insensitive)
+    if (user.userRole.toLowerCase() !== role.toLowerCase()) {
+      return res.status(403).json({ 
+        success: false,
+        message: `Access denied. Your account is registered as ${user.userRole}.` 
+      });
+    }
+
+    // If we get here, credentials and role are valid
+    res.json({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      userRole: user.userRole,
+      // Include other necessary user data, but never send password back
+      department: user.department,
+      location: user.location
+    });
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An error occurred during login. Please try again." });
   }
 };
 

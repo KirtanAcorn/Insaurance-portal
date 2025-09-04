@@ -9,6 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loginAs, setLoginAs] = useState('Client');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [loginMessage, setLoginMessage] = useState(''); // State for displaying messages
 
   const navigate = useNavigate();
 
@@ -31,12 +32,53 @@ const Login = () => {
     }
   }, [theme]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Stop page reload
-    console.log('Login attempt:', { email, password, loginAs });
-   navigate("/dashboard", {
-      state: { role: loginAs }
-    });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoginMessage(''); // Clear previous messages
+    try {
+      const requestBody = {
+        email: email.trim(),
+        password: password,
+        role: loginAs,
+      };
+      
+      console.log('Sending login request with:', {
+        ...requestBody,
+        password: password ? '***' : 'empty' // Don't log actual password
+      });
+      
+      const response = await fetch('http://localhost:7001/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      let data;
+      try {
+        data = await response.json();
+        console.log('Login response:', { status: response.status, data });
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error('Invalid response from server');
+      }
+
+      if (response.ok) { // Status 200-299 is ok
+        console.log('Login successful:', data);
+        setLoginMessage('Login successful! Redirecting...');
+        // Store user data or token here if needed
+        navigate("/dashboard", { state: { role: data.userRole, userData: data } });
+      } else { // Handle errors
+        console.error('Login failed:', { status: response.status, data });
+        // Use the most specific error message available
+        const errorMessage = data?.message || data?.error || `Error: ${response.statusText}`;
+        setLoginMessage(errorMessage);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setLoginMessage('Failed to connect to the server. Please try again later.');
+    }
   };
 
   const themeOptions = [
@@ -197,10 +239,17 @@ const Login = () => {
                   )}
                 </div>
               </div>
+              
+              {/* Login message display */}
+              {loginMessage && (
+                <div className="text-center text-sm font-medium text-red-500">
+                  {loginMessage}
+                </div>
+              )}
 
               {/* Sign In Button */}
               <button
-                type="submit" // ✅ Now triggers HTML5 validation
+                type="submit" 
                 className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 Sign In
