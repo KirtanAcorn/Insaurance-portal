@@ -42,11 +42,6 @@ const Login = () => {
         role: loginAs,
       };
       
-      console.log('Sending login request with:', {
-        ...requestBody,
-        password: password ? '***' : 'empty' // Don't log actual password
-      });
-      
       const response = await fetch('/api/users/login', {
         method: 'POST',
         headers: {
@@ -58,14 +53,12 @@ const Login = () => {
       let data;
       try {
         data = await response.json();
-        console.log('Login response:', { status: response.status, data });
       } catch (parseError) {
         console.error('Error parsing response:', parseError);
         throw new Error('Invalid response from server');
       }
 
       if (response.ok) { // Status 200-299 is ok
-        console.log('Login successful:', data);
         setLoginMessage('Login successful! Redirecting...');
         // Store user data or token here if needed
         navigate("/dashboard", { state: { role: data.userRole, userData: data } });
