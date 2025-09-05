@@ -6,7 +6,7 @@ const UserTable = ({users,changeUsers,isDark, getRoleDarkColor, getRoleColor, ge
     const fetchUsers = async () => {
     
     try {
-      const response = await axios.get('http://localhost:7001/api/users');
+      const response = await axios.get('/api/users');
       const formattedUsers = response.data.map((user, index) => ({
         id: user.id,
         avatar: getInitials(user.name || user.firstName || ""), 

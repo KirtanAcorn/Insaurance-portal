@@ -20,7 +20,7 @@ const ClaimsOverview = ({
     }
     
     try {
-      const documentUrl = `http://localhost:7001/api/claims/documents/${encodeURIComponent(documentName)}?preview=true`;
+      const documentUrl = `/api/claims/documents/${encodeURIComponent(documentName)}?preview=true`;
       const response = await fetch(documentUrl);
       if (!response.ok) throw new Error('Failed to fetch document');
       

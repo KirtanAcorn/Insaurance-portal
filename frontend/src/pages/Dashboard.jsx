@@ -8,12 +8,13 @@ import toast from 'react-hot-toast';
 import Policies from './tabs/Policies';
 import DashboardTab from './tabs/DashboardTab'
 import axios from "axios";
-import { useLocation, useNavigate, } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useMemo } from "react";
 
 const Dashboard = () => {
   const [theme, setTheme] = useState('system');
   const [isDark, setIsDark] = useState(false);
-  const [activeTab, setActiveTab] = useState('Users');
+  const [activeTab, setActiveTab] = useState('Dashboard');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditModalOpenClaim, setIsEditModalOpenClaim] = useState(false)
@@ -25,10 +26,14 @@ const Dashboard = () => {
   const [policyYear, setPolicyYear] = useState('2024-2025');
   const [isOpenNewClaim, setIsOpenNewClaim] = useState(false);
   const [isModalOpenNew, setIsModalOpenNew] = useState(false);
+  const [openIsModalOpenNew, setOpenIsModalOpenNew] = useState(false);
   const [users, setUsers] = useState([]);
   const [claims, setClaims] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUsersLoading, setIsUsersLoading] = useState(false);
+  const [isPoliciesLoading, setIsPoliciesLoading] = useState(false);
+  const [policiesError, setPoliciesError] = useState(null);
+  const [companyPolicies, setCompanyPolicies] = useState([]);
   const [error, setError] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -202,7 +207,7 @@ const Dashboard = () => {
   
     try {
       // Use the year as is from the dropdown
-      const apiUrl = `http://localhost:7001/api/policies/company-details?companyName=${encodeURIComponent(companyName)}&renewalYear=${year}`;
+      const apiUrl = `/api/policies/company-details?companyName=${encodeURIComponent(companyName)}&renewalYear=${year}`;
 
       const response = await axios.get(apiUrl);
   
@@ -354,15 +359,169 @@ const Dashboard = () => {
 
   const insuranceData = {};
 
-  const allPolicies = [];
+  const allPolicies = useMemo(() => {
+    console.log('companyPolicies in useMemo:', companyPolicies);
+    if (!companyPolicies || companyPolicies.length === 0) {
+      console.log('No company policies found');
+      return [];
+    }
+    
+    // Since we expect only one company's policies at a time, take the first item
+    const policy = companyPolicies[0];
+    const policies = [];
+    
+    // Add Property policy
+    policies.push({
+      id: '45057501202A',  // Hardcoded as per requirement
+      type: 'Property',
+      status: 'Active',
+      premium: policy.buildingPremium 
+        ? `£${Number(policy.buildingPremium).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
+        : '£3,950.06',
+      coverage: '£2,087,097',  // Hardcoded as per requirement
+      endDate: policy.propertyRenewalDate 
+        ? new Date(policy.propertyRenewalDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '30 April 2025'  // Fallback date
+    });
+    
+    // Add Commercial Liability policy
+    policies.push({
+      id: 'APP65099COM-24',  // Hardcoded as per requirement
+      type: 'Commercial Liability',
+      status: 'Active',
+      premium: policy.commercialPremium 
+        ? `£${Number(policy.commercialPremium).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
+        : '£1,825.82',
+      coverage: '£4,000,000',  // Hardcoded as per requirement
+      endDate: policy.commercialRenewalDate 
+        ? new Date(policy.commercialRenewalDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '22 April 2025'  // Fallback date
+    });
+    
+    // Add Fleet policy
+    policies.push({
+      id: 'PC380567',  // Hardcoded as per requirement
+      type: 'Fleet',
+      status: 'Active',
+      premium: policy.fleetPremium 
+        ? `£${Number(policy.fleetPremium).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
+        : '£16,036.98',
+      coverage: '£500,000',  // Hardcoded as per requirement
+      endDate: policy.fleetRenewalDate 
+        ? new Date(policy.fleetRenewalDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '7 April 2025'  // Fallback date
+    });
+    
+    // Add Marine policy
+    policies.push({
+      id: 'LMC306726501',  // Hardcoded as per requirement
+      type: 'Marine',
+      status: 'Active',
+      premium: policy.marinePremium 
+        ? `£${Number(policy.marinePremium).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
+        : '£99,999.88',
+      coverage: '£46,100,000',  // Hardcoded as per requirement
+      endDate: policy.marineRenewalDate 
+        ? new Date(policy.marineRenewalDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '15 June 2025'  // Fallback date
+    });
+    
+    console.log('Mapped policies:', policies);
+    return policies;
+  }, [companyPolicies]);
 
-  // Log when policyData changes
+  // Log when allPolicies changes
   useEffect(() => {
-  }, [policyData]);
+    console.log('allPolicies updated:', allPolicies);
+  }, [allPolicies]);
 
   // Find the selected company data using the ID
   const selectedCompanyData = policyCompanies.find(c => c.id === selectedCompanyPolicy) || {};
   const currentInsuranceData = insuranceData[selectedInsuranceType];
+
+  // Memoize the policy companies to prevent unnecessary re-renders
+  const memoizedPolicyCompanies = useMemo(() => policyCompanies, [JSON.stringify(policyCompanies)]);
+
+  // Fetch company policies when selected company changes
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const fetchCompanyPolicies = async () => {
+      if (!selectedCompanyPolicy) {
+        if (isMounted) {
+          setCompanyPolicies([]);
+          setPoliciesError(null);
+          setIsPoliciesLoading(false);
+        }
+        return;
+      }
+      
+      // Find the selected company to get its name
+      const selectedCompany = memoizedPolicyCompanies.find(c => c.id === selectedCompanyPolicy);
+      if (!selectedCompany) {
+        if (isMounted) {
+          setCompanyPolicies([]);
+          setPoliciesError('Selected company not found');
+          setIsPoliciesLoading(false);
+        }
+        return;
+      }
+      
+      const companyName = selectedCompany.name;
+      console.log('Fetching policies for company:', companyName);
+      
+      if (isMounted) {
+        setIsPoliciesLoading(true);
+        setPoliciesError(null);
+      }
+      
+      try {
+        // Encode the company name for URL safety
+        const encodedCompanyName = encodeURIComponent(companyName);
+        console.log('Encoded company name for API:', encodedCompanyName);
+        
+        const response = await axios.get(
+          `/api/policies/company/${encodedCompanyName}`,
+          { 
+            signal,
+            params: { _t: Date.now() } 
+          }
+        );
+        
+        if (isMounted) {
+          if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+            setCompanyPolicies(response.data);
+            setPoliciesError(null);
+          } else {
+            setCompanyPolicies([]);
+            setPoliciesError('No policies found for the selected company');
+          }
+        }
+      } catch (error) {
+        if (isMounted && !signal.aborted) {
+          console.error('Error fetching company policies:', error);
+          setPoliciesError(error.response?.data?.message || 'Failed to load policies. Please try again later.');
+          setCompanyPolicies([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsPoliciesLoading(false);
+        }
+      }
+    };
+
+    // Add a small debounce to prevent rapid successive calls
+    const debounceTimer = setTimeout(fetchCompanyPolicies, 300);
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      controller.abort('Component unmounted or effect re-running');
+      clearTimeout(debounceTimer);
+    };
+  }, [selectedCompanyPolicy, memoizedPolicyCompanies]);
 
   const getInsuranceIcon = (type) => {
     switch (type) {
@@ -493,7 +652,7 @@ const Dashboard = () => {
       }
       
       const response = await axios.put(
-        `http://localhost:7001/api/claims/${claimId}`,
+        `/api/claims/${claimId}`,
         changedFields,
         {
           headers: {
@@ -563,7 +722,7 @@ const Dashboard = () => {
   const fetchUsersClaim = async () => {
     try {
       setIsUsersLoading(true);
-      const response = await axios.get('http://localhost:7001/api/users');
+      const response = await axios.get('/api/users');
       if (response.data && Array.isArray(response.data)) {
         setUsers(response.data);
       }
@@ -632,10 +791,10 @@ const Dashboard = () => {
   const statsClaim = [];
 
   const tabs = [
-    { name: 'Dashboard', icon: BarChart3, color: "bg-gradient-to-br from-blue-500 to-cyan-500" },
-    { name: 'Claims', icon: FileCheck, color: "bg-gradient-to-br from-orange-600 via-red-600 to-pink-600" },
-    { name: 'Policies', icon: Shield, color: "bg-gradient-to-r from-purple-600 to-pink-600" },
-    { name: 'Users', icon: Users, active: true, color: "bg-gradient-to-r from-purple-500 to-pink-500" }
+    { name: 'Dashboard', icon: BarChart3, active: activeTab === 'Dashboard', color: 'bg-gradient-to-br from-blue-500 to-cyan-500' },
+    { name: 'Claims', icon: FileCheck, active: activeTab === 'Claims', color: 'bg-gradient-to-br from-orange-600 via-red-600 to-pink-600' },
+    { name: 'Policies', icon: Shield, active: activeTab === 'Policies', color: 'bg-gradient-to-r from-purple-600 to-pink-600' },
+    { name: 'Users', icon: Users, active: activeTab === 'Users', color: 'bg-gradient-to-r from-purple-500 to-pink-500' },
   ];
 
   const statsData = [];
@@ -841,7 +1000,7 @@ const Dashboard = () => {
       console.log('Sending update request with:', updatedUser);
 
       await axios.put(
-        `http://localhost:7001/api/users/${editFormData.id}`,
+        `/api/users/${editFormData.id}`,
         updatedUser
       );
 
@@ -908,7 +1067,7 @@ const Dashboard = () => {
       console.log("Creating user:", formData);
 
       const response = await axios.post(
-        "http://localhost:7001/api/users", formData
+        "/api/users", formData
       );
       fetchUsers();
       setIsCreateModalOpen(false);
@@ -940,7 +1099,7 @@ const Dashboard = () => {
       return;
     }
     try {
-      await axios.delete(`http://localhost:7001/api/users/${selectedUser.id}`);
+      await axios.delete(`/api/users/${selectedUser.id}`);
 
 
       fetchUsers();
@@ -985,7 +1144,7 @@ const Dashboard = () => {
 
       // Send request via Axios
       const response = await axios.post(
-        'http://localhost:7001/api/claims',
+        '/api/claims',
         formData,
         {
           headers: {
@@ -1101,7 +1260,7 @@ const Dashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:7001/api/users');
+      const response = await axios.get('/api/users');
 
       const formattedUsers = response.data.map((user, index) => ({
         id: user.id,
@@ -1130,7 +1289,7 @@ const Dashboard = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://localhost:7001/api/claims');
+      const response = await axios.get('/api/claims');
       setClaims(response.data);
     } catch (err) {
       console.error('Error fetching claims:', err);
@@ -1171,13 +1330,99 @@ const Dashboard = () => {
   };
 
 
-  const statsDataDashboard = [];
+  const statsDataDashboard = [
+    {
+      title: 'Total Policies',
+      value: '6',
+      change: '+12%',
+      changeText: 'from last month',
+      icon: FileText,
+      color: 'blue'
+    },
+    {
+      title: 'Active Claims',
+      value: '1',
+      change: '+5%',
+      changeText: 'from last month',
+      icon: AlertCircle,
+      color: 'orange'
+    },
+    {
+      title: 'Total Premium',
+      value: '£134K',
+      change: '+18%',
+      changeText: 'from last month',
+      icon: DollarSign,
+      color: 'green'
+    },
+    {
+      title: 'Registered Users',
+      value: '4',
+      change: '+8%',
+      changeText: 'from last month',
+      icon: Users,
+      color: 'purple'
+    }
+  ];
 
-  const recentActivityDashboard = [];
+  const recentActivityDashboard = [
+    {
+      type: 'warning',
+      title: 'Under Review - Water Damage',
+      subtitle: 'Sarah Johnson',
+      date: '2024-01-17',
+      icon: AlertCircle
+    },
+    {
+      type: 'info',
+      title: 'Assigned to Agent - Water Damage',
+      subtitle: 'System',
+      date: '2024-01-16',
+      icon: Activity
+    },
+    {
+      type: 'info',
+      title: 'Claim Submitted - Water Damage',
+      subtitle: 'John Smith',
+      date: '2024-01-15',
+      icon: Activity
+    },
+    {
+      type: 'success',
+      title: 'Approved - Public Liability',
+      subtitle: 'Sarah Johnson',
+      date: '2024-01-14',
+      icon: CheckCircle
+    },
+    {
+      type: 'info',
+      title: 'Payment Processed - Equipment Damage',
+      subtitle: 'Finance Team',
+      date: '2024-01-12',
+      icon: Activity
+    }
+  ];
    
   const policiesDashboard = [];
 
-  const quickStatsDashboard = [];
+  const quickStatsDashboard = [{
+    title: 'Global Coverage',
+    value: '98.5%',
+    icon: Globe,
+    color: 'blue'
+  },
+  {
+    title: 'Claim Success',
+    value: '94.2%',
+    icon: CheckCircle,
+    color: 'green'
+  },
+  {
+    title: 'Data Security',
+    value: '99.9%',
+    icon: Shield,
+    color: 'purple'
+  }];
     
   const getColorClassesDashbaord = (color, variant = 'bg') => {
     const colors = {
@@ -1238,7 +1483,18 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="p-6">
 
-        {activeTab === "Users" && (<Userr
+        {activeTab === 'Dashboard' && (
+        <DashboardTab 
+          isDark={isDark}
+          statsDataDashboard={statsDataDashboard}
+          recentActivityDashboard={recentActivityDashboard}
+          policiesDashboard={policiesDashboard}
+          quickStatsDashboard={quickStatsDashboard}
+          getColorClassesDashbaord={getColorClassesDashbaord}
+        />
+      )}
+        {activeTab === 'Users' && (
+        <Userr 
           openCreateModal={openCreateModal}
           stats={stats}
           isDark={isDark}
@@ -1271,7 +1527,7 @@ const Dashboard = () => {
 
         />)}
 
-        {activeTab === "Claims" && <Claims 
+        {activeTab === 'Claims' && <Claims 
         role={role} 
         isDark={isDark}
         claims={claims}
@@ -1305,7 +1561,7 @@ const Dashboard = () => {
         users={users}
         />}
 
-        {activeTab === "Policies" && <Policies
+        {activeTab === 'Policies' && <Policies
           isDark={isDark}
           selectedCompanyPolicy={selectedCompanyPolicy}
           changeSelectedCompanyPolicy={setSelectedCompanyPolicy}
@@ -1315,20 +1571,20 @@ const Dashboard = () => {
           chooseSelectedInsuranceType={setSelectedInsuranceType}
           getInsuranceIcon={getInsuranceIcon}
           selectedInsuranceType={selectedInsuranceType}
-          selectedCompanyData={selectedCompanyData}
-          policyData={policyData}
-          isLoading={isLoadingPolicy}
-          error={policyError}
-          openIsModalOpenNew={setIsOpenNewClaim}
-        />}
-
-        {activeTab === "Dashboard" && <DashboardTab
-          isDark={isDark}
           statsDataDashboard={statsDataDashboard}
           recentActivityDashboard={recentActivityDashboard}
           policiesDashboard={policiesDashboard}
           quickStatsDashboard={quickStatsDashboard}
           getColorClassesDashbaord={getColorClassesDashbaord}
+          companyPolicies={companyPolicies}
+          isPoliciesLoading={isPoliciesLoading}
+          policiesError={policiesError}
+          selectedCompanyData={selectedCompanyData}
+          policyData={policyData}
+          isLoading={isLoading}
+          error={error}
+          openIsModalOpenNew={setOpenIsModalOpenNew}
+          allPolicies={allPolicies}
         />}
 
       </main>

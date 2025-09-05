@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import AllPolicies from "../../components/policies/AllPolicies"
 import ContentGrid from "../../components/policies/ContentGrid"
 import CompanyInformation from "../../components/policies/CompanyInformation"
 import PoliciesHeader from "../../components/policies/PoliciesHeader"
@@ -17,14 +18,18 @@ const Policies = ({
   policyData = {},
   isLoading,
   error,
-  openIsModalOpenNew
+  openIsModalOpenNew,
+  allPolicies,
+  companyPolicies = [],
+  isPoliciesLoading = false,
+  policiesError = null
 }) => {
   // Log all props when they change
   useEffect(() => {
   }, [selectedCompanyPolicy, policyYear, selectedInsuranceType, policyData, isLoading, error]);
   return (
     <>
-    <PoliciesHeader openIsModalOpenNew={openIsModalOpenNew}/>
+    <PoliciesHeader openIsModalOpenNew={() => openIsModalOpenNew(true)}/>
 
     <CompanyInformation
       isDark={isDark}
@@ -48,6 +53,19 @@ const Policies = ({
       isLoading={isLoading}
       error={error}
     />
+    
+    <AllPolicies
+      isDark={isDark}
+      getInsuranceIcon={getInsuranceIcon}
+      allPolicies={allPolicies}
+      isLoading={isPoliciesLoading}
+      error={policiesError ? { message: policiesError } : null}
+    />
+    {console.log('Policies - AllPolicies props:', {
+      allPolicies,
+      isLoading: isPoliciesLoading,
+      error: policiesError
+    })}
     </>
   )
 }

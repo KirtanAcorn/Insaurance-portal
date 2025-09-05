@@ -11,4 +11,12 @@ const policyController = require('../controllers/policyController');
  */
 router.get('/company-details', policyController.getCompanyDetails);
 
+/**
+ * @route   GET /api/policies/company/:companyName
+ * @desc    Get all policies for a specific company
+ * @access  Private
+ * @param   {string} companyName - Name of the company
+ */
+router.get('/company/:companyName', policyController.getCompanyPolicies);
+
 module.exports = router;

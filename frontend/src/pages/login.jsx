@@ -47,7 +47,7 @@ const Login = () => {
         password: password ? '***' : 'empty' // Don't log actual password
       });
       
-      const response = await fetch('http://localhost:7001/api/users/login', {
+      const response = await fetch('/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
