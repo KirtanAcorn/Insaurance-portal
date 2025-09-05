@@ -39,13 +39,6 @@ exports.createClaim = async (req, res) => {
       claimType, claimAmount, companyName, policyName,
       description, incidentDate, excess, netAmount, status
     } = req.body;
-
-    console.log('Received claim data:', {
-      claimType, claimAmount, companyName, policyName,
-      description, incidentDate, excess, netAmount, status,
-      hasFile: !!req.file
-    });
-
     // Handle file upload
     const supportingDocuments = req.file ? req.file.filename : null;
 

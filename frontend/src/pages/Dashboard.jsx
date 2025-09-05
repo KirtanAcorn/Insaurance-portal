@@ -324,11 +324,6 @@ const Dashboard = () => {
             // policyCompanies is accessible here because it's in a higher scope
             const company = policyCompanies.find(c => c.id === selectedCompanyPolicy);            
             if (company) {
-                console.log('Calling fetchPolicyData with:', { 
-                    companyName: company.name, 
-                    year: policyYear 
-                });
-                
                 try {
                     await fetchPolicyData(company.name, policyYear);
                 } catch (error) {
@@ -360,79 +355,101 @@ const Dashboard = () => {
   const insuranceData = {};
 
   const allPolicies = useMemo(() => {
-    console.log('companyPolicies in useMemo:', companyPolicies);
     if (!companyPolicies || companyPolicies.length === 0) {
-      console.log('No company policies found');
       return [];
     }
     
-    // Since we expect only one company's policies at a time, take the first item
+    // Get the first company's policies (assuming one company at a time)
     const policy = companyPolicies[0];
     const policies = [];
     
-    // Add Property policy
-    policies.push({
-      id: '45057501202A',  // Hardcoded as per requirement
-      type: 'Property',
-      status: 'Active',
-      premium: policy.buildingPremium 
-        ? `£${Number(policy.buildingPremium).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
-        : '£3,950.06',
-      coverage: '£2,087,097',  // Hardcoded as per requirement
-      endDate: policy.propertyRenewalDate 
-        ? new Date(policy.propertyRenewalDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-        : '30 April 2025'  // Fallback date
-    });
+    // Helper function to format date
+    const formatDate = (dateString) => {
+      if (!dateString) return 'N/A';
+      try {
+        const date = new Date(dateString);
+        return isNaN(date.getTime()) 
+          ? 'N/A' 
+          : date.toLocaleDateString('en-GB', { 
+              day: 'numeric', 
+              month: 'long', 
+              year: 'numeric' 
+            });
+      } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'N/A';
+      }
+    };
     
-    // Add Commercial Liability policy
-    policies.push({
-      id: 'APP65099COM-24',  // Hardcoded as per requirement
-      type: 'Commercial Liability',
-      status: 'Active',
-      premium: policy.commercialPremium 
-        ? `£${Number(policy.commercialPremium).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
-        : '£1,825.82',
-      coverage: '£4,000,000',  // Hardcoded as per requirement
-      endDate: policy.commercialRenewalDate 
-        ? new Date(policy.commercialRenewalDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-        : '22 April 2025'  // Fallback date
-    });
+    // Helper function to format currency
+    const formatCurrency = (amount) => {
+      if (amount === null || amount === undefined || amount === '') return '£0.00';
+      try {
+        const num = typeof amount === 'string' 
+          ? parseFloat(amount.replace(/[^0-9.-]+/g,"")) 
+          : Number(amount);
+        return `£${num.toLocaleString('en-GB', { 
+          minimumFractionDigits: 2, 
+          maximumFractionDigits: 2 
+        })}`;
+      } catch (error) {
+        console.error('Error formatting currency:', error);
+        return '£0.00';
+      }
+    };
     
-    // Add Fleet policy
-    policies.push({
-      id: 'PC380567',  // Hardcoded as per requirement
-      type: 'Fleet',
-      status: 'Active',
-      premium: policy.fleetPremium 
-        ? `£${Number(policy.fleetPremium).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
-        : '£16,036.98',
-      coverage: '£500,000',  // Hardcoded as per requirement
-      endDate: policy.fleetRenewalDate 
-        ? new Date(policy.fleetRenewalDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-        : '7 April 2025'  // Fallback date
-    });
+    // Property Policy
+    if (policy.buildingPremium || policy.propertyPolicyLink) {
+      policies.push({
+        id: policy.id || 'N/A',
+        type: 'Property',
+        status: 'Active',
+        premium: formatCurrency(policy.buildingPremium),
+        coverage: formatCurrency(policy.buildingCoverage) || 'N/A',
+        endDate: formatDate(policy.propertyRenewalDate)
+      });
+    }
     
-    // Add Marine policy
-    policies.push({
-      id: 'LMC306726501',  // Hardcoded as per requirement
-      type: 'Marine',
-      status: 'Active',
-      premium: policy.marinePremium 
-        ? `£${Number(policy.marinePremium).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` 
-        : '£99,999.88',
-      coverage: '£46,100,000',  // Hardcoded as per requirement
-      endDate: policy.marineRenewalDate 
-        ? new Date(policy.marineRenewalDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-        : '15 June 2025'  // Fallback date
-    });
+    // Commercial Liability Policy
+    if (policy.commercialPolicy || policy.commercialPolicyLink) {
+      policies.push({
+        id: policy.commercialPolicy || 'N/A',
+        type: 'Commercial Liability',
+        status: 'Active',
+        premium: formatCurrency(policy.commercialPremium),
+        coverage: formatCurrency(policy.commercialCoverage) || 'N/A',
+        endDate: formatDate(policy.commercialRenewalDate)
+      });
+    }
     
-    console.log('Mapped policies:', policies);
+    // Fleet Policy
+    if (policy.fleetPolicy || policy.fleetPolicyLink) {
+      policies.push({
+        id: policy.fleetPolicy || 'N/A',
+        type: 'Fleet',
+        status: 'Active',
+        premium: formatCurrency(policy.fleetPremium),
+        coverage: formatCurrency(policy.fleetCoverage) || 'N/A',
+        endDate: formatDate(policy.fleetRenewalDate)
+      });
+    }
+    
+    // Marine Policy
+    if (policy.marinePolicy || policy.marinePolicyLink) {
+      policies.push({
+        id: policy.marinePolicy || 'N/A',
+        type: 'Marine',
+        status: 'Active',
+        premium: formatCurrency(policy.marinePremium),
+        coverage: formatCurrency(policy.marineCoverage) || 'N/A',
+        endDate: formatDate(policy.marineRenewalDate)
+      });
+    }
     return policies;
   }, [companyPolicies]);
 
   // Log when allPolicies changes
   useEffect(() => {
-    console.log('allPolicies updated:', allPolicies);
   }, [allPolicies]);
 
   // Find the selected company data using the ID
@@ -469,9 +486,7 @@ const Dashboard = () => {
         return;
       }
       
-      const companyName = selectedCompany.name;
-      console.log('Fetching policies for company:', companyName);
-      
+      const companyName = selectedCompany.name;      
       if (isMounted) {
         setIsPoliciesLoading(true);
         setPoliciesError(null);
@@ -479,9 +494,7 @@ const Dashboard = () => {
       
       try {
         // Encode the company name for URL safety
-        const encodedCompanyName = encodeURIComponent(companyName);
-        console.log('Encoded company name for API:', encodedCompanyName);
-        
+        const encodedCompanyName = encodeURIComponent(companyName);        
         const response = await axios.get(
           `/api/policies/company/${encodedCompanyName}`,
           { 
@@ -923,7 +936,6 @@ const Dashboard = () => {
   };
 
   const handleEditUser = (user) => {
-    console.log('Editing user:', user); // Debug log
     setSelectedUser(user);
 
     // Use userRole if available, otherwise fall back to role
@@ -944,19 +956,10 @@ const Dashboard = () => {
       accountStatus: accountStatus,
       isActive: accountStatus === 'Active'
     });
-
-    console.log('Edit form data set to:', {
-      ...editFormData,
-      userRole: userRole || 'Client',
-      accountStatus: accountStatus,
-      isActive: accountStatus === 'Active'
-    });
-
     setIsEditModalOpen(true);
   };
 
   const handleDeleteUser = (user) => {
-    console.log(" inside handledeleteuser setselected user is ....", user);
     setSelectedUser(user);
     setDeleteModalOpen(true)
   }
@@ -985,8 +988,6 @@ const Dashboard = () => {
     }
 
     try {
-      console.log('Updating user with data:', editFormData);
-
       const updatedUser = {
         firstName: editFormData.firstName,
         lastName: editFormData.lastName,
@@ -996,8 +997,6 @@ const Dashboard = () => {
         userRole: editFormData.userRole || 'Client',
         isActive: editFormData.accountStatus === 'Active' ? 1 : 0
       };
-
-      console.log('Sending update request with:', updatedUser);
 
       await axios.put(
         `/api/users/${editFormData.id}`,
@@ -1064,8 +1063,6 @@ const Dashboard = () => {
   const handleCreateUser = async () => {
     try {
 
-      console.log("Creating user:", formData);
-
       const response = await axios.post(
         "/api/users", formData
       );
@@ -1074,10 +1071,7 @@ const Dashboard = () => {
       toast.success('User created successfully!');
 
       if (response.status === 201 || response.status === 200) {
-        console.log("User created successfully:", response.data);
-
         setFormData({});
-
       } else {
         console.warn("Unexpected response:", response);
       }

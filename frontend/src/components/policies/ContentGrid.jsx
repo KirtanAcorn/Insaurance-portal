@@ -42,7 +42,7 @@ const ContentGrid = ({
     if (!dateStr || dateStr === 'N/A') return null;
     
     try {
-      console.log('Parsing date string:', dateStr);
+   
       
       // Handle DD/MM/YYYY format
       if (typeof dateStr === 'string' && dateStr.includes('/')) {
@@ -51,7 +51,6 @@ const ContentGrid = ({
           const [day, month, year] = parts;
           // Create date in UTC to avoid timezone issues
           const date = new Date(Date.UTC(year, month - 1, day));
-          console.log('Parsed from DD/MM/YYYY:', { day, month, year, date });
           return isNaN(date.getTime()) ? null : date;
         }
       }
@@ -59,7 +58,6 @@ const ContentGrid = ({
       // Try ISO format
       let date = new Date(dateStr);
       if (!isNaN(date.getTime())) {
-        console.log('Parsed from ISO format:', date);
         return date;
       }
       
@@ -67,15 +65,13 @@ const ContentGrid = ({
       if (!isNaN(dateStr)) {
         date = new Date(Number(dateStr));
         if (!isNaN(date.getTime())) {
-          console.log('Parsed from timestamp:', date);
           return date;
         }
       }
       
-      console.log('Failed to parse date:', dateStr);
+      
       return null;
     } catch (error) {
-      console.error('Error parsing date:', error, 'Input:', dateStr);
       return null;
     }
   };
@@ -98,7 +94,6 @@ const ContentGrid = ({
         timeZoneName: 'short'
       });
     } catch (error) {
-      console.error('Error formatting date:', error);
       return 'Not Available';
     }
   };
@@ -140,8 +135,6 @@ const ContentGrid = ({
     
     // Calculate start date (end date - 364 days)
     const startDateObj = new Date(endDateObj);
-    console.log('Before subtraction - startDateObj (local):', startDateObj.toString());
-    console.log('Before subtraction - startDateObj (ISO):', startDateObj.toISOString());
     
     // Use UTC methods to avoid timezone issues
     const utcYear = startDateObj.getUTCFullYear();
@@ -151,26 +144,11 @@ const ContentGrid = ({
     // Create new date in UTC
     const calculatedStartDate = new Date(Date.UTC(utcYear, utcMonth, utcDate - 364));
     
-    console.log('After subtraction - calculatedStartDate (local):', calculatedStartDate.toString());
-    console.log('After subtraction - calculatedStartDate (ISO):', calculatedStartDate.toISOString());
-    
     // Use the calculated date
     startDateObj.setTime(calculatedStartDate.getTime());
     
     const formattedStartDate = formatDateForDisplay(startDateObj);
     const formattedEndDate = formatDateForDisplay(endDateObj);
-    
-    console.log('Final dates:', {
-      formattedStartDate,
-      formattedEndDate,
-      startDateObj,
-      endDateObj,
-      startTimestamp: startDateObj.getTime(),
-      endTimestamp: endDateObj.getTime(),
-      startDateISO: startDateObj.toISOString(),
-      endDateISO: endDateObj.toISOString()
-    });
-    
     return { startDate: formattedStartDate, endDate: formattedEndDate };
   };
   
@@ -202,7 +180,6 @@ const ContentGrid = ({
         const parsedDate = new Date(dateString);
         
         if (isNaN(parsedDate.getTime())) {
-          console.log('Could not parse date:', dateString);
           return {
             startDate: 'Not Available',
             endDate: 'Not Available'
@@ -211,14 +188,7 @@ const ContentGrid = ({
         
         const formattedStartDate = formatDate(parsedDate, 364); // 364 days before end date
         const formattedEndDate = formatDate(parsedDate);
-        
-        console.log('Formatted date range:', {
-          input: dateString,
-          parsed: parsedDate.toString(),
-          formattedStartDate,
-          formattedEndDate
-        });
-        
+      
         return {
           startDate: formattedStartDate,
           endDate: formattedEndDate
@@ -267,7 +237,6 @@ const ContentGrid = ({
         for (const altField of alternatives) {
           const altValue = policyData[altField];
           if (altValue && altValue.trim() !== '' && altValue !== 'N/A' && altValue !== 'Invalid Date') {
-            console.log(`Found valid date in alternative field '${altField}':`, altValue);
             return formatDateRange(altValue);
           }
         }
@@ -285,14 +254,6 @@ const ContentGrid = ({
     switch (type) {
       case 'Commercial Liability': {
         const { startDate, endDate } = getPolicyPeriod('Commercial Liability');
-        console.log('Commercial Liability policy data:', {
-          policyNumber: policyData['commercialPolicy'],
-          premiumPaid: policyData['commercialPremiumPaid'] || 'N/A',
-          sumAssured: policyData['employeeLiabilityCover'] || 'N/A',
-          location: policyData['stockLocation'] || 'N/A',
-          excessPerClaim: policyData['commercialExcessPerClaim'] || 'N/A',
-          claimsMade: policyData['noOfClaimCommercial'] || '0',
-        });
         
         return {
           policyNumber: policyData['commercialPolicy'] || 'N/A',
@@ -313,15 +274,6 @@ const ContentGrid = ({
       }
       case 'Marine': {
         const { startDate, endDate } = getPolicyPeriod('Marine');
-        console.log('Marine policy data:', {
-          policyNumber: policyData['marine'],
-          premiumPaid: policyData['marinePremiumPaid'] || 'N/A',
-          sumAssured: policyData['perTransitCover'] || 'N/A',
-          location: 'N/A',
-          excessPerClaim: policyData['cargoExcessPerClaim'] || 'N/A',
-          claimsMade: policyData['noOfClaimCargo'] || '0',
-        });
-        
         return {
           policyNumber: policyData['marine'] || 'N/A',
           status: 'Active',
@@ -344,15 +296,6 @@ const ContentGrid = ({
       }
       case 'Property': {
         const { startDate, endDate } = getPolicyPeriod('Property');
-        console.log('Property policy data:', {
-          policyNumber: policyData['buildingInsurance'],
-          premiumPaid: policyData['buildingPremiumPaid'] || 'N/A',
-          sumAssured: policyData['sumAssuredValueOfPremises'] || 'N/A',
-          location: policyData['buildingLocation'] || 'N/A',
-          excessPerClaim: policyData['buildingExcessPerClaim'] || 'N/A',
-          claimsMade: policyData['noOfClaimBuilding'] || '0',
-        });
-        
         return {
           policyNumber: policyData['buildingInsurance'] || 'N/A',
           status: 'Active',

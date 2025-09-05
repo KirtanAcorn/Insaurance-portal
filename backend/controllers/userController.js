@@ -42,8 +42,6 @@ exports.createUser = async (req, res) => {
     manageUsers = false
   } = permissions || {};
 
-  console.log("Request body:", req.body);
-
   try {
     const pool = await poolPromise;
 
@@ -189,7 +187,6 @@ exports.login = async (req, res) => {
   const { email, password, role } = req.body;
 
   if (!email || !password || !role) {
-    console.log('Missing required fields:', { email: !!email, password: !!password, role: !!role });
     return res.status(400).json({ 
       success: false,
       message: "Email, password, and role are required" 
@@ -201,9 +198,7 @@ exports.login = async (req, res) => {
     let pool;
     try {
       pool = await poolPromise;
-      console.log('Database connection pool created');
     } catch (poolError) {
-      console.error('Database connection error:', poolError);
       return res.status(500).json({
         success: false,
         message: 'Database connection failed',
@@ -232,7 +227,6 @@ exports.login = async (req, res) => {
       userResult = await request.query(query);
       
       if (userResult.recordset.length === 0) {
-        console.log('No user found with email:', email);
         return res.status(401).json({ 
           success: false,
           message: "Invalid email or password" 
@@ -247,7 +241,6 @@ exports.login = async (req, res) => {
     }
     
     if (userResult.recordset.length === 0) {
-      console.log('No user found with email:', email);
       return res.status(401).json({ 
         success: false,
         message: "Invalid email or password" 

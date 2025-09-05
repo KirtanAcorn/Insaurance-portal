@@ -1,7 +1,6 @@
 import { FileText, Loader2, AlertCircle } from 'lucide-react';
 
 const AllPolicies = ({ isDark, getInsuranceIcon, allPolicies, isLoading, error }) => {
-  console.log('AllPolicies - Props:', { allPolicies, isLoading, error });
   // Loading state
   if (isLoading) {
     return (
@@ -87,8 +86,8 @@ const AllPolicies = ({ isDark, getInsuranceIcon, allPolicies, isLoading, error }
               </tr>
             </thead>
             <tbody className={`divide-y ${isDark ? 'divide-gray-700' : 'divide-gray-200'}`}>
-              {allPolicies.map((policy) => (
-                <tr key={policy.id} className={isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}>
+              {allPolicies.map((policy) => {
+              return (<tr key={policy.id} className={isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className={`flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-md ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}>
@@ -107,15 +106,13 @@ const AllPolicies = ({ isDark, getInsuranceIcon, allPolicies, isLoading, error }
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      policy.status === 'Active' 
-                        ? isDark 
-                          ? 'bg-green-900/50 text-green-300' 
-                          : 'bg-green-100 text-green-800'
-                        : isDark
-                          ? 'bg-red-900/50 text-red-300'
-                          : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${policy.status === 'Active'
+            ? isDark
+                ? 'bg-green-900/50 text-green-300'
+                : 'bg-green-100 text-green-800'
+            : isDark
+                ? 'bg-red-900/50 text-red-300'
+                : 'bg-red-100 text-red-800'}`}>
                       {policy.status}
                     </span>
                   </td>
@@ -136,27 +133,21 @@ const AllPolicies = ({ isDark, getInsuranceIcon, allPolicies, isLoading, error }
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex space-x-2">
-                      <button
-                        className={`p-1.5 rounded-md ${isDark ? 'text-blue-400 hover:bg-gray-700' : 'text-blue-600 hover:bg-blue-50'}`}
-                        title="View Details"
-                      >
+                      <button className={`p-1.5 rounded-md ${isDark ? 'text-blue-400 hover:bg-gray-700' : 'text-blue-600 hover:bg-blue-50'}`} title="View Details">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                         </svg>
                       </button>
-                      <button
-                        className={`p-1.5 rounded-md ${isDark ? 'text-gray-400 hover:bg-gray-700 hover:text-white' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'}`}
-                        title="More options"
-                      >
+                      <button className={`p-1.5 rounded-md ${isDark ? 'text-gray-400 hover:bg-gray-700 hover:text-white' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'}`} title="More options">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
                         </svg>
                       </button>
                     </div>
                   </td>
-                </tr>
-              ))}
+                </tr>);
+})}
             </tbody>
           </table>
         </div>
