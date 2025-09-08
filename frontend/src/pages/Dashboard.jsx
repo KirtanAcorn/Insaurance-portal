@@ -398,51 +398,51 @@ const Dashboard = () => {
       }
     };
     
-    // Property Policy
-    if (policy.buildingPremium || policy.propertyPolicyLink) {
+    // Property Policy - using the correct field names from the API response
+    if (policy['Building Premium Paid'] || policy['Property Policy Link']) {
       policies.push({
-        id: policy.id || 'N/A',
+        id: policy['Building Insurance'] || 'N/A',
         type: 'Property',
         status: 'Active',
-        premium: formatCurrency(policy.buildingPremium),
-        coverage: formatCurrency(policy.buildingCoverage) || 'N/A',
-        endDate: formatDate(policy.propertyRenewalDate)
+        premium: formatCurrency(policy['Building Premium Paid']),
+        coverage: formatCurrency(policy['Sume Assure(Value of )Premises']) || '£0.00',
+        endDate: formatDate(policy['Renewal Date'])
       });
     }
     
-    // Commercial Liability Policy
-    if (policy.commercialPolicy || policy.commercialPolicyLink) {
+    // Commercial Liability Policy - using the correct field names from the API response
+    if (policy['Commercial Premium Paid'] || policy['Commercial Policy Link']) {
       policies.push({
-        id: policy.commercialPolicy || 'N/A',
+        id: policy['Commercial Policy'] || 'N/A',
         type: 'Commercial Liability',
         status: 'Active',
-        premium: formatCurrency(policy.commercialPremium),
-        coverage: formatCurrency(policy.commercialCoverage) || 'N/A',
-        endDate: formatDate(policy.commercialRenewalDate)
+        premium: formatCurrency(policy['Commercial Premium Paid']),
+        coverage: formatCurrency(policy['Employee Liability Cover']) || '£0.00',
+        endDate: formatDate(policy['Commercial Renewal Date'])
       });
     }
     
-    // Fleet Policy
-    if (policy.fleetPolicy || policy.fleetPolicyLink) {
+    // Fleet Policy - using the correct field names from the API response
+    if (policy['Fleet Premium Paid'] || policy['Fleet Policy Link']) {
       policies.push({
-        id: policy.fleetPolicy || 'N/A',
+        id: policy['Fleet Policy'] || 'N/A',
         type: 'Fleet',
         status: 'Active',
-        premium: formatCurrency(policy.fleetPremium),
-        coverage: formatCurrency(policy.fleetCoverage) || 'N/A',
-        endDate: formatDate(policy.fleetRenewalDate)
+        premium: formatCurrency(policy['Fleet Premium Paid']),
+        coverage: '£0.00', // Fleet coverage not available in current data structure
+        endDate: formatDate(policy['Renewal Date2'])
       });
     }
     
-    // Marine Policy
-    if (policy.marinePolicy || policy.marinePolicyLink) {
+    // Marine Policy - using the correct field names from the API response
+    if (policy['Marine Premium Paid'] || policy['Marine Policy Link']) {
       policies.push({
-        id: policy.marinePolicy || 'N/A',
+        id: policy['Marine'] || 'N/A',
         type: 'Marine',
         status: 'Active',
-        premium: formatCurrency(policy.marinePremium),
-        coverage: formatCurrency(policy.marineCoverage) || 'N/A',
-        endDate: formatDate(policy.marineRenewalDate)
+        premium: formatCurrency(policy['Marine Premium Paid']),
+        coverage: formatCurrency(policy['Per Transit Cover']) || '£0.00',
+        endDate: formatDate(policy['Marine Renewal'])
       });
     }
     return policies;
@@ -459,14 +459,14 @@ const Dashboard = () => {
   // Memoize the policy companies to prevent unnecessary re-renders
   const memoizedPolicyCompanies = useMemo(() => policyCompanies, [JSON.stringify(policyCompanies)]);
 
-  // Fetch company policies when selected company changes
+  // Fetch company policies when selected company or year changes
   useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
     const signal = controller.signal;
 
     const fetchCompanyPolicies = async () => {
-      if (!selectedCompanyPolicy) {
+      if (!selectedCompanyPolicy || !policyYear) {
         if (isMounted) {
           setCompanyPolicies([]);
           setPoliciesError(null);
@@ -493,13 +493,16 @@ const Dashboard = () => {
       }
       
       try {
-        // Encode the company name for URL safety
-        const encodedCompanyName = encodeURIComponent(companyName);        
+        // Use the company-details endpoint that filters by both company and year
         const response = await axios.get(
-          `/api/policies/company/${encodedCompanyName}`,
+          `/api/policies/company-details`,
           { 
             signal,
-            params: { _t: Date.now() } 
+            params: { 
+              companyName: companyName,
+              renewalYear: policyYear,
+              _t: Date.now() 
+            }
           }
         );
         
@@ -509,7 +512,7 @@ const Dashboard = () => {
             setPoliciesError(null);
           } else {
             setCompanyPolicies([]);
-            setPoliciesError('No policies found for the selected company');
+            setPoliciesError(`No policies found for ${companyName} in ${policyYear}`);
           }
         }
       } catch (error) {
@@ -534,7 +537,7 @@ const Dashboard = () => {
       controller.abort('Component unmounted or effect re-running');
       clearTimeout(debounceTimer);
     };
-  }, [selectedCompanyPolicy, memoizedPolicyCompanies]);
+  }, [selectedCompanyPolicy, policyYear, memoizedPolicyCompanies]);
 
   const getInsuranceIcon = (type) => {
     switch (type) {
