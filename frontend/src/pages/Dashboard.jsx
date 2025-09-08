@@ -1128,8 +1128,8 @@ const Dashboard = () => {
       }
 
       formData.append('claimAmount', claimAmount);
-      // Use the correct case that matches the form field name (Description with capital D)
-      formData.append('description', formValues.Description || '');
+      // Use the correct case that matches the form field name (description with lowercase d)
+      formData.append('description', formValues.description || '');
       formData.append('incidentDate', formValues.incidentDate);
 
       if (file) {

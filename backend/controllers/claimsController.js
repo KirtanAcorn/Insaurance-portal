@@ -39,8 +39,15 @@ exports.createClaim = async (req, res) => {
       claimType, claimAmount, companyName, policyName,
       description, incidentDate, excess, netAmount, status
     } = req.body;
+    
     // Handle file upload
     const supportingDocuments = req.file ? req.file.filename : null;
+    
+    console.log('Form data received:', {
+      claimType, claimAmount, companyName, policyName,
+      description, incidentDate, excess, netAmount, status,
+      hasFile: !!req.file
+    });
 
     // Validate and format incidentDate
     const incidentDateForDB = incidentDate ? new Date(incidentDate) : null;
@@ -178,18 +185,39 @@ exports.serveDocument = (req, res) => {
     return res.status(404).json({ error: 'File not found' });
   }
 
-  if (preview === 'true') {
+  // Get file extension
+  const ext = path.extname(filename).toLowerCase();
+  
+  // Define MIME types for different file extensions
+  const mimeTypes = {
+    '.pdf': 'application/pdf',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.png': 'image/png',
+    '.gif': 'image/gif',
+    '.doc': 'application/msword',
+    '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    '.xls': 'application/vnd.ms-excel',
+    '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    '.txt': 'text/plain',
+    '.csv': 'text/csv'
+  };
+
+  // Get the appropriate content type or default to octet-stream
+  const contentType = mimeTypes[ext] || 'application/octet-stream';
+
+  if (preview === 'true' && ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'].includes(contentType)) {
     // For preview, send the file with appropriate headers for inline viewing
     const fileStream = fs.createReadStream(filePath);
     const stat = fs.statSync(filePath);
     
     res.setHeader('Content-Length', stat.size);
-    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Type', contentType);
     res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(filename)}"`);
     
     fileStream.pipe(res);
   } else {
-    // Default to download behavior
+    // For non-preview or unsupported preview types, force download
     res.download(filePath, filename, (err) => {
       if (err) {
         console.error('Error downloading file:', err);
