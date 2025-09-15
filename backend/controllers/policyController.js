@@ -101,6 +101,7 @@ exports.getCompanyDetails = async (req, res) => {
 // Get all policies for a company
 exports.getCompanyPolicies = async (req, res) => {
   const { companyName } = req.params;
+  const { renewalYear } = req.query;
   
   if (!companyName) {
     return res.status(400).json({ error: "Company name is required" });
@@ -120,8 +121,8 @@ exports.getCompanyPolicies = async (req, res) => {
     `;
     const schemaResult = await pool.request().query(schemaQuery);
     
-    // Query using the exact column names from the database
-    const query = `
+    // Build the base query
+    let query = `
       SELECT DISTINCT TOP 50
         [Company Name] AS companyName,
         [Commercial Policy] AS commercialPolicy,
@@ -141,11 +142,21 @@ exports.getCompanyPolicies = async (req, res) => {
         [Renewal Year] AS renewalYear
       FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
       WHERE [Company Name] = @companyName
-      ORDER BY [Company Name]
     `;
+    
+    // Add renewal year filter if provided
+    if (renewalYear) {
+      query += ` AND [Renewal Year] = @renewalYear`;
+    }
+    
+    query += ` ORDER BY [Company Name]`;
     
     const request = pool.request();
     request.input("companyName", sql.NVarChar(255), decodedCompany);
+    
+    if (renewalYear) {
+      request.input("renewalYear", sql.NVarChar(50), renewalYear);
+    }
     
     const result = await request.query(query);
     

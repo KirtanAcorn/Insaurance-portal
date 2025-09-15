@@ -381,6 +381,20 @@ const Dashboard = () => {
       }
     };
     
+    // Only include policies that match the selected year
+    const policyYearMatch = (dateString) => {
+      if (!dateString || !policyYear) return true;
+      try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return true; // If date is invalid, include it
+        const year = date.getFullYear();
+        return policyYear.includes(year);
+      } catch (error) {
+        console.error('Error checking policy year:', error);
+        return true; // If there's an error, include the policy to be safe
+      }
+    };
+    
     // Helper function to format currency
     const formatCurrency = (amount) => {
       if (amount === null || amount === undefined || amount === '') return '£0.00';
@@ -399,7 +413,8 @@ const Dashboard = () => {
     };
     
     // Property Policy - using the correct field names from the API response
-    if (policy['Building Premium Paid'] || policy['Property Policy Link']) {
+    if ((policy['Building Premium Paid'] || policy['Property Policy Link']) && 
+        policyYearMatch(policy['Renewal Date'])) {
       policies.push({
         id: policy['Building Insurance'] || 'N/A',
         type: 'Property',
@@ -411,7 +426,8 @@ const Dashboard = () => {
     }
     
     // Commercial Liability Policy - using the correct field names from the API response
-    if (policy['Commercial Premium Paid'] || policy['Commercial Policy Link']) {
+    if ((policy['Commercial Premium Paid'] || policy['Commercial Policy Link']) && 
+        policyYearMatch(policy['Commercial Renewal Date'])) {
       policies.push({
         id: policy['Commercial Policy'] || 'N/A',
         type: 'Commercial Liability',
@@ -423,7 +439,8 @@ const Dashboard = () => {
     }
     
     // Fleet Policy - using the correct field names from the API response
-    if (policy['Fleet Premium Paid'] || policy['Fleet Policy Link']) {
+    if ((policy['Fleet Premium Paid'] || policy['Fleet Policy Link']) && 
+        policyYearMatch(policy['Renewal Date2'])) {
       policies.push({
         id: policy['Fleet Policy'] || 'N/A',
         type: 'Fleet',
@@ -435,7 +452,8 @@ const Dashboard = () => {
     }
     
     // Marine Policy - using the correct field names from the API response
-    if (policy['Marine Premium Paid'] || policy['Marine Policy Link']) {
+    if ((policy['Marine Premium Paid'] || policy['Marine Policy Link']) && 
+        policyYearMatch(policy['Marine Renewal'])) {
       policies.push({
         id: policy['Marine'] || 'N/A',
         type: 'Marine',

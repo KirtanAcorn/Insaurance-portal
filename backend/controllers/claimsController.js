@@ -37,7 +37,8 @@ exports.createClaim = async (req, res) => {
     // For form-data, we need to parse the fields from req.body
     const {
       claimType, claimAmount, companyName, policyName,
-      description, incidentDate, excess, netAmount, status
+      description, incidentDate, excess, netAmount, status,
+      assignedToUserID
     } = req.body;
     
     // Handle file upload
@@ -66,10 +67,11 @@ exports.createClaim = async (req, res) => {
       .input('netAmount', sql.Decimal(10, 2), netAmount)
       .input('status', sql.VarChar, status)
       .input('supportingDocuments', sql.VarChar, supportingDocuments)
+      .input('assignedToUserID', sql.Int, assignedToUserID || null)
       .query(`INSERT INTO Claims
-              (claimType, claimAmount, companyName, policyName, description, incidentDate, supportingDocuments, excess, netAmount, status)
+              (claimType, claimAmount, companyName, policyName, description, incidentDate, supportingDocuments, excess, netAmount, status, assignedToUserID)
               OUTPUT INSERTED.claimID
-              VALUES (@claimType, @claimAmount, @companyName, @policyName, @description, @incidentDate, @supportingDocuments, @excess, @netAmount, @status)`);
+              VALUES (@claimType, @claimAmount, @companyName, @policyName, @description, @incidentDate, @supportingDocuments, @excess, @netAmount, @status, @assignedToUserID)`);
 
     const insertedId = result.recordset[0].claimID;
 
@@ -125,6 +127,11 @@ exports.updateClaim = async (req, res) => {
     if (req.body.excess !== undefined) addField('excess', sql.Decimal(10, 2), parseFloat(req.body.excess) || 0);
     if (req.body.netAmount !== undefined) addField('netAmount', sql.Decimal(10, 2), parseFloat(req.body.netAmount) || 0);
     if (req.body.status !== undefined) addField('status', sql.VarChar, req.body.status);
+    if (req.body.assignedToUserID !== undefined) {
+      // Convert empty string to null for the database
+      const assignedToValue = req.body.assignedToUserID === '' ? null : parseInt(req.body.assignedToUserID);
+      addField('assignedToUserID', sql.Int, assignedToValue);
+    }
 
     if (updateFields.length === 0) {
       return res.status(400).json({ error: 'No fields to update' });

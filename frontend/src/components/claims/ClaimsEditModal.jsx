@@ -174,8 +174,8 @@ const ClaimsEditModal = ({
                           Assigned To
                         </label>
                         <select
-                          name="assignedTo"
-                          value={formData.assignedTo || ''}
+                          name="assignedToUserID"
+                          value={formData.assignedToUserID || ''}
                           onChange={handleInputChange}
                           className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                             isDark 
