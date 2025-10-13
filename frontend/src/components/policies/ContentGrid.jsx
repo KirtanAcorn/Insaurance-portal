@@ -8,6 +8,7 @@ const ContentGrid = ({
   isLoading,
   error,
 }) => {
+  console.log("===============", policyData)
   // Handle loading state
   if (isLoading) {
     return (
@@ -317,11 +318,11 @@ const ContentGrid = ({
         const { startDate, endDate } = getPolicyPeriod('Fleet');
         console.log('Fleet policy data:', {
           policyNumber: policyData['fleetPolicy'],
-          premiumPaid: 'N/A', // Add correct field once known
-          sumAssured: 'N/A',  // Add correct field once known
-          location: 'N/A',    // Add correct field once known
-          excessPerClaim: 'N/A', // Add correct field once known
-          claimsMade: 'N/A'     // Add correct field once known
+          premiumPaid: policyData['fleetPremiumPaid'], 
+          sumAssured: policyData['fleetSumAssured'], 
+          location: policyData['fleetLocation'],    
+          excessPerClaim: policyData['fleetExcessPerClaim'] || 'N/A', 
+          claimsMade: policyData['noOfClaimMadeFleet'] || 'N/A'     
         });
         
         return {
@@ -330,8 +331,8 @@ const ContentGrid = ({
           startDate,
           endDate,
           premiumPaid: policyData['fleetPremiumPaid'] || 'N/A',
-          sumAssured: 'N/A',
-          location: 'Multiple Locations',
+          sumAssured: policyData['fleetSumAssured'] || 'N/A',
+          location: policyData['fleetLocation'] || 'Multiple Locations',
           excessPerClaim: policyData['fleetExcessPerClaim'] || 'N/A',
           claimsMade: policyData['noOfClaimMadeFleet'] || 'N/A',
           coverage: {
@@ -567,7 +568,12 @@ const ContentGrid = ({
                   </div>
                   <div>
                     <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Premium Paid</p>
-                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.buildingPremiumPaid}</p>
+                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                    {selectedInsuranceType === 'Property' && (policyData['buildingPremiumPaid'] || 'N/A')}
+                    {selectedInsuranceType === 'Commercial Liability' && (policyData['commercialPremiumPaid'] || 'N/A')}
+                    {selectedInsuranceType === 'Marine' && (policyData['marinePremiumPaid'] || 'N/A')}
+                    {selectedInsuranceType === 'Fleet' && (policyData['fleetPremiumPaid'] || 'N/A')}
+                  </p>
                   </div>
                 </div>
 
