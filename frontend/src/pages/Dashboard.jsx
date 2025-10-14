@@ -1345,10 +1345,23 @@ const Dashboard = () => {
   };
 
 
+  // Calculate total premium from companyPolicies
+  const calculateTotalPremium = () => {
+    if (!companyPolicies || companyPolicies.length === 0) return '£0';
+    
+    const total = companyPolicies.reduce((sum, policy) => {
+      const premium = parseFloat(policy['Premium Paid']?.replace(/[^0-9.]/g, '') || 0);
+      return sum + premium;
+    }, 0);
+    
+    // Format as currency with K for thousands
+    return total >= 1000 ? `£${(total/1000).toFixed(0)}K` : `£${total.toFixed(2)}`;
+  };
+
   const statsDataDashboard = [
     {
       title: 'Total Policies',
-      value: '6',
+      value: companyPolicies?.length?.toString() || '0',
       change: '+12%',
       changeText: 'from last month',
       icon: FileText,
@@ -1356,7 +1369,7 @@ const Dashboard = () => {
     },
     {
       title: 'Active Claims',
-      value: '1',
+      value: claims?.filter(claim => claim.status !== 'Closed')?.length?.toString() || '0',
       change: '+5%',
       changeText: 'from last month',
       icon: AlertCircle,
@@ -1364,7 +1377,7 @@ const Dashboard = () => {
     },
     {
       title: 'Total Premium',
-      value: '£134K',
+      value: calculateTotalPremium(),
       change: '+18%',
       changeText: 'from last month',
       icon: DollarSign,
@@ -1372,7 +1385,7 @@ const Dashboard = () => {
     },
     {
       title: 'Registered Users',
-      value: '4',
+      value: users?.length?.toString() || '0',
       change: '+8%',
       changeText: 'from last month',
       icon: Users,
@@ -1380,43 +1393,81 @@ const Dashboard = () => {
     }
   ];
 
-  const recentActivityDashboard = [
-    {
-      type: 'warning',
-      title: 'Under Review - Water Damage',
-      subtitle: 'Sarah Johnson',
-      date: '2024-01-17',
-      icon: AlertCircle
-    },
-    {
-      type: 'info',
-      title: 'Assigned to Agent - Water Damage',
-      subtitle: 'System',
-      date: '2024-01-16',
-      icon: Activity
-    },
-    {
-      type: 'info',
-      title: 'Claim Submitted - Water Damage',
-      subtitle: 'John Smith',
-      date: '2024-01-15',
-      icon: Activity
-    },
-    {
-      type: 'success',
-      title: 'Approved - Public Liability',
-      subtitle: 'Sarah Johnson',
-      date: '2024-01-14',
-      icon: CheckCircle
-    },
-    {
-      type: 'info',
-      title: 'Payment Processed - Equipment Damage',
-      subtitle: 'Finance Team',
-      date: '2024-01-12',
-      icon: Activity
+  const recentActivityDashboard = useMemo(() => {
+    if (!Array.isArray(claims) || claims.length === 0) {
+      return [
+        {
+          type: 'info',
+          title: 'No recent activities',
+          subtitle: 'System',
+          date: new Date().toISOString().split('T')[0],
+          icon: AlertCircle
+        }
+      ];
     }
-  ];
+
+    const getType = (status) => {
+      const s = (status || '').toString().toLowerCase();
+      if (s.includes('approve')) return 'success';
+      if (s.includes('reject') || s.includes('deny')) return 'error';
+      if (s.includes('under') || s.includes('review') || s.includes('pending')) return 'warning';
+      return 'info';
+    };
+
+    const getIcon = (status) => {
+      const s = (status || '').toString().toLowerCase();
+      if (s.includes('approve')) return CheckCircle;
+      if (s.includes('reject') || s.includes('deny')) return X;
+      if (s.includes('under') || s.includes('review') || s.includes('pending')) return AlertCircle;
+      return Activity;
+    };
+
+    const parseDate = (d) => {
+      if (!d) return null;
+      try {
+        const dt = new Date(d);
+        return isNaN(dt.getTime()) ? null : dt;
+      } catch {
+        return null;
+      }
+    };
+    const toISODate = (dt) => dt?.toISOString?.().split('T')[0];
+
+    const items = claims
+      .map((c) => {
+        const updated = c.updatedAt || c.updated_on || c.modifiedAt || c.modified_on;
+        const created = c.createdAt || c.created_on || c.createdDate;
+        const incident = c.incidentDate;
+        const updatedDt = parseDate(updated);
+        const createdDt = parseDate(created);
+        const incidentDt = parseDate(incident);
+        // Sort by most recent change; fall back to created; finally incident
+        const when = updatedDt || createdDt || incidentDt || new Date(0);
+        // Display date: incidentDate preferred
+        const displayDate = toISODate(incidentDt) || toISODate(when) || '';
+        return {
+          type: getType(c.status),
+          title: `${c.status || 'Updated'} - ${c.claimType || 'Claim'}`,
+          subtitle: c.companyName || c.company || c.assignedTo || 'System',
+          date: displayDate,
+          icon: getIcon(c.status),
+          _sort: when.getTime()
+        };
+      })
+      .sort((a, b) => b._sort - a._sort)
+      .slice(0, 5)
+      .map(({ _sort, ...rest }) => rest);
+
+    return items.length > 0 ? items : [
+      {
+        type: 'info',
+        title: 'No recent activities',
+        subtitle: 'System',
+        date: new Date().toISOString().split('T')[0],
+        icon: AlertCircle
+      }
+    ];
+  }, [claims]);
    
   const policiesDashboard = [];
 

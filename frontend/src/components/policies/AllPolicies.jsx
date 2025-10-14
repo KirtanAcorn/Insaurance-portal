@@ -80,9 +80,9 @@ const AllPolicies = ({ isDark, getInsuranceIcon, allPolicies, isLoading, error }
                 <th scope="col" className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-500'}`}>
                   End Date
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   <span className={`${isDark ? 'text-gray-300' : 'text-gray-500'}`}>Actions</span>
-                </th>
+                </th> */}
               </tr>
             </thead>
             <tbody className={`divide-y ${isDark ? 'divide-gray-700' : 'divide-gray-200'}`}>
@@ -131,7 +131,7 @@ const AllPolicies = ({ isDark, getInsuranceIcon, allPolicies, isLoading, error }
                       {policy.endDate}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  {/* <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex space-x-2">
                       <button className={`p-1.5 rounded-md ${isDark ? 'text-blue-400 hover:bg-gray-700' : 'text-blue-600 hover:bg-blue-50'}`} title="View Details">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +145,7 @@ const AllPolicies = ({ isDark, getInsuranceIcon, allPolicies, isLoading, error }
                         </svg>
                       </button>
                     </div>
-                  </td>
+                  </td> */}
                 </tr>);
 })}
             </tbody>
