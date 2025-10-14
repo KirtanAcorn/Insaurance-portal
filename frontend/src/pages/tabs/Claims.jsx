@@ -36,6 +36,7 @@ const Claims = ({
                  setIsEditModalOpenClaim,
                  setIsOpenNewClaim,
                  setIsModalOpenNew,
+                 policyYear,
                  users = []
                 }) => {
   return (
@@ -86,6 +87,7 @@ const Claims = ({
     handleInputChangeNewClaim={handleInputChangeNewClaim}
     handleCloseNewClaim={handleCloseNewClaim}
     handleCancelNewClaim={handleCancelNewClaim}
+    policyYear={policyYear}
     />
     </>
   )

@@ -39,6 +39,34 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const role = location.state?.role;
 
+  // Live FX rates (GBP base) for converting premiums to GBP on the dashboard
+  const [fxRates, setFxRates] = useState({});
+  const [fxLastUpdated, setFxLastUpdated] = useState(null);
+  const [fxError, setFxError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchRates = async () => {
+      try {
+        // Using Frankfurter (ECB) - no API key required.
+        // Query with base GBP so rates are: 1 GBP -> X foreign currency
+        // To convert foreign -> GBP, divide by rates[currency].
+        const { data } = await axios.get('https://api.frankfurter.app/latest', {
+          params: { from: 'GBP' }
+        });
+        if (isMounted && data && data.rates) {
+          setFxRates(data.rates);
+          setFxLastUpdated(new Date().toISOString());
+          setFxError(null);
+        }
+      } catch (e) {
+        if (isMounted) setFxError(e.message || 'Failed to load FX rates');
+      }
+    };
+    fetchRates();
+    return () => { isMounted = false; };
+  }, []);
+
   // Policy data shape that matches the SQL table structure
   const policyDataShape = {
     // Company Information
@@ -1345,17 +1373,39 @@ const Dashboard = () => {
   };
 
 
-  // Calculate total premium from companyPolicies
+  // Convert an amount in a given currency to GBP using live FX
+  const toGBP = (amount, currency) => {
+    if (!amount) return 0;
+    const num = typeof amount === 'string' ? parseFloat(amount.replace(/[^0-9.-]+/g, '')) : Number(amount);
+    if (isNaN(num)) return 0;
+    const code = (currency || 'GBP').toString().trim().toUpperCase();
+    if (code === 'GBP') return num;
+    const rate = fxRates?.[code];
+    // With base=GBP, rate = 1 GBP -> rate units of foreign; foreign -> GBP = amount / rate
+    return rate ? num / rate : num; // fallback: treat as GBP if unknown
+  };
+
+  // Calculate total premium across known premium columns and convert to GBP
   const calculateTotalPremium = () => {
     if (!companyPolicies || companyPolicies.length === 0) return '£0';
-    
-    const total = companyPolicies.reduce((sum, policy) => {
-      const premium = parseFloat(policy['Premium Paid']?.replace(/[^0-9.]/g, '') || 0);
-      return sum + premium;
+
+    const sumGBP = companyPolicies.reduce((sum, row) => {
+      const currency = row['Currency'] || row['currency'] || 'GBP';
+      const premiums = [
+        row['Commercial Premium Paid'],
+        row['Marine Premium Paid'],
+        row['Building Premium Paid'],
+        row['Fleet Premium Paid'],
+        row['Premium Paid'] // fallback if present
+      ];
+      const rowTotalGBP = premiums.reduce((s, p) => s + toGBP(p, currency), 0);
+      return sum + rowTotalGBP;
     }, 0);
-    
-    // Format as currency with K for thousands
-    return total >= 1000 ? `£${(total/1000).toFixed(0)}K` : `£${total.toFixed(2)}`;
+
+    // Format: show K/M if large
+    if (sumGBP >= 1_000_000) return `£${(sumGBP / 1_000_000).toFixed(1)}M`;
+    if (sumGBP >= 1_000) return `£${(sumGBP / 1_000).toFixed(1)}K`;
+    return `£${sumGBP.toFixed(2)}`;
   };
 
   const statsDataDashboard = [
@@ -1624,6 +1674,7 @@ const Dashboard = () => {
         setIsEditModalOpenClaim={setIsEditModalOpenClaim}
         setIsOpenNewClaim={setIsOpenNewClaim}
         setIsModalOpenNew={setIsModalOpenNew}
+        policyYear={policyYear}
         users={users}
         />}
 

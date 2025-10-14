@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { X, Building, FileText, Upload, Calendar } from "lucide-react";
 
 const SubmitNewClaimModal = ({
@@ -10,7 +11,130 @@ const SubmitNewClaimModal = ({
   handleInputChangeNewClaim,
   handleCloseNewClaim,
   handleCancelNewClaim,
+  policyYear,
 }) => {
+  const [policyData, setPolicyData] = useState(null);
+  const [isPolicyLoading, setIsPolicyLoading] = useState(false);
+  const [policyError, setPolicyError] = useState(null);
+
+  const normalizeType = (name) => {
+    if (!name) return "";
+    const n = name.toLowerCase();
+    if (n.includes("commercial")) return "Commercial Liability";
+    if (n.includes("property")) return "Property";
+    if (n.includes("marine")) return "Marine";
+    if (n.includes("fleet")) return "Fleet";
+    return name;
+  };
+
+  const formatCurrency = (value) => {
+    if (value === null || value === undefined || value === "" || value === "N/A") return "N/A";
+    try {
+      const num = typeof value === "string" ? parseFloat(value.replace(/[^0-9.-]+/g, "")) : Number(value);
+      if (isNaN(num)) return String(value);
+      return `£${num.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    } catch {
+      return String(value);
+    }
+  };
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      const companyName = formDataNewClaim?.companyName;
+      if (!companyName || !policyYear) {
+        setPolicyData(null);
+        setPolicyError(null);
+        return;
+      }
+      setIsPolicyLoading(true);
+      setPolicyError(null);
+      try {
+        const res = await axios.get(`/api/policies/company-details`, {
+          params: { companyName, renewalYear: policyYear, _t: Date.now() },
+        });
+        const apiData = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
+        setPolicyData(apiData || null);
+      } catch (err) {
+        setPolicyData(null);
+        setPolicyError(err?.response?.data?.message || err.message || "Failed to load policy details");
+      } finally {
+        setIsPolicyLoading(false);
+      }
+    };
+    fetchDetails();
+  }, [formDataNewClaim?.companyName, policyYear]);
+
+  const getDetailsForSelectedPolicy = () => {
+    if (!policyData) return null;
+    const type = normalizeType(formDataNewClaim?.policyName);
+    if (type === "Commercial Liability") {
+      return {
+        title: "Commercial Liability Insurance",
+        policyId: policyData["Commercial Policy"] || "N/A",
+        status: "Active",
+        sumAssured: formatCurrency(policyData["Employee Liability Cover"]) || "N/A",
+        excess: formatCurrency(policyData["Commercial Excess Per claim"]) || "N/A",
+        location: policyData["Stock Location"] || "N/A",
+        claims: policyData["No Of claim Commercial"] ?? "N/A",
+        coverage: [
+          { label: "Public Liability", value: formatCurrency(policyData["Employee Liability Cover"]) || "N/A" },
+          { label: "Product Liability", value: formatCurrency(policyData["Product Liability"]) || "N/A" },
+          { label: "Floating Stock", value: formatCurrency(policyData["Floting stock"]) || "N/A" },
+        ],
+      };
+    }
+    if (type === "Property") {
+      return {
+        title: "Property Insurance",
+        policyId: policyData["Building Insurance"] || "N/A",
+        status: "Active",
+        sumAssured: formatCurrency(policyData["Sume Assure(Value of )Premises"]) || "N/A",
+        excess: formatCurrency(policyData["Building Excess Per claim"]) || "N/A",
+        location: policyData["Building Location"] || "N/A",
+        claims: policyData["No Of claim Building"] ?? "N/A",
+        coverage: [
+          { label: "Building Value", value: formatCurrency(policyData["Sume Assure(Value of )Premises"]) || "N/A" },
+          { label: "Declared Value", value: formatCurrency(policyData["Declare Value"]) || "N/A" },
+          { label: "Location", value: policyData["Building Location"] || "N/A" },
+        ],
+      };
+    }
+    if (type === "Marine") {
+      return {
+        title: "Marine Insurance",
+        policyId: policyData["Marine"] || "N/A",
+        status: "Active",
+        sumAssured: formatCurrency(policyData["Per Transit Cover"]) || "N/A",
+        excess: formatCurrency(policyData["Cargo Excess Excess Per claim"]) || "N/A",
+        location: "Multiple Locations",
+        claims: policyData["No Of claim Cargo"] ?? "N/A",
+        coverage: [
+          { label: "Per Transit Cover", value: formatCurrency(policyData["Per Transit Cover"]) || "N/A" },
+          { label: "UK-UK/EU-EU/USA-USA", value: policyData["UK-UK/EU-EU/USA-USA"] || "N/A" },
+          { label: "UK-EU", value: policyData["UK-EU"] || "N/A" },
+        ],
+      };
+    }
+    if (type === "Fleet") {
+      return {
+        title: "Fleet Insurance",
+        policyId: policyData["Fleet Policy"] || "N/A",
+        status: "Active",
+        sumAssured: formatCurrency(policyData["fleetSumAssured"]) || "N/A",
+        excess: formatCurrency(policyData["Fleet Excess Per claim "]) || "N/A",
+        location: policyData["fleetLocation"] || "Multiple Locations",
+        claims: policyData["No Of claim made fleet"] ?? "N/A",
+        coverage: [
+          { label: "Registration Numbers", value: policyData["Reg No2"] || "N/A" },
+          { label: "Coverage Type", value: "Comprehensive" },
+          { label: "Policy Type", value: "Fleet" },
+        ],
+      };
+    }
+    return null;
+  };
+
+  const selectedPolicyDetails = getDetailsForSelectedPolicy();
   return (
     isOpenNewClaim && (
       <>
@@ -490,7 +614,105 @@ const SubmitNewClaimModal = ({
                   </div>
                 </div>
               </div>
-            </div>
+
+              {/* Right Side - Policy Details */}
+                <div
+                  className={`w-80 p-6 border-l ${isDark
+                    ? "bg-gray-800 border-gray-700"
+                    : "bg-gray-50 border-gray-200"
+                    }`}
+                >
+                  <div className="flex items-center space-x-2 mb-4">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <h3
+                      className={`text-lg font-medium ${isDark ? "text-white" : "text-gray-900"
+                        }`}
+                    >
+                      Policy Details
+                    </h3>
+                  </div>
+                  <div
+                    className={`rounded-lg p-4 mb-4 ${isDark ? "bg-gray-900" : "bg-white"
+                      }`}
+                  >
+                    {isPolicyLoading ? (
+                      <div className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>Loading policy details...</div>
+                    ) : policyError ? (
+                      <div className={`text-sm ${isDark ? "text-red-400" : "text-red-600"}`}>{String(policyError)}</div>
+                    ) : !formDataNewClaim?.companyName ? (
+                      <div className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>Select a company to view details.</div>
+                    ) : !selectedPolicyDetails ? (
+                      <div className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>Select a policy to view details.</div>
+                    ) : (
+                      <>
+                        <div className="flex items-center space-x-2 mb-3">
+                          <Building
+                            className={`w-5 h-5 ${isDark ? "text-blue-400" : "text-blue-500"}`}
+                          />
+                          <span
+                            className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}
+                          >
+                            {selectedPolicyDetails.title}
+                          </span>
+                        </div>
+                        <p
+                          className={`text-sm mb-3 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                        >
+                          Policy ID: {selectedPolicyDetails.policyId}
+                        </p>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>Status:</span>
+                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                            {selectedPolicyDetails.status}
+                          </span>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className={isDark ? "text-gray-400" : "text-gray-600"}>Sum Assured:</span>
+                            <span className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>{selectedPolicyDetails.sumAssured}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className={isDark ? "text-gray-400" : "text-gray-600"}>Excess Per Claim:</span>
+                            <span className="font-medium text-red-600">{selectedPolicyDetails.excess}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className={isDark ? "text-gray-400" : "text-gray-600"}>Location:</span>
+                            <span className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>{selectedPolicyDetails.location}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className={isDark ? "text-gray-400" : "text-gray-600"}>Claims Made:</span>
+                            <span className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>{selectedPolicyDetails.claims}</span>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div
+                    className={`rounded-lg p-4 ${isDark ? "bg-gray-900" : "bg-white"
+                      }`}
+                  >
+                    <h4
+                      className={`font-medium mb-3 ${isDark ? "text-white" : "text-gray-900"
+                        }`}
+                    >
+                      Coverage Breakdown:
+                    </h4>
+                    {selectedPolicyDetails && selectedPolicyDetails.coverage ? (
+                      <div className="space-y-2 text-sm">
+                        {selectedPolicyDetails.coverage.map((c) => (
+                          <div key={c.label} className="flex justify-between">
+                            <span className={isDark ? "text-gray-400" : "text-gray-600"}>{c.label}:</span>
+                            <span className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>{c.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>Select company and policy to view coverage.</div>
+                    )}
+                  </div>
+                </div>
+              </div>
 
             {/* Footer */}
             <div
