@@ -38,6 +38,14 @@ const ContentGrid = ({
     );
   }
 
+  // Normalize any missing/placeholder values to a dash for display
+  const toDash = (v) => {
+    const raw = v == null ? '' : String(v).trim();
+    if (!raw || raw === 'N/A' || raw === 'Not Available' || raw === 'Invalid Date' || raw === '-') return '-';
+    if (raw.startsWith('£') && raw.toLowerCase().includes('nan')) return '-';
+    return raw;
+  };
+
   // Helper function to parse date string in DD/MM/YYYY format
   const parseDate = (dateStr) => {
     if (!dateStr || dateStr === 'N/A') return null;
@@ -79,12 +87,12 @@ const ContentGrid = ({
 
   // Format date to display string
   const formatDateForDisplay = (date) => {
-    if (!date) return 'Not Available';
+    if (!date) return '-';
     
     try {
       // Ensure we have a valid Date object
       const dateObj = new Date(date);
-      if (isNaN(dateObj.getTime())) return 'Invalid Date';
+      if (isNaN(dateObj.getTime())) return '-';
       
       // Format in UTC to avoid timezone issues
       return dateObj.toLocaleDateString('en-GB', {
@@ -95,13 +103,13 @@ const ContentGrid = ({
         timeZoneName: 'short'
       });
     } catch (error) {
-      return 'Not Available';
+      return '-';
     }
   };
 
   // Get policy dates based on insurance type and company details
   const getPolicyDates = (insuranceType) => {
-    if (!policyData) return { startDate: 'Not Available', endDate: 'Not Available' };
+    if (!policyData) return { startDate: '-', endDate: '-' };
     
     let renewalDateStr;
     
@@ -124,14 +132,14 @@ const ContentGrid = ({
         break;
         
       default:
-        return { startDate: 'Not Available', endDate: 'Not Available' };
+        return { startDate: '-', endDate: '-' };
     }
     
     // Parse the end date from the renewal date string
     const endDateObj = parseDate(renewalDateStr);
     
     if (!endDateObj) {
-      return { startDate: 'Not Available', endDate: 'Not Available' };
+      return { startDate: '-', endDate: '-' };
     }
     
     // Calculate start date (end date - 364 days)
@@ -161,15 +169,15 @@ const ContentGrid = ({
     
     if (!policyData || Object.keys(policyData).length === 0) {
       return {
-        policyNumber: 'N/A',
+        policyNumber: '-',
         status: 'Inactive',
-        startDate: 'Not Available',
-        endDate: 'Not Available',
-        premiumPaid: 'N/A',
-        sumAssured: 'N/A',
-        location: 'N/A',
-        excessPerClaim: 'N/A',
-        claimsMade: 'N/A',
+        startDate: '-',
+        endDate: '-',
+        premiumPaid: '-',
+        sumAssured: '-',
+        location: '-',
+        excessPerClaim: '-',
+        claimsMade: '-',
         coverage: {}
       };
     }
@@ -181,10 +189,7 @@ const ContentGrid = ({
         const parsedDate = new Date(dateString);
         
         if (isNaN(parsedDate.getTime())) {
-          return {
-            startDate: 'Not Available',
-            endDate: 'Not Available'
-          };
+          return { startDate: '-', endDate: '-' };
         }
         
         const formattedStartDate = formatDate(parsedDate, 364); // 364 days before end date
@@ -200,10 +205,7 @@ const ContentGrid = ({
           dateString,
           type: typeof dateString 
         });
-        return {
-          startDate: 'Not Available',
-          endDate: 'Not Available'
-        };
+        return { startDate: '-', endDate: '-' };
       }
     };
 
@@ -223,7 +225,7 @@ const ContentGrid = ({
       const fieldValue = policyData[fieldName];
       
       // If the field is empty or invalid, try alternative field names
-      if (!fieldValue || fieldValue.trim() === '' || fieldValue === 'N/A' || fieldValue === 'Invalid Date') {
+      if (!fieldValue || fieldValue.trim() === '' || fieldValue === 'N/A' || fieldValue === 'Invalid Date' || fieldValue === '-') {
         
         // Define alternative field names for each policy type
         const alternativeFields = {
@@ -237,15 +239,11 @@ const ContentGrid = ({
         const alternatives = alternativeFields[policyType] || [];
         for (const altField of alternatives) {
           const altValue = policyData[altField];
-          if (altValue && altValue.trim() !== '' && altValue !== 'N/A' && altValue !== 'Invalid Date') {
+          if (altValue && altValue.trim() !== '' && altValue !== 'N/A' && altValue !== 'Invalid Date' && altValue !== '-') {
             return formatDateRange(altValue);
           }
         }
-        
-        return {
-          startDate: 'Not Available',
-          endDate: 'Not Available'
-        };
+        return { startDate: '-', endDate: '-' };
       }
       
       // If we have a valid field value, format it
@@ -257,60 +255,60 @@ const ContentGrid = ({
         const { startDate, endDate } = getPolicyPeriod('Commercial Liability');
         
         return {
-          policyNumber: policyData['commercialPolicy'] || 'N/A',
+          policyNumber: policyData['commercialPolicy'] || '-',
           status: 'Active',
           startDate,
           endDate,
-          premiumPaid: policyData['commercialPremiumPaid'] || 'N/A',
-          sumAssured: policyData['employeeLiabilityCover'] || 'N/A',
-          location: policyData['stockLocation'] || 'N/A',
-          excessPerClaim: policyData['commercialExcessPerClaim'] || 'N/A',
+          premiumPaid: policyData['commercialPremiumPaid'] || '-',
+          sumAssured: policyData['employeeLiabilityCover'] || '-',
+          location: policyData['stockLocation'] || '-',
+          excessPerClaim: policyData['commercialExcessPerClaim'] || '-',
           claimsMade: policyData['noOfClaimCommercial'] || '0',
           coverage: {
-            'Employee Liability Cover': policyData['employeeLiabilityCover'] || 'N/A',
-            'Floating Stock': policyData['floatingStock'] || 'N/A',
-            'Product Liability': policyData['productLiability'] || 'N/A'
+            'Employee Liability Cover': policyData['employeeLiabilityCover'] || '-',
+            'Floating Stock': policyData['floatingStock'] || '-',
+            'Product Liability': policyData['productLiability'] || '-'
           }
         };
       }
       case 'Marine': {
         const { startDate, endDate } = getPolicyPeriod('Marine');
         return {
-          policyNumber: policyData['marine'] || 'N/A',
+          policyNumber: policyData['marine'] || '-',
           status: 'Active',
           startDate,
           endDate,
-          premiumPaid: policyData['marinePremiumPaid'] || 'N/A',
-          sumAssured: policyData['perTransitCover'] || 'N/A',
+          premiumPaid: policyData['marinePremiumPaid'] || '-',
+          sumAssured: policyData['perTransitCover'] || '-',
           location: 'Multiple Locations',
-          excessPerClaim: policyData['cargoExcessPerClaim'] || 'N/A',
+          excessPerClaim: policyData['cargoExcessPerClaim'] || '-',
           claimsMade: policyData['noOfClaimCargo'] || '0',
           coverage: {
-            'Per Transit Cover': policyData['perTransitCover'] || 'N/A',
-            'UK-UK/EU-EU/USA-USA': policyData['ukUkEuEuUsaUsa'] || 'N/A',
-            'UK-EU': policyData['ukEu'] || 'N/A',
-            'Cross Voyage': policyData['crossVoyage'] || 'N/A',
-            'Air/Sea/Rail': policyData['airSeaRail'] || 'N/A',
-            'Road': policyData['road'] || 'N/A'
+            'Per Transit Cover': policyData['perTransitCover'] || '-',
+            'UK-UK/EU-EU/USA-USA': policyData['ukUkEuEuUsaUsa'] || '-',
+            'UK-EU': policyData['ukEu'] || '-',
+            'Cross Voyage': policyData['crossVoyage'] || '-',
+            'Air/Sea/Rail': policyData['airSeaRail'] || '-',
+            'Road': policyData['road'] || '-'
           }
         };
       }
       case 'Property': {
         const { startDate, endDate } = getPolicyPeriod('Property');
         return {
-          policyNumber: policyData['buildingInsurance'] || 'N/A',
+          policyNumber: policyData['buildingInsurance'] || '-',
           status: 'Active',
           startDate,
           endDate,
-          premiumPaid: policyData['buildingPremiumPaid'] || 'N/A',
-          sumAssured: policyData['sumAssuredValueOfPremises'] || 'N/A',
-          location: policyData['buildingLocation'] || 'N/A',
-          excessPerClaim: policyData['buildingExcessPerClaim'] || 'N/A',
+          premiumPaid: policyData['buildingPremiumPaid'] || '-',
+          sumAssured: policyData['sumAssuredValueOfPremises'] || '-',
+          location: policyData['buildingLocation'] || '-',
+          excessPerClaim: policyData['buildingExcessPerClaim'] || '-',
           claimsMade: policyData['noOfClaimBuilding'] || '0',
           coverage: {
-            'Building Value': policyData['sumAssuredValueOfPremises'] || 'N/A',
-            'Declared Value': policyData['declareValue'] || 'N/A',
-            'Location': policyData['buildingLocation'] || 'N/A'
+            'Building Value': policyData['sumAssuredValueOfPremises'] || '-',
+            'Declared Value': policyData['declareValue'] || '-',
+            'Location': policyData['buildingLocation'] || '-'
           }
         };
       }
@@ -326,17 +324,17 @@ const ContentGrid = ({
         });
         
         return {
-          policyNumber: policyData['fleetPolicy'] || 'N/A',
+          policyNumber: policyData['fleetPolicy'] || '-',
           status: 'Active',
           startDate,
           endDate,
-          premiumPaid: policyData['fleetPremiumPaid'] || 'N/A',
-          sumAssured: policyData['fleetSumAssured'] || 'N/A',
+          premiumPaid: policyData['fleetPremiumPaid'] || '-',
+          sumAssured: policyData['fleetSumAssured'] || '-',
           location: policyData['fleetLocation'] || 'Multiple Locations',
-          excessPerClaim: policyData['fleetExcessPerClaim'] || 'N/A',
-          claimsMade: policyData['noOfClaimMadeFleet'] || 'N/A',
+          excessPerClaim: policyData['fleetExcessPerClaim'] || '-',
+          claimsMade: policyData['noOfClaimMadeFleet'] || '-',
           coverage: {
-            'Registration Numbers': policyData['regNo2'] || 'N/A',
+            'Registration Numbers': policyData['regNo2'] || '-',
             'Coverage Type': 'Comprehensive',
             'Policy Type': 'Fleet'
           }

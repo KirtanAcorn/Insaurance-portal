@@ -244,78 +244,79 @@ const Dashboard = () => {
 
               // Helper functions for data formatting
               const formatCurrency = (value) => {
-                  if (value === null || value === undefined) return 'N/A';
-                  const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]+/g, "")) : value;
-                  return isNaN(num) ? value : `£${num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                  if (value === null || value === undefined || value === '' || value === '-') return '-';
+                  const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]+/g, "")) : Number(value);
+                  if (!isFinite(num)) return '-';
+                  return `£${num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
               };
 
               const formatDate = (dateString) => {
-                  if (!dateString) return 'N/A';
+                  if (!dateString || dateString === 'N/A' || dateString === '-') return '-';
                   const date = new Date(dateString);
-                  return isNaN(date.getTime()) ? dateString : date.toLocaleDateString('en-GB');
+                  return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('en-GB');
               };
 
               // Map API data to the frontend state shape
               const transformedData = {
-                  companyName: apiData['Company Name'] || 'N/A',
-                  country: apiData['Country'] || 'N/A',
-                  regAddress: apiData['Reg Address'] || 'N/A',
-                  warehouseOfficeAddress: apiData['Warehouse/Office Address/es'] || 'N/A',
-                  regNo: apiData['Reg No'] || 'N/A',
+                  companyName: apiData['Company Name'] || '-',
+                  country: apiData['Country'] || '-',
+                  regAddress: apiData['Reg Address'] || '-',
+                  warehouseOfficeAddress: apiData['Warehouse/Office Address/es'] || '-',
+                  regNo: apiData['Reg No'] || '-',
                   regDate: formatDate(apiData['Reg Date']),
-                  companyFirstTimePolicy: apiData['Company first Time Policy'] || 'N/A',
-                  directorOwnerName: apiData['Director/Owner Name'] || 'N/A',
-                  companyHandledBy: apiData['Company Handle By'] || 'N/A',
-                  vatNumber: apiData['VAT Number'] || 'N/A',
-                  commodity: apiData['Comodity'] || 'N/A',
-                  currency: apiData['Currency'] || 'N/A',
+                  companyFirstTimePolicy: apiData['Company first Time Policy'] || '-',
+                  directorOwnerName: apiData['Director/Owner Name'] || '-',
+                  companyHandledBy: apiData['Company Handle By'] || '-',
+                  vatNumber: apiData['VAT Number'] || '-',
+                  commodity: apiData['Comodity'] || '-',
+                  currency: apiData['Currency'] || '-',
                   turnoverGBP: formatCurrency(apiData['Turnover in £ Mn']),
-                  insuranceAgent: apiData['Insurance Agent'] || 'N/A',
-                  accountHandler: apiData['A/C HANDLER'] || 'N/A',
-                  employeeCount: apiData['Emp Count'] || 'N/A',
-                  commercialPolicy: apiData['Commercial Policy'] || 'N/A',
+                  insuranceAgent: apiData['Insurance Agent'] || '-',
+                  accountHandler: apiData['A/C HANDLER'] || '-',
+                  employeeCount: apiData['Emp Count'] || '-',
+                  commercialPolicy: apiData['Commercial Policy'] || '-',
                   commercialRenewalDate: formatDate(apiData['Commercial Renewal Date']),
-                  commercialPolicyLink: apiData['Commercial Policy Link'] || 'N/A',
+                  commercialPolicyLink: apiData['Commercial Policy Link'] || '-',
                   commercialPremiumPaid: allPolicies.find(p => p.type === 'Commercial Liability')?.premium || formatCurrency(apiData['Commercial Premium Paid']),
-                  employeeLiabilityCover: apiData['Employee Liability Cover'] || 'N/A',
+                  employeeLiabilityCover: apiData['Employee Liability Cover'] || '-',
                   empLiabilityRenewalDate: formatDate(apiData['Emp_Liabality Renewal Date']),
-                  floatingStock: apiData['Floting stock'] || 'N/A',
-                  stockCover: apiData['Stock Cover'] || 'N/A',
-                  stockLocation: apiData['Stock Location'] || 'N/A',
-                  productLiability: apiData['Product Liability'] || 'N/A',
+                  floatingStock: apiData['Floting stock'] || '-',
+                  stockCover: apiData['Stock Cover'] || '-',
+                  stockLocation: apiData['Stock Location'] || '-',
+                  productLiability: apiData['Product Liability'] || '-',
                   commercialExcessPerClaim: formatCurrency(apiData['Commercial Excess Per claim']),
-                  noOfClaimCommercial: apiData['No Of claim Commercial'] || 'N/A',
-                  marine: apiData['Marine'] || 'N/A',
-                  marinePolicyLink: apiData['Marine Policy Link'] || 'N/A',
+                  noOfClaimCommercial: apiData['No Of claim Commercial'] || '-',
+                  marine: apiData['Marine'] || '-',
+                  marinePolicyLink: apiData['Marine Policy Link'] || '-',
                   marineRenewal: formatDate(apiData['Marine Renewal']),
                   marinePremiumPaid: allPolicies.find(p => p.type === 'Marine')?.premium || formatCurrency(apiData['Marine Premium Paid']),
-                  perTransitCover: apiData['Per Transit Cover'] || 'N/A',
-                  ukUkEuEuUsaUsa: apiData['UK-UK/EU-EU/USA-USA'] || 'N/A',
-                  ukEu: apiData['UK-EU'] || 'N/A',
-                  ukUsaMiddleEast: apiData['UK-USA/MiddelEast'] || 'N/A',
-                  ukRowUsaRow: apiData['UK-ROW/USA-ROW'] || 'N/A',
-                  crossVoyage: apiData['CROSS VOYAGE'] || 'N/A',
-                  airSeaRail: apiData['AIR/SEA/RAIL'] || 'N/A',
-                  road: apiData['ROAD'] || 'N/A',
-                  anyLocationInOrdinaryCourseOfTransit: apiData['ANYONE LOACTION IN ORDINARY COURSE OF TRANSIT'] || 'N/A',
-                  cargoExcessPerClaim: apiData['Cargo Excess Excess Per claim'] || 'N/A',
-                  noOfClaimCargo: apiData['No Of claim Cargo'] || 'N/A',
-                  buildingInsurance: apiData['Building Insurance'] || 'N/A',
-                  propertyPolicyLink: apiData['Property Policy Link'] || 'N/A',
+                  perTransitCover: apiData['Per Transit Cover'] || '-',
+                  ukUkEuEuUsaUsa: apiData['UK-UK/EU-EU/USA-USA'] || '-',
+                  ukEu: apiData['UK-EU'] || '-',
+                  ukUsaMiddleEast: apiData['UK-USA/MiddelEast'] || '-',
+                  ukRowUsaRow: apiData['UK-ROW/USA-ROW'] || '-',
+                  crossVoyage: apiData['CROSS VOYAGE'] || '-',
+                  airSeaRail: apiData['AIR/SEA/RAIL'] || '-',
+                  road: apiData['ROAD'] || '-',
+                  anyLocationInOrdinaryCourseOfTransit: apiData['ANYONE LOACTION IN ORDINARY COURSE OF TRANSIT'] || '-',
+                  cargoExcessPerClaim: apiData['Cargo Excess Excess Per claim'] || '-',
+                  noOfClaimCargo: apiData['No Of claim Cargo'] || '-',
+                  buildingInsurance: apiData['Building Insurance'] || '-',
+                  propertyPolicyLink: apiData['Property Policy Link'] || '-',
                   renewalDate: formatDate(apiData['Renewal Date']),
                   buildingPremiumPaid: allPolicies.find(p => p.type === 'Property')?.premium || formatCurrency(apiData['Building Premium Paid']),
-                  sumAssuredValueOfPremises: apiData['Sume Assure(Value of )Premises'] || 'N/A',
-                  declareValue: apiData['Declare Value'] || 'N/A',
-                  buildingLocation: apiData['Building Location'] || 'N/A',
-                  buildingExcessPerClaim: apiData['Building Excess Per claim'] || 'N/A',
-                  noOfClaimBuilding: apiData['No Of claim Building'] || 'N/A',
-                  fleetPolicy: apiData['Fleet Policy'] || 'N/A',
-                  fleetPolicyLink: apiData['Fleet Policy Link'] || 'N/A',
+                  sumAssuredValueOfPremises: apiData['Sume Assure(Value of )Premises'] || '-',
+                  declareValue: apiData['Declare Value'] || '-',
+                  buildingLocation: apiData['Building Location'] || '-',
+                  buildingExcessPerClaim: apiData['Building Excess Per claim'] || '-',
+                  noOfClaimBuilding: apiData['No Of claim Building'] || '-',
+                  fleetPolicy: apiData['Fleet Policy'] || '-',
+                  fleetPolicyLink: apiData['Fleet Policy Link'] || '-',
                   renewalDate2: formatDate(apiData['Renewal Date2']),
                   fleetPremiumPaid: allPolicies.find(p => p.type === 'Fleet')?.premium || formatCurrency(apiData['Fleet Premium Paid']),
-                  regNo2: apiData['Reg No2'] || 'N/A',
-                  fleetExcessPerClaim: apiData['Fleet Excess Per claim '] || 'N/A',
-                  noOfClaimMadeFleet: apiData['No Of claim made fleet'] || 'N/A',
+                  regNo2: apiData['Reg No2'] || '-',
+                  fleetExcessPerClaim: apiData['Fleet Excess Per claim '] || '-',
+                  noOfClaimMadeFleet: apiData['No Of claim made fleet'] || '-',
                   renewalYear: apiData['Renewal Year'] || year // Use the selected year if not available in the response
               };
               setPolicyData(transformedData);
@@ -393,11 +394,11 @@ const Dashboard = () => {
     
     // Helper function to format date
     const formatDate = (dateString) => {
-      if (!dateString) return 'N/A';
+      if (!dateString) return '-';
       try {
         const date = new Date(dateString);
         return isNaN(date.getTime()) 
-          ? 'N/A' 
+          ? '-' 
           : date.toLocaleDateString('en-GB', { 
               day: 'numeric', 
               month: 'long', 
@@ -405,7 +406,7 @@ const Dashboard = () => {
             });
       } catch (error) {
         console.error('Error formatting date:', error);
-        return 'N/A';
+        return '-';
       }
     };
     
@@ -425,18 +426,19 @@ const Dashboard = () => {
     
     // Helper function to format currency
     const formatCurrency = (amount) => {
-      if (amount === null || amount === undefined || amount === '') return '£0.00';
+      if (amount === null || amount === undefined || amount === '' || amount === '-') return '-';
       try {
         const num = typeof amount === 'string' 
           ? parseFloat(amount.replace(/[^0-9.-]+/g,"")) 
           : Number(amount);
+        if (!isFinite(num)) return '-';
         return `£${num.toLocaleString('en-GB', { 
           minimumFractionDigits: 2, 
           maximumFractionDigits: 2 
         })}`;
       } catch (error) {
         console.error('Error formatting currency:', error);
-        return '£0.00';
+        return '-';
       }
     };
     
@@ -444,11 +446,11 @@ const Dashboard = () => {
     if ((policy['Building Premium Paid'] || policy['Property Policy Link']) && 
         policyYearMatch(policy['Renewal Date'])) {
       policies.push({
-        id: policy['Building Insurance'] || 'N/A',
+        id: policy['Building Insurance'] || '-',
         type: 'Property',
         status: 'Active',
         premium: formatCurrency(policy['Building Premium Paid']),
-        coverage: formatCurrency(policy['Sume Assure(Value of )Premises']) || '£0.00',
+        coverage: formatCurrency(policy['Sume Assure(Value of )Premises']) || '-',
         endDate: formatDate(policy['Renewal Date'])
       });
     }
@@ -457,11 +459,11 @@ const Dashboard = () => {
     if ((policy['Commercial Premium Paid'] || policy['Commercial Policy Link']) && 
         policyYearMatch(policy['Commercial Renewal Date'])) {
       policies.push({
-        id: policy['Commercial Policy'] || 'N/A',
+        id: policy['Commercial Policy'] || '-',
         type: 'Commercial Liability',
         status: 'Active',
         premium: formatCurrency(policy['Commercial Premium Paid']),
-        coverage: formatCurrency(policy['Employee Liability Cover']) || '£0.00',
+        coverage: formatCurrency(policy['Employee Liability Cover']) || '-',
         endDate: formatDate(policy['Commercial Renewal Date'])
       });
     }
@@ -470,11 +472,11 @@ const Dashboard = () => {
     if ((policy['Fleet Premium Paid'] || policy['Fleet Policy Link']) && 
         policyYearMatch(policy['Renewal Date2'])) {
       policies.push({
-        id: policy['Fleet Policy'] || 'N/A',
+        id: policy['Fleet Policy'] || '-',
         type: 'Fleet',
         status: 'Active',
         premium: formatCurrency(policy['Fleet Premium Paid']),
-        coverage: '£0.00', // Fleet coverage not available in current data structure
+        coverage: '-', // Fleet coverage not available in current data structure
         endDate: formatDate(policy['Renewal Date2'])
       });
     }
@@ -483,11 +485,11 @@ const Dashboard = () => {
     if ((policy['Marine Premium Paid'] || policy['Marine Policy Link']) && 
         policyYearMatch(policy['Marine Renewal'])) {
       policies.push({
-        id: policy['Marine'] || 'N/A',
+        id: policy['Marine'] || '-',
         type: 'Marine',
         status: 'Active',
         premium: formatCurrency(policy['Marine Premium Paid']),
-        coverage: formatCurrency(policy['Per Transit Cover']) || '£0.00',
+        coverage: formatCurrency(policy['Per Transit Cover']) || '-',
         endDate: formatDate(policy['Marine Renewal'])
       });
     }
@@ -1419,7 +1421,13 @@ const Dashboard = () => {
     },
     {
       title: 'Active Claims',
-      value: claims?.filter(claim => claim.status !== 'Closed')?.length?.toString() || '0',
+      value: claims
+        ?.filter(claim => {
+          const s = (claim?.status || '').toString().toLowerCase();
+          return !(s.includes('approved') || s.includes('rejected'));
+        })
+        ?.length
+        ?.toString() || '0',
       change: '+5%',
       changeText: 'from last month',
       icon: AlertCircle,

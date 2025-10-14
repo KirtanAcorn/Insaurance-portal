@@ -14,12 +14,12 @@ const CompanyInformation = ({
 }) => {
   
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     try {
       const date = new Date(dateString);
-      return isNaN(date.getTime()) ? dateString : date.toLocaleDateString('en-GB');
+      return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('en-GB');
     } catch (e) {
-      return dateString;
+      return '-';
     }
   };
   return (
@@ -81,7 +81,7 @@ const CompanyInformation = ({
                         <div>
                           <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Registered Address</p>
                           <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {policyData['Reg Address'] || 'N/A'}
+                            {policyData['Reg Address'] || '-'}
                           </p>
                         </div>
                       </div>
@@ -90,7 +90,7 @@ const CompanyInformation = ({
                         <div>
                           <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Registration Number</p>
                           <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {policyData['Reg No'] || 'N/A'}
+                            {policyData['Reg No'] || '-'}
                           </p>
                         </div>
                       </div>
@@ -116,7 +116,7 @@ const CompanyInformation = ({
                         <div>
                           <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Director</p>
                           <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {policyData['Director/Owner Name'] || 'N/A'}
+                            {policyData['Director/Owner Name'] || '-'}
                           </p>
                         </div>
                       </div>
@@ -125,7 +125,7 @@ const CompanyInformation = ({
                         <div>
                           <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Insurance Agent</p>
                           <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {policyData['Insurance Agent'] || 'N/A'}
+                            {policyData['Insurance Agent'] || '-'}
                           </p>
                         </div>
                       </div>
@@ -134,7 +134,7 @@ const CompanyInformation = ({
                         <div>
                           <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Employees</p>
                           <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {policyData['Emp Count'] || 'N/A'}
+                            {policyData['Emp Count'] || '-'}
                           </p>
                         </div>
                       </div>
