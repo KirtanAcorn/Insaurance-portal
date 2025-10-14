@@ -71,8 +71,8 @@ const getInitials = (name) => {
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Role</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Status</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Department</th>
-                  <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Policies</th>
-                  <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Claims</th>
+                  {/* <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Policies</th>
+                  <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Claims</th> */}
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Actions</th>
                 </tr>
               </thead>
@@ -131,7 +131,7 @@ const getInitials = (name) => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    {/* <td className="px-6 py-4">
                       <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         {user.policies}
                       </span>
@@ -140,7 +140,7 @@ const getInitials = (name) => {
                       <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         {user.claims}
                       </span>
-                    </td>
+                    </td> */}
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
                         <button 

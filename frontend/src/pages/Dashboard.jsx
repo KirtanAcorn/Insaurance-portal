@@ -1414,8 +1414,8 @@ const Dashboard = () => {
     {
       title: 'Total Policies',
       value: companyPolicies?.length?.toString() || '0',
-      change: '+12%',
-      changeText: 'from last month',
+      // change: '+12%',
+      // changeText: 'from last month',
       icon: FileText,
       color: 'blue'
     },
@@ -1428,24 +1428,24 @@ const Dashboard = () => {
         })
         ?.length
         ?.toString() || '0',
-      change: '+5%',
-      changeText: 'from last month',
+      // change: '+5%',
+      // changeText: 'from last month',
       icon: AlertCircle,
       color: 'orange'
     },
     {
       title: 'Total Premium',
       value: calculateTotalPremium(),
-      change: '+18%',
-      changeText: 'from last month',
+      // change: '+18%',
+      // changeText: 'from last month',
       icon: DollarSign,
       color: 'green'
     },
     {
       title: 'Registered Users',
       value: users?.length?.toString() || '0',
-      change: '+8%',
-      changeText: 'from last month',
+      // change: '+8%',
+      // changeText: 'from last month',
       icon: Users,
       color: 'purple'
     }
