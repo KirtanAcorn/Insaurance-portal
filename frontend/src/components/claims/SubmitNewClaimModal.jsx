@@ -38,6 +38,16 @@ const SubmitNewClaimModal = ({
     }
   };
 
+  const parseCurrency = (value) => {
+    if (value === null || value === undefined || value === "" || value === "N/A") return 0;
+    try {
+      const num = typeof value === "string" ? parseFloat(value.replace(/[^0-9.-]+/g, "")) : Number(value);
+      return isNaN(num) ? 0 : num;
+    } catch {
+      return 0;
+    }
+  };
+
   useEffect(() => {
     const fetchDetails = async () => {
       const companyName = formDataNewClaim?.companyName;
@@ -711,6 +721,17 @@ const SubmitNewClaimModal = ({
                       <div className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>Select company and policy to view coverage.</div>
                     )}
                   </div>
+                  {(() => {
+                    const enteredAmount = Number(formDataNewClaim?.claimAmount) || 0;
+                    const excessAmount = parseCurrency(selectedPolicyDetails?.excess);
+                    const claimable = Math.max(0, enteredAmount - excessAmount);
+                      return (
+                        <div className="flex justify-between pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
+                          <span className={isDark ? "text-gray-400" : "text-green-500"}>Claimable Amount:</span>
+                          <span className={`font-semibold ${isDark ? "text-white" : "text-green-500"}`}>{formatCurrency(claimable)}</span>
+                        </div>
+                        );
+                      })()}
                 </div>
               </div>
 
