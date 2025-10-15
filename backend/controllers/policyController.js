@@ -17,6 +17,72 @@ const extractPolicyData = (record) => {
     renewalDate: record.renewalDate || 'N/A',
     policyDocument: record.policyDocument || null
   };
+}; // <--- FIXED: Missing closing brace was added here
+
+// Get all policies for a specific renewal year, or latest year if none provided
+exports.getPoliciesByYear = async (req, res) => {
+  const { renewalYear } = req.query;
+  let pool;
+  try {
+    pool = await poolPromise;
+
+    // Determine latest renewal year if not provided
+    let targetYear = renewalYear;
+    if (!targetYear) {
+      const latestYearQuery = `
+        SELECT TOP 1 [Renewal Year] AS renewalYear
+        FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+        WHERE [Renewal Year] IS NOT NULL AND LTRIM(RTRIM([Renewal Year])) <> ''
+        ORDER BY TRY_CONVERT(datetime, SUBSTRING([Renewal Year], 1, 4) + '-01-01') DESC
+      `;
+      const latestResult = await pool.request().query(latestYearQuery);
+      targetYear = latestResult.recordset[0]?.renewalYear || null;
+    }
+
+    if (!targetYear) {
+      return res.status(404).json({ message: 'No renewal year found in data' });
+    }
+
+    const query = `
+      SELECT
+        [Id],
+        [Company Name],
+        [Currency],
+        [Commercial Premium Paid],
+        [Marine Premium Paid],
+        [Building Premium Paid],
+        [Fleet Premium Paid],
+        [Renewal Year]
+      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      WHERE [Renewal Year] = @renewalYear
+    `;
+
+    const request = pool.request();
+    request.input('renewalYear', sql.NVarChar(50), targetYear);
+    const result = await request.query(query);
+
+    // Aggregate totals per currency on the server to avoid client parsing issues
+    const totalsQuery = `
+      SELECT
+        UPPER(REPLACE(REPLACE(LTRIM(RTRIM(ISNULL([Currency], 'GBP'))), '£', 'GBP'), ' ', '')) AS currency,
+        SUM(TRY_CONVERT(decimal(18,2), REPLACE(REPLACE(ISNULL([Commercial Premium Paid], '0'), ',', ''), '£', ''))) AS commercialTotal,
+        SUM(TRY_CONVERT(decimal(18,2), REPLACE(REPLACE(ISNULL([Marine Premium Paid], '0'), ',', ''), '£', ''))) AS marineTotal,
+        SUM(TRY_CONVERT(decimal(18,2), REPLACE(REPLACE(ISNULL([Building Premium Paid], '0'), ',', ''), '£', ''))) AS buildingTotal,
+        SUM(TRY_CONVERT(decimal(18,2), REPLACE(REPLACE(ISNULL([Fleet Premium Paid], '0'), ',', ''), '£', ''))) AS fleetTotal
+      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      WHERE [Renewal Year] = @renewalYear
+      GROUP BY UPPER(REPLACE(REPLACE(LTRIM(RTRIM(ISNULL([Currency], 'GBP'))), '£', 'GBP'), ' ', ''))
+    `;
+
+    const totalsResult = await pool.request()
+      .input('renewalYear', sql.NVarChar(50), targetYear)
+      .query(totalsQuery);
+
+    return res.json({ renewalYear: targetYear, rows: result.recordset, currencyTotals: totalsResult.recordset });
+  } catch (error) {
+    console.error('Error in getPoliciesByYear:', error);
+    return res.status(500).json({ error: 'Failed to fetch policies by year', details: error.message });
+  }
 };
 
 exports.getCompanyDetails = async (req, res) => {
@@ -37,8 +103,7 @@ exports.getCompanyDetails = async (req, res) => {
     
     // Optimize the query by selecting only needed columns and using parameterized query
     const query = `
-      SELECT TOP 50 * 
-      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      SELECT TOP 50 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
       WHERE 
         [Company Name] = @companyName AND
         [Renewal Year] = @renewalYear
@@ -58,8 +123,7 @@ exports.getCompanyDetails = async (req, res) => {
     } else {
       // Try with a more flexible search if no exact match found
       const likeQuery = `
-        SELECT TOP 50 * 
-        FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+        SELECT TOP 50 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
         WHERE 
           [Company Name] LIKE '%' + @companyName + '%' AND
           [Renewal Year] LIKE '%' + @renewalYear + '%'

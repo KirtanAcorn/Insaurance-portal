@@ -23,16 +23,17 @@ const Dashboard = () => {
   const [selectedCompany, setSelectedCompany] = useState('');
   const [selectedCompanyPolicy, setSelectedCompanyPolicy] = useState('');
   const [selectedInsuranceType, setSelectedInsuranceType] = useState('Property');
-  const [policyYear, setPolicyYear] = useState('2024-2025');
+  const [policyYear, setPolicyYear] = useState('2025-2026');
   const [isOpenNewClaim, setIsOpenNewClaim] = useState(false);
   const [isModalOpenNew, setIsModalOpenNew] = useState(false);
   const [openIsModalOpenNew, setOpenIsModalOpenNew] = useState(false);
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState([]); 
   const [claims, setClaims] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUsersLoading, setIsUsersLoading] = useState(false);
   const [isPoliciesLoading, setIsPoliciesLoading] = useState(false);
   const [policiesError, setPoliciesError] = useState(null);
+  const [latestYearSummary, setLatestYearSummary] = useState({ year: null, policyCount: 0, totalPremiumGBP: 0 });
   const [companyPolicies, setCompanyPolicies] = useState([]);
   const [error, setError] = useState(null);
   const location = useLocation();
@@ -66,6 +67,91 @@ const Dashboard = () => {
     fetchRates();
     return () => { isMounted = false; };
   }, []);
+
+  // Fetch all policies for latest renewal year to drive dashboard-wide totals
+  useEffect(() => {
+    let cancelled = false;
+
+    const parseAmount = (v) => {
+      if (v === null || v === undefined || v === '' || v === '-') return 0;
+      const num = typeof v === 'string' ? parseFloat(v.replace(/[^0-9.-]+/g, '')) : Number(v);
+      return isFinite(num) ? num : 0;
+    };
+
+    const normalizeCurrency = (c) => {
+      if (!c) return 'GBP';
+      const onlyLetters = String(c).toUpperCase().replace(/[^A-Z]/g, '');
+      // Common symbol/labels to ISO
+      if (!onlyLetters) return 'GBP';
+      if (onlyLetters.startsWith('GBP')) return 'GBP';
+      if (onlyLetters.startsWith('USD')) return 'USD';
+      if (onlyLetters.startsWith('EUR')) return 'EUR';
+      if (onlyLetters.startsWith('INR')) return 'INR';
+      if (onlyLetters.startsWith('AUD')) return 'AUD';
+      if (onlyLetters.startsWith('CAD')) return 'CAD';
+      if (onlyLetters.startsWith('JPY')) return 'JPY';
+      if (onlyLetters.startsWith('CNY')) return 'CNY';
+      // Fallback: take first 3 letters
+      return onlyLetters.slice(0, 3);
+    };
+
+    const toGBP = (amount, currency) => {
+      const num = parseAmount(amount);
+      const cur = normalizeCurrency(currency);
+      if (!num) return 0;
+      if (cur === 'GBP') return num;
+      const rate = fxRates[cur];
+      if (!rate || !isFinite(rate)) return num; // assume already GBP when we don't know the rate
+      // fxRates is 1 GBP -> X CUR, so CUR -> GBP is divide
+      return num / rate;
+    };
+
+    const fetchLatestYearPolicies = async () => {
+      try {
+        const { data } = await axios.get('/api/policies/by-year', { params: { _t: Date.now() } });
+        if (cancelled || !data || !Array.isArray(data.rows)) return;
+        const rows = data.rows;
+        const year = data.renewalYear || null;
+
+        // Count = number of rows for the latest year
+        const policyCount = rows.length;
+
+        // Prefer server-side currency buckets for accuracy
+        let totalPremiumGBP = 0;
+        if (Array.isArray(data.currencyTotals) && data.currencyTotals.length > 0) {
+          totalPremiumGBP = data.currencyTotals.reduce((acc, ct) => {
+            const currency = ct.currency || 'GBP';
+            const curTotal = Number(ct.commercialTotal || 0) + Number(ct.marineTotal || 0) + Number(ct.buildingTotal || 0) + Number(ct.fleetTotal || 0);
+            return acc + toGBP(curTotal, currency);
+          }, 0);
+        } else {
+          // Fallback: Sum all premiums per row, converting by detected currency
+          totalPremiumGBP = rows.reduce((sum, row) => {
+            const currency = row['Currency'] || row.currency || 'GBP';
+            const premiums = [
+              row['Commercial Premium Paid'],
+              row['Marine Premium Paid'],
+              row['Building Premium Paid'],
+              row['Fleet Premium Paid']
+            ];
+            const rowSum = premiums.reduce((s, p) => s + toGBP(p, currency), 0);
+            return sum + rowSum;
+          }, 0);
+        }
+
+        if (!cancelled) {
+          setLatestYearSummary({ year, policyCount, totalPremiumGBP });
+        }
+      } catch (e) {
+        if (!cancelled) setLatestYearSummary({ year: null, policyCount: 0, totalPremiumGBP: 0 });
+      }
+    };
+
+    // Only fetch once FX rates are available to avoid recompute issues
+    fetchLatestYearPolicies();
+
+    return () => { cancelled = true; };
+  }, [fxRates]);
 
   // Policy data shape that matches the SQL table structure
   const policyDataShape = {
@@ -1413,7 +1499,7 @@ const Dashboard = () => {
   const statsDataDashboard = [
     {
       title: 'Total Policies',
-      value: companyPolicies?.length?.toString() || '0',
+      value: (latestYearSummary.policyCount || 0).toString(),
       // change: '+12%',
       // changeText: 'from last month',
       icon: FileText,
@@ -1435,7 +1521,12 @@ const Dashboard = () => {
     },
     {
       title: 'Total Premium',
-      value: calculateTotalPremium(),
+      value: (() => {
+        const sumGBP = latestYearSummary.totalPremiumGBP || 0;
+        if (sumGBP >= 1_000_000) return `£${(sumGBP / 1_000_000).toFixed(1)}M`;
+        if (sumGBP >= 1_000) return `£${(sumGBP / 1_000).toFixed(1)}K`;
+        return `£${sumGBP.toFixed(2)}`;
+      })(),
       // change: '+18%',
       // changeText: 'from last month',
       icon: DollarSign,
