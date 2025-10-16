@@ -19,7 +19,7 @@ import RecentActivity from '../../components/dashboard/RecentActivity';
 import PolicyOverview from '../../components/dashboard/PolicyOverview';
 import QuickStats from '../../components/dashboard/QuickStats';
 
-const DashboardTab = ({isDark, statsDataDashboard, recentActivityDashboard, policiesDashboard, quickStatsDashboard, getColorClassesDashbaord}) => {
+const DashboardTab = ({isDark, statsDataDashboard, recentActivityDashboard, policiesDashboard, quickStats, getColorClassesDashbaord}) => {
 
   return (
     <>
@@ -54,7 +54,7 @@ const DashboardTab = ({isDark, statsDataDashboard, recentActivityDashboard, poli
             <QuickStats
             isDark={isDark}
             getColorClassesDashbaord={getColorClassesDashbaord}
-            quickStatsDashboard={quickStatsDashboard}
+            quickStats={quickStats}
             />
           </div>
         </div>

@@ -4,6 +4,7 @@ require("dotenv").config();
 const userRoutes = require("./routes/userRoutes");
 const claimsRoutes = require("./routes/claimsRoutes");
 const policyRoutes = require("./routes/policyRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 const path = require("path");
 const app = express();
 app.use(cors());
@@ -12,6 +13,7 @@ app.use('/uploads', express.static('uploads'));
 app.use("/api/users", userRoutes);
 app.use("/api/claims", claimsRoutes);
 app.use("/api/policies", policyRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 

@@ -1,5 +1,6 @@
-import { FileText, Calendar, Eye, Edit } from "lucide-react"
+import { FileText, Calendar, Eye, Edit } from "lucide-react";
 import { useState } from 'react';
+import { getCurrencySymbol } from "../../utils/currency";
 
 const ClaimsOverview = ({
   isDark, 
@@ -36,16 +37,12 @@ const ClaimsOverview = ({
     }
   };
   // Format currency
-  const formatCurrency = (amount) => {
+  const formatCurrency = (amount, currencyCode = 'GBP') => {
     if (amount === null || amount === undefined || amount === '' || amount === '-') return '-';
     const num = typeof amount === 'string' ? parseFloat(amount.replace(/[^0-9.-]+/g, '')) : Number(amount);
     if (!isFinite(num)) return '-';
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(num);
+    const symbol = getCurrencySymbol(currencyCode);
+    return `${symbol}${num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   return (
@@ -130,7 +127,7 @@ const ClaimsOverview = ({
                     </td>
                     <td className="px-6 py-4">
                       <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {formatCurrency(claim.claimAmount)}
+                        {formatCurrency(claim.claimAmount, claim.Currency)}
                       </span>
                     </td>
                     <td className="px-6 py-4">

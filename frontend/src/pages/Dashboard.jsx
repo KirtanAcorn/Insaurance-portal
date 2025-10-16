@@ -36,6 +36,7 @@ const Dashboard = () => {
   const [latestYearSummary, setLatestYearSummary] = useState({ year: null, policyCount: 0, totalPremiumGBP: 0 });
   const [companyPolicies, setCompanyPolicies] = useState([]);
   const [error, setError] = useState(null);
+  const [quickStatsData, setQuickStatsData] = useState({ claimSuccess: 0, globalCoverage: 0, dataSecurity: 0 });
   const location = useLocation();
   const navigate = useNavigate();
   const role = location.state?.role;
@@ -66,6 +67,19 @@ const Dashboard = () => {
     };
     fetchRates();
     return () => { isMounted = false; };
+  }, []);
+
+  useEffect(() => {
+    const fetchQuickStats = async () => {
+      try {
+        const { data } = await axios.get('/api/dashboard/quick-stats');
+        setQuickStatsData(data);
+      } catch (error) {
+        console.error('Error fetching quick stats:', error);
+      }
+    };
+
+    fetchQuickStats();
   }, []);
 
   // Fetch all policies for latest renewal year to drive dashboard-wide totals
@@ -1704,7 +1718,7 @@ const Dashboard = () => {
           statsDataDashboard={statsDataDashboard}
           recentActivityDashboard={recentActivityDashboard}
           policiesDashboard={policiesDashboard}
-          quickStatsDashboard={quickStatsDashboard}
+          quickStats={quickStatsData}
           getColorClassesDashbaord={getColorClassesDashbaord}
         />
       )}

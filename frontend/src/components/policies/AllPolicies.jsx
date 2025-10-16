@@ -86,8 +86,8 @@ const AllPolicies = ({ isDark, getInsuranceIcon, allPolicies, isLoading, error }
               </tr>
             </thead>
             <tbody className={`divide-y ${isDark ? 'divide-gray-700' : 'divide-gray-200'}`}>
-              {allPolicies.map((policy) => {
-              return (<tr key={policy.id} className={isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}>
+              {allPolicies.map((policy, index) => {
+              return (<tr key={`${policy.id}-${index}`} className={isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className={`flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-md ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}>
