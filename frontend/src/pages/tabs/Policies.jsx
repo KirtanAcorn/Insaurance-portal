@@ -22,7 +22,8 @@ const Policies = ({
   allPolicies,
   companyPolicies = [],
   isPoliciesLoading = false,
-  policiesError = null
+  policiesError = null,
+  rawPolicyRow = null
 }) => {
   // Log all props when they change
   useEffect(() => {
@@ -60,6 +61,7 @@ const Policies = ({
       allPolicies={allPolicies}
       isLoading={isPoliciesLoading}
       error={policiesError ? { message: policiesError } : null}
+      rawPolicyRow={rawPolicyRow}
     />
     {console.log('Policies - AllPolicies props:', {
       allPolicies,

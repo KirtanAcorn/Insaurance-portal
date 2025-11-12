@@ -1,6 +1,30 @@
-import { FileText, Loader2, AlertCircle } from 'lucide-react';
+import { FileText, Loader2, AlertCircle, X } from 'lucide-react';
+import { useState, useMemo } from 'react';
 
-const AllPolicies = ({ isDark, getInsuranceIcon, allPolicies, isLoading, error }) => {
+const AllPolicies = ({ isDark, getInsuranceIcon, allPolicies, isLoading, error, rawPolicyRow }) => {
+  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+  const [docInfo, setDocInfo] = useState({ title: '', url: '' });
+
+  const linkMap = useMemo(() => ({
+    'Commercial Liability': 'Commercial Policy Link',
+    'Marine': 'Marine Policy Link',
+    'Property': 'Property Policy Link',
+    'Fleet': 'Fleet Policy Link'
+  }), []);
+
+  const openDoc = (policyType) => {
+    if (!rawPolicyRow) {
+      setDocInfo({ title: policyType, url: '' });
+      setIsDocModalOpen(true);
+      return;
+    }
+    const key = linkMap[policyType];
+    const url = key ? (rawPolicyRow[key] || '') : '';
+    setDocInfo({ title: policyType, url });
+    setIsDocModalOpen(true);
+  };
+  const closeDoc = () => setIsDocModalOpen(false);
+
   // Loading state
   if (isLoading) {
     return (
@@ -80,14 +104,14 @@ const AllPolicies = ({ isDark, getInsuranceIcon, allPolicies, isLoading, error }
                 <th scope="col" className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-500'}`}>
                   End Date
                 </th>
-                {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   <span className={`${isDark ? 'text-gray-300' : 'text-gray-500'}`}>Actions</span>
-                </th> */}
+                </th>
               </tr>
             </thead>
             <tbody className={`divide-y ${isDark ? 'divide-gray-700' : 'divide-gray-200'}`}>
               {allPolicies.map((policy, index) => {
-              return (<tr key={`${policy.id}-${index}`} className={isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}>
+                return (<tr key={`${policy.id}-${index}`} className={isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className={`flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-md ${isDark ? 'bg-gray-600' : 'bg-gray-100'}`}>
@@ -131,27 +155,60 @@ const AllPolicies = ({ isDark, getInsuranceIcon, allPolicies, isLoading, error }
                       {policy.endDate}
                     </div>
                   </td>
-                  {/* <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex space-x-2">
-                      <button className={`p-1.5 rounded-md ${isDark ? 'text-blue-400 hover:bg-gray-700' : 'text-blue-600 hover:bg-blue-50'}`} title="View Details">
+                      <button onClick={() => openDoc(policy.type)} className={`p-1.5 rounded-md ${isDark ? 'text-blue-400 hover:bg-gray-700' : 'text-blue-600 hover:bg-blue-50'}`} title="View">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                         </svg>
                       </button>
-                      <button className={`p-1.5 rounded-md ${isDark ? 'text-gray-400 hover:bg-gray-700 hover:text-white' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'}`} title="More options">
+                      {/* <button className={`p-1.5 rounded-md ${isDark ? 'text-gray-400 hover:bg-gray-700 hover:text-white' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'}`} title="More options">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
                         </svg>
-                      </button>
+                      </button> */}
                     </div>
-                  </td> */}
+                  </td>
                 </tr>);
 })}
             </tbody>
           </table>
         </div>
       </div>
+      {isDocModalOpen && (
+        <div className={`fixed inset-0 z-50 flex items-center justify-center ${isDark ? 'bg-black/70' : 'bg-gray-900/50'}`}>
+          <div className={`w-full max-w-lg rounded-lg shadow-xl ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+            <div className={`flex items-center justify-between px-4 py-3 ${isDark ? 'border-b border-gray-700' : 'border-b border-gray-200'}`}>
+              <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{docInfo.title} Documents</h3>
+              <button onClick={closeDoc} className={`${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-3">
+              {docInfo.url && docInfo.url !== '-' ? (
+                <a
+                  href={docInfo.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center px-4 py-2 rounded-md font-medium ${isDark ? 'bg-blue-900 text-blue-200 hover:bg-blue-800' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'}`}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Open document
+                </a>
+              ) : (
+                <div className={`flex items-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                  <AlertCircle className={`w-4 h-4 mr-2 ${isDark ? 'text-yellow-300' : 'text-yellow-600'}`} />
+                  No document link available for this policy.
+                </div>
+              )}
+            </div>
+            <div className={`px-4 py-3 flex justify-end ${isDark ? 'border-t border-gray-700' : 'border-t border-gray-200'}`}>
+              <button onClick={closeDoc} className={`px-4 py-2 rounded-md ${isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

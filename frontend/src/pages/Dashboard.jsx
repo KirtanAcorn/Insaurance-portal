@@ -594,7 +594,7 @@ const Dashboard = () => {
       });
     }
     return policies;
-  }, [companyPolicies]);
+  }, [companyPolicies, policyYear]);
 
   // Log when allPolicies changes
   useEffect(() => {
@@ -842,7 +842,7 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('Error updating claim:', error);
-      const errorMessage = error.response?.data?.error || 'Failed to update claim';
+      const errorMessage = error.response?.data?.error || error.message;
       toast.error(errorMessage);
       return false;
     }
@@ -1815,6 +1815,7 @@ const Dashboard = () => {
           error={error}
           openIsModalOpenNew={setOpenIsModalOpenNew}
           allPolicies={allPolicies}
+          rawPolicyRow={companyPolicies && companyPolicies.length > 0 ? companyPolicies[0] : null}
         />}
 
       </main>
