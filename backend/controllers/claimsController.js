@@ -184,7 +184,7 @@ exports.serveDocument = (req, res) => {
     return res.status(400).json({ error: 'Filename is required' });
   }
     
-  const documentsPath = 'https://acornsolution.sharepoint.com/:f:/s/AcornUniversal/Facilities/EtXY6snEBBRMjuQXGiD3ZcoBnktLULd4uSIxpFtPe3VV7w?e=pOPfSj';
+  const documentsPath = 'C:\\Users\\Priyal.Makwana\\Acorn Solution\\Facilities - Insurance_portal Claims';
   const filePath = path.join(documentsPath, filename);
   
   // Check if file exists

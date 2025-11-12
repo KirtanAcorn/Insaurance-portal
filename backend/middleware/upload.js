@@ -5,7 +5,7 @@ const path = require('path');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Using the SharePoint folder path for document storage
-    const sharepointPath = 'https://acornsolution.sharepoint.com/:f:/s/AcornUniversal/Facilities/EtXY6snEBBRMjuQXGiD3ZcoBnktLULd4uSIxpFtPe3VV7w?e=pOPfSj';
+    const sharepointPath = 'C:\\Users\\Priyal.Makwana\\Acorn Solution\\Facilities - Insurance_portal Claims';
     cb(null, sharepointPath);
   },
   filename: function (req, file, cb) {
