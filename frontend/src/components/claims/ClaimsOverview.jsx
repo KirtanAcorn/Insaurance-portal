@@ -134,7 +134,11 @@ const ClaimsOverview = ({
                       <div className="flex items-center space-x-2">
                         <Calendar className={`w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
                         <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {claim.incidentDate ? new Date(claim.incidentDate).toLocaleDateString('en-GB') : '-'}
+                          {claim.incidentDate ? new Date(claim.incidentDate).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          }) : '-'}
 
                         </span>
                       </div>

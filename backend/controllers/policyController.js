@@ -19,28 +19,28 @@ const extractPolicyData = (record) => {
   };
 }; // <--- FIXED: Missing closing brace was added here
 
-// Get all policies for a specific renewal year, or latest year if none provided
+// Get all policies for a specific year, or latest year if none provided
 exports.getPoliciesByYear = async (req, res) => {
   const { renewalYear } = req.query;
   let pool;
   try {
     pool = await poolPromise;
 
-    // Determine latest renewal year if not provided
+    // Determine latest year if not provided - using [Year] field
     let targetYear = renewalYear;
     if (!targetYear) {
       const latestYearQuery = `
-        SELECT TOP 1 [Renewal Year] AS renewalYear
+        SELECT TOP 1 [Year] AS renewalYear
         FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
-        WHERE [Renewal Year] IS NOT NULL AND LTRIM(RTRIM([Renewal Year])) <> ''
-        ORDER BY TRY_CONVERT(datetime, SUBSTRING([Renewal Year], 1, 4) + '-01-01') DESC
+        WHERE [Year] IS NOT NULL AND LTRIM(RTRIM([Year])) <> ''
+        ORDER BY TRY_CONVERT(datetime, SUBSTRING([Year], 1, 4) + '-01-01') DESC
       `;
       const latestResult = await pool.request().query(latestYearQuery);
       targetYear = latestResult.recordset[0]?.renewalYear || null;
     }
 
     if (!targetYear) {
-      return res.status(404).json({ message: 'No renewal year found in data' });
+      return res.status(404).json({ message: 'No year found in data' });
     }
 
     const query = `
@@ -52,9 +52,9 @@ exports.getPoliciesByYear = async (req, res) => {
         [Marine Premium Paid],
         [Building Premium Paid],
         [Fleet Premium Paid],
-        [Renewal Year]
+        [Year]
       FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
-      WHERE [Renewal Year] = @renewalYear
+      WHERE [Year] = @renewalYear
     `;
 
     const request = pool.request();
@@ -70,7 +70,7 @@ exports.getPoliciesByYear = async (req, res) => {
         SUM(TRY_CONVERT(decimal(18,2), REPLACE(REPLACE(ISNULL([Building Premium Paid], '0'), ',', ''), '£', ''))) AS buildingTotal,
         SUM(TRY_CONVERT(decimal(18,2), REPLACE(REPLACE(ISNULL([Fleet Premium Paid], '0'), ',', ''), '£', ''))) AS fleetTotal
       FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
-      WHERE [Renewal Year] = @renewalYear
+      WHERE [Year] = @renewalYear
       GROUP BY UPPER(REPLACE(REPLACE(LTRIM(RTRIM(ISNULL([Currency], 'GBP'))), '£', 'GBP'), ' ', ''))
     `;
 
@@ -88,7 +88,7 @@ exports.getPoliciesByYear = async (req, res) => {
 exports.getCompanyDetails = async (req, res) => {
   const { companyName, renewalYear } = req.query;
   if (!companyName || !renewalYear) {
-    return res.status(400).json({ error: "Company name and Renewal Year are required" });
+    return res.status(400).json({ error: "Company name and Renewal Year (Year field) are required" });
   }
 
   const decodedCompany = decodeURIComponent(companyName).replace(/-/g, ' ').trim();
@@ -101,20 +101,17 @@ exports.getCompanyDetails = async (req, res) => {
     // First, check if the table exists and is accessible
     await pool.request().query('SELECT TOP 1 1 FROM Tbl_Insurance_Details_Facility');
     
-    // Optimize the query by selecting only needed columns and using parameterized query
+    // Query with new table structure - using [Year] field instead of [Renewal Year]
     const query = `
       SELECT TOP 50 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
       WHERE 
         [Company Name] = @companyName AND
-        [Renewal Year] = @renewalYear
+        [Year] = @renewalYear
     `;
     
     const request = pool.request();
     request.input("companyName", sql.NVarChar(255), decodedCompany);
     request.input("renewalYear", sql.NVarChar(50), decodedYear);
-    
-    // Set a specific timeout for this request
-    //request.query_timeout = 45000; // 45 seconds
     
     const result = await request.query(query);
     
@@ -126,13 +123,12 @@ exports.getCompanyDetails = async (req, res) => {
         SELECT TOP 50 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
         WHERE 
           [Company Name] LIKE '%' + @companyName + '%' AND
-          [Renewal Year] LIKE '%' + @renewalYear + '%'
+          [Year] LIKE '%' + @renewalYear + '%'
       `;
       
       const likeRequest = pool.request();
       likeRequest.input("companyName", sql.NVarChar(255), decodedCompany);
       likeRequest.input("renewalYear", sql.NVarChar(50), decodedYear);
-      //likeRequest.query_timeout = 45000;
       
       const likeResult = await likeRequest.query(likeQuery);
       
@@ -185,7 +181,7 @@ exports.getCompanyPolicies = async (req, res) => {
     `;
     const schemaResult = await pool.request().query(schemaQuery);
     
-    // Build the base query
+    // Build the base query with new table structure
     let query = `
       SELECT DISTINCT TOP 50
         [Company Name] AS companyName,
@@ -203,14 +199,14 @@ exports.getCompanyPolicies = async (req, res) => {
         [Marine Renewal] AS marineRenewalDate,
         [Renewal Date] AS propertyRenewalDate,
         [Renewal Date2] AS fleetRenewalDate,
-        [Renewal Year] AS renewalYear
+        [Year] AS renewalYear
       FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
       WHERE [Company Name] = @companyName
     `;
     
-    // Add renewal year filter if provided
+    // Add year filter if provided - using [Year] field
     if (renewalYear) {
-      query += ` AND [Renewal Year] = @renewalYear`;
+      query += ` AND [Year] = @renewalYear`;
     }
     
     query += ` ORDER BY [Company Name]`;

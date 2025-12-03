@@ -353,7 +353,11 @@ const Dashboard = () => {
               const formatDate = (dateString) => {
                   if (!dateString || dateString === 'N/A' || dateString === '-') return '-';
                   const date = new Date(dateString);
-                  return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('en-GB');
+                  return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                  });
               };
 
               // Map API data to the frontend state shape
@@ -417,7 +421,7 @@ const Dashboard = () => {
                   regNo2: apiData['Reg No2'] || '-',
                   fleetExcessPerClaim: apiData['Fleet Excess Per claim '] || '-',
                   noOfClaimMadeFleet: apiData['No Of claim made fleet'] || '-',
-                  renewalYear: apiData['Renewal Year'] || year // Use the selected year if not available in the response
+                  renewalYear: apiData['Year'] || year // Updated to use [Year] field from new table structure
               };
               setPolicyData(transformedData);
               setPolicyError(null);

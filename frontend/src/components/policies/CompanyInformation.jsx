@@ -17,7 +17,11 @@ const CompanyInformation = ({
     if (!dateString) return '-';
     try {
       const date = new Date(dateString);
-      return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('en-GB');
+      return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
     } catch (e) {
       return '-';
     }

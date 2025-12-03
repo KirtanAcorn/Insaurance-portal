@@ -9,6 +9,13 @@ const ContentGrid = ({
   error,
 }) => {
   console.log("===============", policyData)
+  
+  // Helper function to check if a value is empty/null/undefined or just a dash
+  const hasValue = (value) => {
+    if (value === null || value === undefined || value === '') return false;
+    const strValue = String(value).trim();
+    return strValue !== '' && strValue !== '-' && strValue !== 'N/A' && strValue !== 'null' && strValue !== 'undefined';
+  };
   // Handle loading state
   if (isLoading) {
     return (
@@ -182,83 +189,11 @@ const ContentGrid = ({
       };
     }
     
-    // Helper function to format a date range from a single date
-    const formatDateRange = (dateString) => {
-      try {
-        // Try to parse the date
-        const parsedDate = new Date(dateString);
-        
-        if (isNaN(parsedDate.getTime())) {
-          return { startDate: '-', endDate: '-' };
-        }
-        
-        const formattedStartDate = formatDate(parsedDate, 364); // 364 days before end date
-        const formattedEndDate = formatDate(parsedDate);
-      
-        return {
-          startDate: formattedStartDate,
-          endDate: formattedEndDate
-        };
-      } catch (error) {
-        console.error('Error in formatDateRange:', { 
-          error: error.message,
-          dateString,
-          type: typeof dateString 
-        });
-        return { startDate: '-', endDate: '-' };
-      }
-    };
-
-    // Helper function to get policy period
-    const getPolicyPeriod = (policyType) => {
-      // Map policy types to their respective date fields in the API response
-      const dateFieldMap = {
-        'Commercial Liability': 'commercialRenewalDate',
-        'Marine': 'marineRenewal',
-        'Property': 'renewalDate',
-        'Fleet': 'renewalDate2'
-      };
-      
-      const fieldName = dateFieldMap[policyType];
-      
-      // Check if the field exists and has a value
-      const fieldValue = policyData[fieldName];
-      
-      // If the field is empty or invalid, try alternative field names
-      if (!fieldValue || fieldValue.trim() === '' || fieldValue === 'N/A' || fieldValue === 'Invalid Date' || fieldValue === '-') {
-        
-        // Define alternative field names for each policy type
-        const alternativeFields = {
-          'Commercial Liability': ['commercialRenewalDate', 'empLiabilityRenewalDate'],
-          'Marine': ['marineRenewalDate', 'marineRenewal'],
-          'Property': ['renewalDate', 'buildingRenewalDate'],
-          'Fleet': ['renewalDate2', 'fleetRenewalDate']
-        };
-        
-        // Try each alternative field until we find a valid date
-        const alternatives = alternativeFields[policyType] || [];
-        for (const altField of alternatives) {
-          const altValue = policyData[altField];
-          if (altValue && altValue.trim() !== '' && altValue !== 'N/A' && altValue !== 'Invalid Date' && altValue !== '-') {
-            return formatDateRange(altValue);
-          }
-        }
-        return { startDate: '-', endDate: '-' };
-      }
-      
-      // If we have a valid field value, format it
-      return formatDateRange(fieldValue);
-    };
-    
     switch (type) {
       case 'Commercial Liability': {
-        const { startDate, endDate } = getPolicyPeriod('Commercial Liability');
-        
         return {
           policyNumber: policyData['commercialPolicy'] || '-',
           status: 'Active',
-          startDate,
-          endDate,
           premiumPaid: policyData['commercialPremiumPaid'] || '-',
           sumAssured: policyData['employeeLiabilityCover'] || '-',
           location: policyData['stockLocation'] || '-',
@@ -272,12 +207,9 @@ const ContentGrid = ({
         };
       }
       case 'Marine': {
-        const { startDate, endDate } = getPolicyPeriod('Marine');
         return {
           policyNumber: policyData['marine'] || '-',
           status: 'Active',
-          startDate,
-          endDate,
           premiumPaid: policyData['marinePremiumPaid'] || '-',
           sumAssured: policyData['perTransitCover'] || '-',
           location: 'Multiple Locations',
@@ -294,12 +226,9 @@ const ContentGrid = ({
         };
       }
       case 'Property': {
-        const { startDate, endDate } = getPolicyPeriod('Property');
         return {
           policyNumber: policyData['buildingInsurance'] || '-',
           status: 'Active',
-          startDate,
-          endDate,
           premiumPaid: policyData['buildingPremiumPaid'] || '-',
           sumAssured: policyData['sumAssuredValueOfPremises'] || '-',
           location: policyData['buildingLocation'] || '-',
@@ -313,21 +242,9 @@ const ContentGrid = ({
         };
       }
       case 'Fleet': {
-        const { startDate, endDate } = getPolicyPeriod('Fleet');
-        console.log('Fleet policy data:', {
-          policyNumber: policyData['fleetPolicy'],
-          premiumPaid: policyData['fleetPremiumPaid'], 
-          sumAssured: policyData['fleetSumAssured'], 
-          location: policyData['fleetLocation'],    
-          excessPerClaim: policyData['fleetExcessPerClaim'] || 'N/A', 
-          claimsMade: policyData['noOfClaimMadeFleet'] || 'N/A'     
-        });
-        
         return {
           policyNumber: policyData['fleetPolicy'] || '-',
           status: 'Active',
-          startDate,
-          endDate,
           premiumPaid: policyData['fleetPremiumPaid'] || '-',
           sumAssured: policyData['fleetSumAssured'] || '-',
           location: policyData['fleetLocation'] || 'Multiple Locations',
@@ -369,129 +286,161 @@ const ContentGrid = ({
           {/* Use policyData directly for company details */}
           {policyData.companyName ? (
             <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <BuildingIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+              {hasValue(policyData.regAddress) && (
+                <div className="flex items-start space-x-3">
+                  <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                    <BuildingIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>REG. ADDRESS</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.regAddress}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>REG. ADDRESS</p>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.regAddress}</p>
-                </div>
-              </div>
+              )}
 
-              <div className="flex items-start space-x-3">
-                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <BuildingIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+              {hasValue(policyData.warehouseOfficeAddress) && (
+                <div className="flex items-start space-x-3">
+                  <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                    <BuildingIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>WAREHOUSE ADDRESS</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.warehouseOfficeAddress}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>WAREHOUSE ADDRESS</p>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.warehouseOfficeAddress}</p>
-                </div>
-              </div>
+              )}
               
-              {/* Other fields... */}
-              <div className="flex items-start space-x-3">
-                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
+              {hasValue(policyData.regNo) && (
+                <div className="flex items-start space-x-3">
+                  <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                    <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>REG NO</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.regNo}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>REG NO</p>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.regNo}</p>
-                </div>
-              </div>
+              )}
 
-              <div className="flex items-start space-x-3">
-                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
+              {hasValue(policyData.vatNumber) && (
+                <div className="flex items-start space-x-3">
+                  <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                    <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>VAT NO</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.vatNumber}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>VAT NO</p>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.vatNumber}</p>
-                </div>
-              </div>
+              )}
 
-              <div className="flex items-start space-x-3">
-                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
+              {hasValue(policyData.commodity) && (
+                <div className="flex items-start space-x-3">
+                  <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                    <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>COMMODITIES</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.commodity}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>COMMODITIES</p>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.commodity}</p>
-                </div>
-              </div>
+              )}
 
+              {hasValue(policyData.regDate) && (
+                <div className="flex items-start space-x-3">
+                  <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                    <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>REG DATE</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.regDate}</p>
+                  </div>
+                </div>
+              )}
 
-              <div className="flex items-start space-x-3">
-                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
+              {hasValue(policyData.companyFirstTimePolicy) && (
+                <div className="flex items-start space-x-3">
+                  <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                    <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>FIRST TIME POLICY</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.companyFirstTimePolicy}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>REG DATE</p>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.regDate}</p>
-                </div>
-              </div>
+              )}
 
-              <div className="flex items-start space-x-3">
-                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <UserIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+              {hasValue(policyData.directorOwnerName) && (
+                <div className="flex items-start space-x-3">
+                  <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                    <UserIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>DIRECTOR NAME</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.directorOwnerName}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>DIRECTOR NAME</p>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.directorOwnerName}</p>
-                </div>
-              </div>
+              )}
 
-              <div className="flex items-start space-x-3">
-                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <UserIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+              {hasValue(policyData.insuranceAgent) && (
+                <div className="flex items-start space-x-3">
+                  <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                    <UserIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>INSURANCE AGENT</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.insuranceAgent}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>INSURANCE AGENT</p>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.insuranceAgent}</p>
-                </div>
-              </div>
+              )}
 
-              <div className="flex items-start space-x-3">
-                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <BuildingIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+              {hasValue(policyData.country) && (
+                <div className="flex items-start space-x-3">
+                  <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                    <BuildingIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>COUNTRY</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.country}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>COUNTRY</p>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.country}</p>
-                </div>
-              </div>
+              )}
 
-              
+              {hasValue(policyData.employeeCount) && (
+                <div className="flex items-start space-x-3">
+                  <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                    <UserIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>EMPLOYEE COUNT</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.employeeCount}</p>
+                  </div>
+                </div>
+              )}
 
-              <div className="flex items-start space-x-3">
-                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <UserIcon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+              {hasValue(policyData.turnoverGBP) && (
+                <div className="flex items-start space-x-3">
+                  <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                    <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>TURNOVER (£)</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.turnoverGBP}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>EMPLOYEE COUNT</p>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.employeeCount}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <div className={`p-1 rounded ${isDark ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <svg className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <p className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>TURNOVER (£)</p>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{policyData.turnoverGBP}</p>
-                </div>
-              </div>
+              )}
             </div>
           ) : (
             <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Please select a company to view details</p>
@@ -530,99 +479,113 @@ const ContentGrid = ({
 
               {/* Other Insurance Details */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center space-x-3">
-                  <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
-                    <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                {hasValue(policyDates.startDate) && (
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
+                      <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Policy Start Date</p>
+                      <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                        {policyDates.startDate}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Policy Start Date</p>
-                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-                      {policyDates.startDate}
+                )}
+
+                {hasValue(policyDates.endDate) && (
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
+                      <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Policy End Date</p>
+                      <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                        {policyDates.endDate}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {hasValue(insuranceDetails.premiumPaid) && (
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
+                      <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Premium Paid</p>
+                      <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+                      {selectedInsuranceType === 'Property' && (policyData['buildingPremiumPaid'] || 'N/A')}
+                      {selectedInsuranceType === 'Commercial Liability' && (policyData['commercialPremiumPaid'] || 'N/A')}
+                      {selectedInsuranceType === 'Marine' && (policyData['marinePremiumPaid'] || 'N/A')}
+                      {selectedInsuranceType === 'Fleet' && (policyData['fleetPremiumPaid'] || 'N/A')}
                     </p>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div className="flex items-center space-x-3">
-                  <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
-                    <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                {hasValue(insuranceDetails.sumAssured) && (
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
+                      <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Sum Assured</p>
+                      <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{insuranceDetails.sumAssured}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Policy End Date</p>
-                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-                      {policyDates.endDate}
-                    </p>
-                  </div>
-                </div>
+                )}
 
-                <div className="flex items-center space-x-3">
-                  <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
-                    <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                    </svg>
+                {hasValue(insuranceDetails.location) && (
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
+                      <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Location</p>
+                      <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{insuranceDetails.location}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Premium Paid</p>
-                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-                    {selectedInsuranceType === 'Property' && (policyData['buildingPremiumPaid'] || 'N/A')}
-                    {selectedInsuranceType === 'Commercial Liability' && (policyData['commercialPremiumPaid'] || 'N/A')}
-                    {selectedInsuranceType === 'Marine' && (policyData['marinePremiumPaid'] || 'N/A')}
-                    {selectedInsuranceType === 'Fleet' && (policyData['fleetPremiumPaid'] || 'N/A')}
-                  </p>
-                  </div>
-                </div>
+                )}
 
-                <div className="flex items-center space-x-3">
-                  <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
-                    <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                    </svg>
+                {hasValue(insuranceDetails.excessPerClaim) && (
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
+                      <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Excess Per Claim</p>
+                      <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{insuranceDetails.excessPerClaim}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Sum Assured</p>
-                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{insuranceDetails.sumAssured}</p>
-                  </div>
-                </div>
+                )}
 
-                <div className="flex items-center space-x-3">
-                  <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
-                    <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+                {hasValue(insuranceDetails.claimsMade) && (
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
+                      <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Claims Made</p>
+                      <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{insuranceDetails.claimsMade}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Location</p>
-                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{insuranceDetails.location}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
-                    <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Excess Per Claim</p>
-                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{insuranceDetails.excessPerClaim}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <div className={`p-1 rounded ${isDark ? 'bg-purple-900' : 'bg-purple-100'}`}>
-                    <svg className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className={`text-xs font-medium uppercase ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Claims Made</p>
-                    <p className={`text-sm ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{insuranceDetails.claimsMade}</p>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Coverage Breakdown */}
