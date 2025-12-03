@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, Sun, Moon, Monitor, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import astuteLogo from '../assets/Astute logo.png';
+import infoImg from '../assets/infoImg.png';
 
 const Login = () => {
   const [theme, setTheme] = useState('system');
@@ -109,32 +111,67 @@ const Login = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <div className={`w-full max-w-md rounded-2xl shadow-2xl transition-colors duration-300 border-0 ${
-          isDark ? 'bg-gray-800' : ' bg-white/60'
+      <div className="flex items-center justify-center min-h-screen p-6">
+        <div className={`w-full max-w-6xl rounded-2xl shadow-2xl transition-colors duration-300 border-0 overflow-hidden ${
+          isDark ? 'bg-gray-800' : 'bg-white'
         }`}>
-          {/* Header */}
-          <div className="px-8 pt-12 pb-8 text-center">
-            <div className={`w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center ${
-              isDark ? 'bg-blue-600' : 'bg-blue-500'
+          <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[650px]">
+            {/* Left Section - Insurance Details */}
+            <div className={`hidden lg:flex flex-col justify-center p-12 ${
+              isDark ? 'bg-gray-900' : 'bg-white'
             }`}>
-              <FileText className="w-8 h-8 text-white" />
+              <div className="w-full">
+                <h2 className={`text-3xl font-bold mb-6 ${
+                  isDark ? 'text-white' : 'text-gray-900'
+                }`}>
+                  GROUP - COMPANY INSURANCE DETAILS
+                </h2>
+                <p className={`text-sm mb-10 leading-relaxed ${
+                  isDark ? 'text-gray-400' : 'text-gray-900'
+                }`}>
+                  Company insurance, also known as business insurance, protects a company from financial losses due to unexpected events such as property damage, legal liabilities, employee-related risks, and operational disruptions. It helps businesses mitigate risks and comply with regulations, ensuring smooth operations.
+                </p>
+                
+                {/* Insurance Details Image */}
+                <div className="w-full flex items-center justify-center">
+                  <img 
+                    src={infoImg} 
+                    alt="Group Company Insurance Details" 
+                    className="w-full h-auto object-contain"
+                  />
+                </div>
+              </div>
             </div>
-            <h1 className={`text-2xl font-semibold mb-2 ${
-              isDark ? 'text-white' : 'text-gray-900'
-            }`}>
-              Insurance Portal
-            </h1>
-            <p className={`text-sm ${
-              isDark ? 'text-gray-400' : 'text-gray-600'
-            }`}>
-              Next-Generation Insurance Management
-            </p>
-          </div>
 
-          {/* Form */}
-          <form className="px-8 pb-8" onSubmit={handleSubmit}>
-            <div className="space-y-6">
+            {/* Right Section - Login Form */}
+            <div className={`flex flex-col justify-center p-12 ${
+              isDark ? 'bg-gray-800' : 'bg-gradient-to-br from-blue-50 to-indigo-100'
+            }`}>
+              {/* Header */}
+              <div className="text-center mb-8">
+                {/* Astute Logo */}
+                <div className="mx-auto mb-6 flex items-center justify-center">
+                  <img 
+                    src={astuteLogo} 
+                    alt="Astute Healthcare Logo" 
+                    className="h-20 w-auto object-contain"
+                  />
+                </div>
+                <h1 className={`text-2xl font-semibold mb-2 ${
+                  isDark ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Login
+                </h1>
+                <p className={`text-sm ${
+                  isDark ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Please enter your email and Password
+                </p>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleSubmit}>
+            <div className="space-y-5">
               {/* Email Field */}
               <div>
                 <label className={`block text-sm font-medium mb-2 ${
@@ -148,7 +185,7 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
-                  className={`w-full px-4 py-3 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-4 py-3 text-sm rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     isDark 
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
@@ -169,7 +206,7 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className={`w-full px-4 py-3 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-4 py-3 text-sm rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     isDark 
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
@@ -188,14 +225,13 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className={`w-full px-4 py-3 rounded-lg border text-left flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+                    className={`w-full px-4 py-3 text-sm rounded-lg border text-left flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${
                       isDark 
                         ? 'bg-gray-700 border-gray-600 text-white' 
                         : 'bg-white border-gray-300 text-gray-900'
                     }`}
                   >
                     <span className="flex items-center">
-                      <span className='mr-1'></span>
                       {loginAs}
                     </span>
                     <ChevronDown className={`w-5 h-5 transition-transform ${
@@ -217,7 +253,7 @@ const Login = () => {
                             setLoginAs(option);
                             setIsDropdownOpen(false);
                           }}
-                          className={`w-full px-4 py-3 text-left transition-colors first:rounded-t-lg last:rounded-b-lg cursor-pointer ${
+                          className={`w-full px-4 py-3 text-sm text-left transition-colors first:rounded-t-lg last:rounded-b-lg cursor-pointer ${
                             isDark 
                               ? 'text-white hover:bg-gray-600' 
                               : 'text-gray-900 hover:bg-gray-50'
@@ -235,7 +271,7 @@ const Login = () => {
               
               {/* Login message display */}
               {loginMessage && (
-                <div className="text-center text-sm font-medium text-red-500">
+                <div className="text-center text-sm font-medium text-red-500 mt-3">
                   {loginMessage}
                 </div>
               )}
@@ -243,12 +279,14 @@ const Login = () => {
               {/* Sign In Button */}
               <button
                 type="submit" 
-                className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="mt-6 w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-sm"
               >
-                Sign In
+                Login
               </button>
             </div>
           </form>
+            </div>
+          </div>
         </div>
       </div>
 
