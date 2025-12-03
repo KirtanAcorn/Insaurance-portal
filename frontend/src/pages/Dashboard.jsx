@@ -7,6 +7,8 @@ import Claims from './tabs/Claims';
 import toast from 'react-hot-toast';
 import Policies from './tabs/Policies';
 import DashboardTab from './tabs/DashboardTab'
+import AddPolicyModal from '../components/policies/AddPolicyModal';
+import EditPolicyModal from '../components/policies/EditPolicyModal';
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMemo } from "react";
@@ -27,6 +29,8 @@ const Dashboard = () => {
   const [isOpenNewClaim, setIsOpenNewClaim] = useState(false);
   const [isModalOpenNew, setIsModalOpenNew] = useState(false);
   const [openIsModalOpenNew, setOpenIsModalOpenNew] = useState(false);
+  const [isEditPolicyModalOpen, setIsEditPolicyModalOpen] = useState(false);
+  const [selectedPolicy, setSelectedPolicy] = useState(null);
   const [users, setUsers] = useState([]); 
   const [claims, setClaims] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -1341,6 +1345,76 @@ const Dashboard = () => {
     }
   };
 
+  const handleCreatePolicy = async (policyFormData) => {
+    try {
+      if (!policyFormData.companyName || !policyFormData.year || !policyFormData.propertyType) {
+        toast.error('Please fill in all required fields (Company, Year, Property Type)', {
+          duration: 3000,
+          position: 'top-center'
+        });
+        return;
+      }
+
+      const response = await axios.post('/api/policies/create', policyFormData);
+
+      toast.success('Policy created successfully!', {
+        duration: 3000,
+        position: 'top-center'
+      });
+
+      setOpenIsModalOpenNew(false);
+
+      // Refresh policy data if we're on the policies tab
+      if (activeTab === 'Policies' && selectedCompanyPolicy && policyYear) {
+        const company = policyCompanies.find(c => c.id === selectedCompanyPolicy);
+        if (company) {
+          await fetchPolicyData(company.name, policyYear);
+        }
+      }
+
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || error.message;
+      toast.error('Error creating policy: ' + errorMsg, {
+        duration: 5000,
+        position: 'top-center'
+      });
+    }
+  };
+
+  const handleEditPolicy = (policy) => {
+    setSelectedPolicy(policy);
+    setIsEditPolicyModalOpen(true);
+  };
+
+  const handleUpdatePolicy = async (policyFormData) => {
+    try {
+      const response = await axios.put('/api/policies/update', policyFormData);
+
+      toast.success('Policy updated successfully!', {
+        duration: 3000,
+        position: 'top-center'
+      });
+
+      setIsEditPolicyModalOpen(false);
+      setSelectedPolicy(null);
+
+      // Refresh policy data if we're on the policies tab
+      if (activeTab === 'Policies' && selectedCompanyPolicy && policyYear) {
+        const company = policyCompanies.find(c => c.id === selectedCompanyPolicy);
+        if (company) {
+          await fetchPolicyData(company.name, policyYear);
+        }
+      }
+
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || error.message;
+      toast.error('Error updating policy: ' + errorMsg, {
+        duration: 5000,
+        position: 'top-center'
+      });
+    }
+  };
+
 
   const companies = [
     'Astute Healthcare limited',
@@ -1820,9 +1894,30 @@ const Dashboard = () => {
           openIsModalOpenNew={setOpenIsModalOpenNew}
           allPolicies={allPolicies}
           rawPolicyRow={companyPolicies && companyPolicies.length > 0 ? companyPolicies[0] : null}
+          onEditPolicy={handleEditPolicy}
         />}
 
       </main>
+
+      {/* Add Policy Modal */}
+      <AddPolicyModal
+        isDark={isDark}
+        isOpen={openIsModalOpenNew}
+        onClose={() => setOpenIsModalOpenNew(false)}
+        onSubmit={handleCreatePolicy}
+      />
+
+      {/* Edit Policy Modal */}
+      <EditPolicyModal
+        isDark={isDark}
+        isOpen={isEditPolicyModalOpen}
+        onClose={() => {
+          setIsEditPolicyModalOpen(false);
+          setSelectedPolicy(null);
+        }}
+        onSubmit={handleUpdatePolicy}
+        policyData={selectedPolicy}
+      />
     </div>
   );
 };

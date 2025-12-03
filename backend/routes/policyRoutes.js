@@ -27,4 +27,20 @@ router.get('/company/:companyName', policyController.getCompanyPolicies);
  */
 router.get('/by-year', policyController.getPoliciesByYear);
 
+/**
+ * @route   POST /api/policies/create
+ * @desc    Create a new policy
+ * @access  Private
+ * @body    {object} policyData - Policy data including company, year, and property type specific fields
+ */
+router.post('/create', policyController.createPolicy);
+
+/**
+ * @route   PUT /api/policies/update
+ * @desc    Update an existing policy
+ * @access  Private
+ * @body    {object} policyData - Policy data including id and fields to update
+ */
+router.put('/update', policyController.updatePolicy);
+
 module.exports = router;
