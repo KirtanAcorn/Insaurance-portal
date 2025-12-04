@@ -558,18 +558,11 @@ const Dashboard = () => {
       }
     };
     
-    // Only include policies that match the selected year
+    // Since we're already filtering by year in the API call, we don't need to filter again
+    // Just check if the policy has data
     const policyYearMatch = (dateString) => {
-      if (!dateString || !policyYear) return true;
-      try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return true; // If date is invalid, include it
-        const year = date.getFullYear();
-        return policyYear.includes(year);
-      } catch (error) {
-        console.error('Error checking policy year:', error);
-        return true; // If there's an error, include the policy to be safe
-      }
+      // Always return true since the API already filters by year
+      return true;
     };
     
     // Helper function to format currency
@@ -590,11 +583,10 @@ const Dashboard = () => {
       }
     };
     
-    // Property Policy - using the correct field names from the API response
-    if ((policy['Building Premium Paid'] || policy['Property Policy Link']) && 
-        policyYearMatch(policy['Renewal Date'])) {
+    // Property Policy - Check if policy number exists (primary indicator)
+    if (policy['Building Insurance'] && policy['Building Insurance'].trim() !== '') {
       policies.push({
-        id: policy['Building Insurance'] || '-',
+        id: policy['Building Insurance'],
         type: 'Property',
         status: 'Active',
         premium: formatCurrency(policy['Building Premium Paid']),
@@ -603,11 +595,10 @@ const Dashboard = () => {
       });
     }
     
-    // Commercial Liability Policy - using the correct field names from the API response
-    if ((policy['Commercial Premium Paid'] || policy['Commercial Policy Link']) && 
-        policyYearMatch(policy['Commercial Renewal Date'])) {
+    // Commercial Liability Policy - Check if policy number exists (primary indicator)
+    if (policy['Commercial Policy'] && policy['Commercial Policy'].trim() !== '') {
       policies.push({
-        id: policy['Commercial Policy'] || '-',
+        id: policy['Commercial Policy'],
         type: 'Commercial Liability',
         status: 'Active',
         premium: formatCurrency(policy['Commercial Premium Paid']),
@@ -616,24 +607,22 @@ const Dashboard = () => {
       });
     }
     
-    // Fleet Policy - using the correct field names from the API response
-    if ((policy['Fleet Premium Paid'] || policy['Fleet Policy Link']) && 
-        policyYearMatch(policy['Renewal Date2'])) {
+    // Fleet Policy - Check if policy number exists (primary indicator)
+    if (policy['Fleet Policy'] && policy['Fleet Policy'].trim() !== '') {
       policies.push({
-        id: policy['Fleet Policy'] || '-',
+        id: policy['Fleet Policy'],
         type: 'Fleet',
         status: 'Active',
         premium: formatCurrency(policy['Fleet Premium Paid']),
-        coverage: '-', // Fleet coverage not available in current data structure
+        coverage: '-',
         endDate: formatDate(policy['Renewal Date2'])
       });
     }
     
-    // Marine Policy - using the correct field names from the API response
-    if ((policy['Marine Premium Paid'] || policy['Marine Policy Link']) && 
-        policyYearMatch(policy['Marine Renewal'])) {
+    // Marine Policy - Check if policy number exists (primary indicator)
+    if (policy['Marine'] && policy['Marine'].trim() !== '') {
       policies.push({
-        id: policy['Marine'] || '-',
+        id: policy['Marine'],
         type: 'Marine',
         status: 'Active',
         premium: formatCurrency(policy['Marine Premium Paid']),

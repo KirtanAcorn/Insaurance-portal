@@ -129,6 +129,19 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
   }, [policyData, isOpen]);
 
   const determinePropertyType = (data) => {
+    // If selectedPolicyType is provided, use it directly
+    if (data.selectedPolicyType) {
+      // Map the policy type names to property type values
+      const typeMap = {
+        'Commercial Liability': 'Commercial',
+        'Marine': 'Marine',
+        'Property': 'Property',
+        'Fleet': 'Fleet'
+      };
+      return typeMap[data.selectedPolicyType] || data.selectedPolicyType;
+    }
+    
+    // Otherwise, determine from the data
     if (data['Commercial Policy'] || data['Commercial Premium Paid']) return 'Commercial';
     if (data['Marine'] || data['Marine Premium Paid']) return 'Marine';
     if (data['Building Insurance'] || data['Building Premium Paid']) return 'Property';
