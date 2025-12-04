@@ -122,8 +122,8 @@ const SubmitNewClaimModal = ({
         claims: policyData["No Of claim Cargo"] ?? "N/A",
         coverage: [
           { label: "Per Transit Cover", value: formatCurrency(policyData["Per Transit Cover"], policyData?.Currency) || "N/A" },
-          { label: "UK-UK/EU-EU/USA-USA", value: policyData["UK-UK/EU-EU/USA-USA"] || "N/A" },
-          { label: "UK-EU", value: policyData["UK-EU"] || "N/A" },
+          { label: "UK-EU", value: formatCurrency(policyData["UK-EU"], policyData?.Currency) || "N/A" },
+          { label: "Cross Voyage", value: formatCurrency(policyData["CROSS VOYAGE"], policyData?.Currency) || "N/A" },
         ],
       };
     }
