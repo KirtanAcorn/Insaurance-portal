@@ -191,6 +191,17 @@ const ContentGrid = ({
     
     switch (type) {
       case 'Commercial Liability': {
+        const commercialCoverage = {};
+        
+        // Only add fields that have values
+        if (hasValue(policyData['employeeLiabilityCover'])) commercialCoverage['Employee Liability Cover'] = policyData['employeeLiabilityCover'];
+        if (hasValue(policyData['floatingStock'])) commercialCoverage['Floating Stock'] = policyData['floatingStock'];
+        if (hasValue(policyData['productLiability'])) commercialCoverage['Product Liability'] = policyData['productLiability'];
+        if (hasValue(policyData['stockLocation'])) commercialCoverage['Stock Location'] = policyData['stockLocation'];
+        if (hasValue(policyData['stockCover'])) commercialCoverage['Stock Cover'] = policyData['stockCover'];
+        if (hasValue(policyData['amazonVendorLiability'])) commercialCoverage['Amazon Vendor Liability'] = policyData['amazonVendorLiability'];
+        if (hasValue(policyData['legalExpenseCover'])) commercialCoverage['Legal Expense Cover'] = policyData['legalExpenseCover'];
+        
         return {
           policyNumber: policyData['commercialPolicy'] || '-',
           status: 'Active',
@@ -199,14 +210,33 @@ const ContentGrid = ({
           location: policyData['stockLocation'] || '-',
           excessPerClaim: policyData['commercialExcessPerClaim'] || '-',
           claimsMade: policyData['noOfClaimCommercial'] || '0',
-          coverage: {
-            'Employee Liability Cover': policyData['employeeLiabilityCover'] || '-',
-            'Floating Stock': policyData['floatingStock'] || '-',
-            'Product Liability': policyData['productLiability'] || '-'
-          }
+          coverage: commercialCoverage
         };
       }
       case 'Marine': {
+        const marineCoverage = {};
+        
+        // Only add fields that have values
+        if (hasValue(policyData['perTransitCover'])) marineCoverage['Per Transit Cover'] = policyData['perTransitCover'];
+        if (hasValue(policyData['ukUk'])) marineCoverage['UK-UK'] = policyData['ukUk'];
+        if (hasValue(policyData['ukEu'])) marineCoverage['UK-EU'] = policyData['ukEu'];
+        if (hasValue(policyData['ukUsaCanada'])) marineCoverage['UK-USA/Canada'] = policyData['ukUsaCanada'];
+        if (hasValue(policyData['ukMiddleEastDubai'])) marineCoverage['UK-MiddleEast(Dubai)'] = policyData['ukMiddleEastDubai'];
+        if (hasValue(policyData['usaMiddleEastDubai'])) marineCoverage['USA-MiddleEast(Dubai)'] = policyData['usaMiddleEastDubai'];
+        if (hasValue(policyData['euMiddleEastDubai'])) marineCoverage['EU-MiddleEast(Dubai)'] = policyData['euMiddleEastDubai'];
+        if (hasValue(policyData['euEu'])) marineCoverage['EU-EU'] = policyData['euEu'];
+        if (hasValue(policyData['euUsa'])) marineCoverage['EU-USA'] = policyData['euUsa'];
+        if (hasValue(policyData['usaUsa'])) marineCoverage['USA-USA'] = policyData['usaUsa'];
+        if (hasValue(policyData['ukRow'])) marineCoverage['UK-ROW'] = policyData['ukRow'];
+        if (hasValue(policyData['usaRow'])) marineCoverage['USA-ROW'] = policyData['usaRow'];
+        if (hasValue(policyData['euRow'])) marineCoverage['EU-ROW'] = policyData['euRow'];
+        if (hasValue(policyData['rowRow'])) marineCoverage['ROW-ROW'] = policyData['rowRow'];
+        if (hasValue(policyData['crossVoyage'])) marineCoverage['Cross Voyage'] = policyData['crossVoyage'];
+        if (hasValue(policyData['airSeaRail'])) marineCoverage['Air/Sea/Rail'] = policyData['airSeaRail'];
+        if (hasValue(policyData['road'])) marineCoverage['Road'] = policyData['road'];
+        if (hasValue(policyData['anyoneLocationInOrdinaryCourseOfTransit'])) marineCoverage['Anyone Location In Ordinary Course Of Transit'] = policyData['anyoneLocationInOrdinaryCourseOfTransit'];
+        if (hasValue(policyData['cargoExcessPerClaim'])) marineCoverage['Cargo Excess Per Claim'] = policyData['cargoExcessPerClaim'];
+        
         return {
           policyNumber: policyData['marine'] || '-',
           status: 'Active',
@@ -215,17 +245,17 @@ const ContentGrid = ({
           location: 'Multiple Locations',
           excessPerClaim: policyData['cargoExcessPerClaim'] || '-',
           claimsMade: policyData['noOfClaimCargo'] || '0',
-          coverage: {
-            'Per Transit Cover': policyData['perTransitCover'] || '-',
-            'UK-UK/EU-EU/USA-USA': policyData['ukUkEuEuUsaUsa'] || '-',
-            'UK-EU': policyData['ukEu'] || '-',
-            'Cross Voyage': policyData['crossVoyage'] || '-',
-            'Air/Sea/Rail': policyData['airSeaRail'] || '-',
-            'Road': policyData['road'] || '-'
-          }
+          coverage: marineCoverage
         };
       }
       case 'Property': {
+        const propertyCoverage = {};
+        
+        // Only add fields that have values
+        if (hasValue(policyData['sumAssuredValueOfPremises'])) propertyCoverage['Building Value'] = policyData['sumAssuredValueOfPremises'];
+        if (hasValue(policyData['declareValue'])) propertyCoverage['Declared Value'] = policyData['declareValue'];
+        if (hasValue(policyData['buildingLocation'])) propertyCoverage['Location'] = policyData['buildingLocation'];
+        
         return {
           policyNumber: policyData['buildingInsurance'] || '-',
           status: 'Active',
@@ -234,14 +264,16 @@ const ContentGrid = ({
           location: policyData['buildingLocation'] || '-',
           excessPerClaim: policyData['buildingExcessPerClaim'] || '-',
           claimsMade: policyData['noOfClaimBuilding'] || '0',
-          coverage: {
-            'Building Value': policyData['sumAssuredValueOfPremises'] || '-',
-            'Declared Value': policyData['declareValue'] || '-',
-            'Location': policyData['buildingLocation'] || '-'
-          }
+          coverage: propertyCoverage
         };
       }
       case 'Fleet': {
+        const fleetCoverage = {};
+        
+        // Only add fields that have values
+        if (hasValue(policyData['regNo2'])) fleetCoverage['Registration Numbers'] = policyData['regNo2'];
+        if (hasValue(policyData['fleetExcessPerClaim'])) fleetCoverage['Excess Per Claim'] = policyData['fleetExcessPerClaim'];
+        
         return {
           policyNumber: policyData['fleetPolicy'] || '-',
           status: 'Active',
@@ -250,11 +282,7 @@ const ContentGrid = ({
           location: policyData['fleetLocation'] || 'Multiple Locations',
           excessPerClaim: policyData['fleetExcessPerClaim'] || '-',
           claimsMade: policyData['noOfClaimMadeFleet'] || '-',
-          coverage: {
-            'Registration Numbers': policyData['regNo2'] || '-',
-            'Coverage Type': 'Comprehensive',
-            'Policy Type': 'Fleet'
-          }
+          coverage: fleetCoverage
         };
       }
       default:
@@ -588,23 +616,25 @@ const ContentGrid = ({
                 )}
               </div>
 
-              {/* Coverage Breakdown */}
-              <div className="mt-6">
-                <h4 className={`text-sm font-medium mb-3 flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  Coverage Breakdown
-                </h4>
-                <div className="space-y-3">
-                  {insuranceDetails.coverage && Object.entries(insuranceDetails.coverage).map(([type, amount]) => (
-                    <div key={type} className={`flex justify-between items-center p-3 rounded-lg ${isDark ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
-                      <span className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{type}:</span>
-                      <span className={`text-sm font-semibold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{amount}</span>
-                    </div>
-                  ))}
+              {/* Coverage Breakdown - Only show if there are coverage items */}
+              {insuranceDetails.coverage && Object.keys(insuranceDetails.coverage).length > 0 && (
+                <div className="mt-6">
+                  <h4 className={`text-sm font-medium mb-3 flex items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Coverage Breakdown
+                  </h4>
+                  <div className="space-y-3">
+                    {Object.entries(insuranceDetails.coverage).map(([type, amount]) => (
+                      <div key={type} className={`flex justify-between items-center p-3 rounded-lg ${isDark ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
+                        <span className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{type}:</span>
+                        <span className={`text-sm font-semibold ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{amount}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ) : (
             <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Please select an insurance type to view details</p>
