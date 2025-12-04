@@ -242,7 +242,7 @@ const ContentGrid = ({
           status: 'Active',
           premiumPaid: policyData['marinePremiumPaid'] || '-',
           sumAssured: policyData['perTransitCover'] || '-',
-          location: 'Multiple Locations',
+          location: '-',
           excessPerClaim: policyData['cargoExcessPerClaim'] || '-',
           claimsMade: policyData['noOfClaimCargo'] || '0',
           coverage: marineCoverage
@@ -279,7 +279,7 @@ const ContentGrid = ({
           status: 'Active',
           premiumPaid: policyData['fleetPremiumPaid'] || '-',
           sumAssured: policyData['fleetSumAssured'] || '-',
-          location: policyData['fleetLocation'] || 'Multiple Locations',
+          location: policyData['fleetLocation'] || '-',
           excessPerClaim: policyData['fleetExcessPerClaim'] || '-',
           claimsMade: policyData['noOfClaimMadeFleet'] || '-',
           coverage: fleetCoverage
@@ -287,6 +287,24 @@ const ContentGrid = ({
       }
       default:
         return {};
+    }
+  };
+
+  // Check if a policy exists for the selected insurance type
+  const policyExists = (type) => {
+    if (!policyData || Object.keys(policyData).length === 0) return false;
+    
+    switch (type) {
+      case 'Commercial Liability':
+        return hasValue(policyData['commercialPolicy']);
+      case 'Marine':
+        return hasValue(policyData['marine']);
+      case 'Property':
+        return hasValue(policyData['buildingInsurance']);
+      case 'Fleet':
+        return hasValue(policyData['fleetPolicy']);
+      default:
+        return false;
     }
   };
 
@@ -487,7 +505,7 @@ const ContentGrid = ({
             </div>
           </div>
 
-          {insuranceDetails ? (
+          {policyExists(selectedInsuranceType) && insuranceDetails ? (
             <div className="space-y-4">
               <div className={`flex justify-between items-center p-3 rounded-lg border-l-4 ${isDark ? 'bg-red-900/20 border-red-500' : 'bg-red-50 border-red-400'}`}>
                 <span className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Policy Number</span>
@@ -637,7 +655,11 @@ const ContentGrid = ({
               )}
             </div>
           ) : (
-            <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Please select an insurance type to view details</p>
+            <p className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              {selectedInsuranceType 
+                ? `No ${selectedInsuranceType} policy found for this company and year.` 
+                : 'Please select an insurance type to view details'}
+            </p>
           )}
         </div>
       </div>
