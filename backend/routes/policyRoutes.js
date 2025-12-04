@@ -28,6 +28,13 @@ router.get('/company/:companyName', policyController.getCompanyPolicies);
 router.get('/by-year', policyController.getPoliciesByYear);
 
 /**
+ * @route   GET /api/policies/available-years
+ * @desc    Get all distinct years available in the database
+ * @access  Private
+ */
+router.get('/available-years', policyController.getAvailableYears);
+
+/**
  * @route   POST /api/policies/create
  * @desc    Create a new policy
  * @access  Private

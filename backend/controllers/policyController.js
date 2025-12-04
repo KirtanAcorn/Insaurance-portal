@@ -26,14 +26,14 @@ exports.getPoliciesByYear = async (req, res) => {
   try {
     pool = await poolPromise;
 
-    // Determine latest year if not provided - using [Year] field
+    // Determine latest year if not provided - using [Year ] field (note the trailing space)
     let targetYear = renewalYear;
     if (!targetYear) {
       const latestYearQuery = `
-        SELECT TOP 1 [Year] AS renewalYear
+        SELECT TOP 1 [Year ] AS renewalYear
         FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
-        WHERE [Year] IS NOT NULL AND LTRIM(RTRIM([Year])) <> ''
-        ORDER BY TRY_CONVERT(datetime, SUBSTRING([Year], 1, 4) + '-01-01') DESC
+        WHERE [Year ] IS NOT NULL AND LTRIM(RTRIM([Year ])) <> ''
+        ORDER BY TRY_CONVERT(datetime, SUBSTRING([Year ], 1, 4) + '-01-01') DESC
       `;
       const latestResult = await pool.request().query(latestYearQuery);
       targetYear = latestResult.recordset[0]?.renewalYear || null;
@@ -52,9 +52,9 @@ exports.getPoliciesByYear = async (req, res) => {
         [Marine Premium Paid],
         [Building Premium Paid],
         [Fleet Premium Paid],
-        [Year]
+        [Year ]
       FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
-      WHERE [Year] = @renewalYear
+      WHERE [Year ] = @renewalYear
     `;
 
     const request = pool.request();
@@ -70,7 +70,7 @@ exports.getPoliciesByYear = async (req, res) => {
         SUM(TRY_CONVERT(decimal(18,2), REPLACE(REPLACE(ISNULL([Building Premium Paid], '0'), ',', ''), '£', ''))) AS buildingTotal,
         SUM(TRY_CONVERT(decimal(18,2), REPLACE(REPLACE(ISNULL([Fleet Premium Paid], '0'), ',', ''), '£', ''))) AS fleetTotal
       FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
-      WHERE [Year] = @renewalYear
+      WHERE [Year ] = @renewalYear
       GROUP BY UPPER(REPLACE(REPLACE(LTRIM(RTRIM(ISNULL([Currency], 'GBP'))), '£', 'GBP'), ' ', ''))
     `;
 
@@ -101,12 +101,12 @@ exports.getCompanyDetails = async (req, res) => {
     // First, check if the table exists and is accessible
     await pool.request().query('SELECT TOP 1 1 FROM Tbl_Insurance_Details_Facility');
     
-    // Query with new table structure - using [Year] field instead of [Renewal Year]
+    // Query with new table structure - using [Year ] field (note the trailing space)
     const query = `
       SELECT TOP 50 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
       WHERE 
         [Company Name] = @companyName AND
-        [Year] = @renewalYear
+        [Year ] = @renewalYear
     `;
     
     const request = pool.request();
@@ -123,7 +123,7 @@ exports.getCompanyDetails = async (req, res) => {
         SELECT TOP 50 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
         WHERE 
           [Company Name] LIKE '%' + @companyName + '%' AND
-          [Year] LIKE '%' + @renewalYear + '%'
+          [Year ] LIKE '%' + @renewalYear + '%'
       `;
       
       const likeRequest = pool.request();
@@ -170,8 +170,30 @@ exports.createPolicy = async (req, res) => {
   try {
     pool = await poolPromise;
     
+    // Check if a policy already exists for this company and year
+    const checkQuery = `
+      SELECT COUNT(*) as count 
+      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      WHERE [Company Name] = @companyName AND [Year ] = @year
+    `;
+    
+    const checkRequest = pool.request();
+    checkRequest.input('companyName', sql.NVarChar(255), policyData.companyName);
+    checkRequest.input('year', sql.NVarChar(50), policyData.year);
+    
+    const checkResult = await checkRequest.query(checkQuery);
+    const existingCount = checkResult.recordset[0].count;
+    
+    if (existingCount > 0) {
+      return res.status(409).json({ 
+        error: 'Duplicate policy detected',
+        message: `A policy for ${policyData.companyName} in year ${policyData.year} already exists. Please use the Edit function to update the existing policy.`,
+        existingCount: existingCount
+      });
+    }
+    
     // Build the INSERT query dynamically based on property type
-    let fields = ['[Company Name]', '[Year]'];
+    let fields = ['[Company Name]', '[Year ]'];
     let values = ['@companyName', '@year'];
     let params = {
       companyName: policyData.companyName,
@@ -393,6 +415,30 @@ exports.updatePolicy = async (req, res) => {
   }
 };
 
+// Get all distinct years from the database
+exports.getAvailableYears = async (req, res) => {
+  let pool;
+  try {
+    pool = await poolPromise;
+    
+    const query = `
+      SELECT DISTINCT [Year ] as year
+      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      WHERE [Year ] IS NOT NULL AND LTRIM(RTRIM([Year ])) <> ''
+      ORDER BY [Year ] DESC
+    `;
+    
+    const result = await pool.request().query(query);
+    
+    const years = result.recordset.map(row => row.year);
+    
+    return res.json({ years });
+  } catch (error) {
+    console.error('Error fetching available years:', error);
+    return res.status(500).json({ error: 'Failed to fetch available years', details: error.message });
+  }
+};
+
 // Get all policies for a company
 exports.getCompanyPolicies = async (req, res) => {
   const { companyName } = req.params;
@@ -434,14 +480,14 @@ exports.getCompanyPolicies = async (req, res) => {
         [Marine Renewal] AS marineRenewalDate,
         [Renewal Date] AS propertyRenewalDate,
         [Renewal Date2] AS fleetRenewalDate,
-        [Year] AS renewalYear
+        [Year ] AS renewalYear
       FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
       WHERE [Company Name] = @companyName
     `;
     
-    // Add year filter if provided - using [Year] field
+    // Add year filter if provided - using [Year ] field (note the trailing space)
     if (renewalYear) {
-      query += ` AND [Year] = @renewalYear`;
+      query += ` AND [Year ] = @renewalYear`;
     }
     
     query += ` ORDER BY [Company Name]`;

@@ -1,5 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Building, FileText, DollarSign, Ship, Truck, Home } from 'lucide-react';
+
+// Move InputField outside to prevent re-creation on every render
+const InputField = ({ label, field, type = 'text', placeholder, disabled = false, value, onChange, isDark }) => (
+  <div>
+    <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{label}</label>
+    <input 
+      type={type} 
+      value={value} 
+      onChange={(e) => onChange(field, e.target.value)}
+      disabled={disabled}
+      className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+        disabled ? 'bg-gray-200 cursor-not-allowed' : ''} ${
+        isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
+      placeholder={placeholder} 
+    />
+  </div>
+);
 
 const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
   const [formData, setFormData] = useState({
@@ -119,23 +136,25 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
     return '';
   };
 
-  const handleChange = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
+  const handleChange = useCallback((field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  }, []);
+
   const handleSubmit = () => onSubmit(formData);
   const handleCancel = () => onClose();
 
-  if (!isOpen) return null;
+  // ALL HOOKS MUST BE BEFORE ANY EARLY RETURN
+  // Memoized wrapper to pass common props automatically
+  const Field = useCallback((props) => (
+    <InputField 
+      {...props} 
+      value={formData[props.field]} 
+      onChange={handleChange} 
+      isDark={isDark} 
+    />
+  ), [formData, handleChange, isDark]);
 
-  const InputField = ({ label, field, type = 'text', placeholder, disabled = false }) => (
-    <div>
-      <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{label}</label>
-      <input type={type} value={formData[field]} onChange={(e) => handleChange(field, e.target.value)}
-        disabled={disabled}
-        className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-          disabled ? 'bg-gray-200 cursor-not-allowed' : ''} ${
-          isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
-        placeholder={placeholder} />
-    </div>
-  );
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
@@ -162,9 +181,9 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
               <h4 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Policy Information</h4>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <InputField label="Company Name" field="companyName" disabled={true} />
-              <InputField label="Year" field="year" disabled={true} />
-              <InputField label="Property Type" field="propertyType" disabled={true} />
+              <Field label="Company Name" field="companyName" disabled={true} />
+              <Field label="Year" field="year" disabled={true} />
+              <Field label="Property Type" field="propertyType" disabled={true} />
             </div>
           </div>
 
@@ -174,21 +193,21 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
               <h4 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Company Information</h4>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputField label="Country" field="country" placeholder="Enter country" />
-              <InputField label="Reg Address" field="regAddress" placeholder="Enter registered address" />
-              <InputField label="Warehouse/Office Address" field="warehouseOfficeAddress" placeholder="Enter warehouse/office address" />
-              <InputField label="Reg No" field="regNo" placeholder="Enter registration number" />
-              <InputField label="Reg Date" field="regDate" type="date" />
-              <InputField label="Company First Time Policy" field="companyFirstTimePolicy" placeholder="Enter first time policy" />
-              <InputField label="Director/Owner Name" field="directorOwnerName" placeholder="Enter director/owner name" />
-              <InputField label="Company Handle By" field="companyHandledBy" placeholder="Enter handler name" />
-              <InputField label="VAT Number" field="vatNumber" placeholder="Enter VAT number" />
-              <InputField label="Commodity" field="commodity" placeholder="Enter commodity" />
-              <InputField label="Currency" field="currency" placeholder="Enter currency" />
-              <InputField label="Turnover in £ Mn" field="turnoverGBP" type="number" placeholder="Enter turnover" />
-              <InputField label="Insurance Agent" field="insuranceAgent" placeholder="Enter insurance agent" />
-              <InputField label="A/C Handler" field="accountHandler" placeholder="Enter account handler" />
-              <InputField label="Emp Count" field="empCount" type="number" placeholder="Enter employee count" />
+              <Field label="Country" field="country" placeholder="Enter country" />
+              <Field label="Reg Address" field="regAddress" placeholder="Enter registered address" />
+              <Field label="Warehouse/Office Address" field="warehouseOfficeAddress" placeholder="Enter warehouse/office address" />
+              <Field label="Reg No" field="regNo" placeholder="Enter registration number" />
+              <Field label="Reg Date" field="regDate" type="date" />
+              <Field label="Company First Time Policy" field="companyFirstTimePolicy" placeholder="Enter first time policy" />
+              <Field label="Director/Owner Name" field="directorOwnerName" placeholder="Enter director/owner name" />
+              <Field label="Company Handle By" field="companyHandledBy" placeholder="Enter handler name" />
+              <Field label="VAT Number" field="vatNumber" placeholder="Enter VAT number" />
+              <Field label="Commodity" field="commodity" placeholder="Enter commodity" />
+              <Field label="Currency" field="currency" placeholder="Enter currency" />
+              <Field label="Turnover in £ Mn" field="turnoverGBP" type="number" placeholder="Enter turnover" />
+              <Field label="Insurance Agent" field="insuranceAgent" placeholder="Enter insurance agent" />
+              <Field label="A/C Handler" field="accountHandler" placeholder="Enter account handler" />
+              <Field label="Emp Count" field="empCount" type="number" placeholder="Enter employee count" />
             </div>
           </div>
 
@@ -199,20 +218,20 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
                 <h4 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Commercial Liability Details</h4>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField label="Commercial Policy" field="commercialPolicy" placeholder="Enter policy number" />
-                <InputField label="Commercial Policy Link" field="commercialPolicyLink" placeholder="Enter policy link" />
-                <InputField label="Commercial Renewal Date" field="commercialRenewalDate" type="date" />
-                <InputField label="Commercial Premium Paid" field="commercialPremiumPaid" type="number" placeholder="Enter premium amount" />
-                <InputField label="Employee Liability Cover" field="employeeLiabilityCover" type="number" placeholder="Enter cover amount" />
-                <InputField label="EMP Liability Renewal Date" field="empLiabilityRenewalDate" type="date" />
-                <InputField label="Floating Stock" field="floatingStock" placeholder="Enter floating stock" />
-                <InputField label="Stock Cover" field="stockCover" type="number" placeholder="Enter stock cover" />
-                <InputField label="Stock Location" field="stockLocation" placeholder="Enter stock location" />
-                <InputField label="Product Liability" field="productLiability" type="number" placeholder="Enter product liability" />
-                <InputField label="Amazon Vendor Liability" field="amazonVendorLiability" placeholder="Enter amazon vendor liability" />
-                <InputField label="Legal Expense Cover" field="legalExpenseCover" type="number" placeholder="Enter legal expense cover" />
-                <InputField label="Commercial Excess Per Claim" field="commercialExcessPerClaim" type="number" placeholder="Enter excess per claim" />
-                <InputField label="Number of Claims Commercial" field="noOfClaimCommercial" type="number" placeholder="Enter number of claims" />
+                <Field label="Commercial Policy" field="commercialPolicy" placeholder="Enter policy number" />
+                <Field label="Commercial Policy Link" field="commercialPolicyLink" placeholder="Enter policy link" />
+                <Field label="Commercial Renewal Date" field="commercialRenewalDate" type="date" />
+                <Field label="Commercial Premium Paid" field="commercialPremiumPaid" type="number" placeholder="Enter premium amount" />
+                <Field label="Employee Liability Cover" field="employeeLiabilityCover" type="number" placeholder="Enter cover amount" />
+                <Field label="EMP Liability Renewal Date" field="empLiabilityRenewalDate" type="date" />
+                <Field label="Floating Stock" field="floatingStock" placeholder="Enter floating stock" />
+                <Field label="Stock Cover" field="stockCover" type="number" placeholder="Enter stock cover" />
+                <Field label="Stock Location" field="stockLocation" placeholder="Enter stock location" />
+                <Field label="Product Liability" field="productLiability" type="number" placeholder="Enter product liability" />
+                <Field label="Amazon Vendor Liability" field="amazonVendorLiability" placeholder="Enter amazon vendor liability" />
+                <Field label="Legal Expense Cover" field="legalExpenseCover" type="number" placeholder="Enter legal expense cover" />
+                <Field label="Commercial Excess Per Claim" field="commercialExcessPerClaim" type="number" placeholder="Enter excess per claim" />
+                <Field label="Number of Claims Commercial" field="noOfClaimCommercial" type="number" placeholder="Enter number of claims" />
               </div>
             </div>
           )}
@@ -224,30 +243,30 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
                 <h4 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Marine Insurance Details</h4>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField label="Marine" field="marine" placeholder="Enter marine policy" />
-                <InputField label="Marine Policy Link" field="marinePolicyLink" placeholder="Enter policy link" />
-                <InputField label="Marine Renewal" field="marineRenewal" type="date" />
-                <InputField label="Marine Premium Paid" field="marinePremiumPaid" type="number" placeholder="Enter premium amount" />
-                <InputField label="Per Transit Cover" field="perTransitCover" type="number" placeholder="Enter per transit cover" />
-                <InputField label="UK-UK" field="ukUk" placeholder="Enter UK-UK" />
-                <InputField label="UK-EU" field="ukEu" placeholder="Enter UK-EU" />
-                <InputField label="UK-USA/Canada" field="ukUsaCanada" placeholder="Enter UK-USA/Canada" />
-                <InputField label="UK-MiddleEast(Dubai)" field="ukMiddleEastDubai" placeholder="Enter UK-MiddleEast" />
-                <InputField label="USA-MiddleEast(Dubai)" field="usaMiddleEastDubai" placeholder="Enter USA-MiddleEast" />
-                <InputField label="EU-MiddleEast(Dubai)" field="euMiddleEastDubai" placeholder="Enter EU-MiddleEast" />
-                <InputField label="EU-EU" field="euEu" placeholder="Enter EU-EU" />
-                <InputField label="EU-USA" field="euUsa" placeholder="Enter EU-USA" />
-                <InputField label="USA-USA" field="usaUsa" placeholder="Enter USA-USA" />
-                <InputField label="UK-ROW" field="ukRow" placeholder="Enter UK-ROW" />
-                <InputField label="USA-ROW" field="usaRow" placeholder="Enter USA-ROW" />
-                <InputField label="EU-ROW" field="euRow" placeholder="Enter EU-ROW" />
-                <InputField label="ROW-ROW" field="rowRow" placeholder="Enter ROW-ROW" />
-                <InputField label="CROSS VOYAGE" field="crossVoyage" placeholder="Enter cross voyage" />
-                <InputField label="AIR/SEA/RAIL" field="airSeaRail" placeholder="Enter air/sea/rail" />
-                <InputField label="ROAD" field="road" placeholder="Enter road" />
-                <InputField label="Any Location In Ordinary Course Of Transit" field="anyLocationInOrdinaryCourseOfTransit" placeholder="Enter location" />
-                <InputField label="Cargo Excess Per Claim" field="cargoExcessPerClaim" type="number" placeholder="Enter excess per claim" />
-                <InputField label="No Of Claim Cargo" field="noOfClaimCargo" type="number" placeholder="Enter number of claims" />
+                <Field label="Marine" field="marine" placeholder="Enter marine policy" />
+                <Field label="Marine Policy Link" field="marinePolicyLink" placeholder="Enter policy link" />
+                <Field label="Marine Renewal" field="marineRenewal" type="date" />
+                <Field label="Marine Premium Paid" field="marinePremiumPaid" type="number" placeholder="Enter premium amount" />
+                <Field label="Per Transit Cover" field="perTransitCover" type="number" placeholder="Enter per transit cover" />
+                <Field label="UK-UK" field="ukUk" placeholder="Enter UK-UK" />
+                <Field label="UK-EU" field="ukEu" placeholder="Enter UK-EU" />
+                <Field label="UK-USA/Canada" field="ukUsaCanada" placeholder="Enter UK-USA/Canada" />
+                <Field label="UK-MiddleEast(Dubai)" field="ukMiddleEastDubai" placeholder="Enter UK-MiddleEast" />
+                <Field label="USA-MiddleEast(Dubai)" field="usaMiddleEastDubai" placeholder="Enter USA-MiddleEast" />
+                <Field label="EU-MiddleEast(Dubai)" field="euMiddleEastDubai" placeholder="Enter EU-MiddleEast" />
+                <Field label="EU-EU" field="euEu" placeholder="Enter EU-EU" />
+                <Field label="EU-USA" field="euUsa" placeholder="Enter EU-USA" />
+                <Field label="USA-USA" field="usaUsa" placeholder="Enter USA-USA" />
+                <Field label="UK-ROW" field="ukRow" placeholder="Enter UK-ROW" />
+                <Field label="USA-ROW" field="usaRow" placeholder="Enter USA-ROW" />
+                <Field label="EU-ROW" field="euRow" placeholder="Enter EU-ROW" />
+                <Field label="ROW-ROW" field="rowRow" placeholder="Enter ROW-ROW" />
+                <Field label="CROSS VOYAGE" field="crossVoyage" placeholder="Enter cross voyage" />
+                <Field label="AIR/SEA/RAIL" field="airSeaRail" placeholder="Enter air/sea/rail" />
+                <Field label="ROAD" field="road" placeholder="Enter road" />
+                <Field label="Any Location In Ordinary Course Of Transit" field="anyLocationInOrdinaryCourseOfTransit" placeholder="Enter location" />
+                <Field label="Cargo Excess Per Claim" field="cargoExcessPerClaim" type="number" placeholder="Enter excess per claim" />
+                <Field label="No Of Claim Cargo" field="noOfClaimCargo" type="number" placeholder="Enter number of claims" />
               </div>
             </div>
           )}
@@ -259,15 +278,15 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
                 <h4 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Property Insurance Details</h4>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField label="Building Insurance" field="buildingInsurance" placeholder="Enter building insurance" />
-                <InputField label="Property Policy Link" field="propertyPolicyLink" placeholder="Enter policy link" />
-                <InputField label="Renewal Date" field="renewalDate" type="date" />
-                <InputField label="Building Premium Paid" field="buildingPremiumPaid" type="number" placeholder="Enter premium amount" />
-                <InputField label="Sum Assured Value of Premises" field="sumAssuredValueOfPremises" type="number" placeholder="Enter sum assured" />
-                <InputField label="Declared Value" field="declareValue" type="number" placeholder="Enter declared value" />
-                <InputField label="Building Location" field="buildingLocation" placeholder="Enter building location" />
-                <InputField label="Building Excess Per Claim" field="buildingExcessPerClaim" type="number" placeholder="Enter excess per claim" />
-                <InputField label="No Of Claim Building" field="noOfClaimBuilding" type="number" placeholder="Enter number of claims" />
+                <Field label="Building Insurance" field="buildingInsurance" placeholder="Enter building insurance" />
+                <Field label="Property Policy Link" field="propertyPolicyLink" placeholder="Enter policy link" />
+                <Field label="Renewal Date" field="renewalDate" type="date" />
+                <Field label="Building Premium Paid" field="buildingPremiumPaid" type="number" placeholder="Enter premium amount" />
+                <Field label="Sum Assured Value of Premises" field="sumAssuredValueOfPremises" type="number" placeholder="Enter sum assured" />
+                <Field label="Declared Value" field="declareValue" type="number" placeholder="Enter declared value" />
+                <Field label="Building Location" field="buildingLocation" placeholder="Enter building location" />
+                <Field label="Building Excess Per Claim" field="buildingExcessPerClaim" type="number" placeholder="Enter excess per claim" />
+                <Field label="No Of Claim Building" field="noOfClaimBuilding" type="number" placeholder="Enter number of claims" />
               </div>
             </div>
           )}
@@ -279,13 +298,13 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
                 <h4 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>Fleet Insurance Details</h4>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField label="Fleet Policy" field="fleetPolicy" placeholder="Enter fleet policy" />
-                <InputField label="Fleet Policy Link" field="fleetPolicyLink" placeholder="Enter policy link" />
-                <InputField label="Renewal Date" field="renewalDate2" type="date" />
-                <InputField label="Fleet Premium Paid" field="fleetPremiumPaid" type="number" placeholder="Enter premium amount" />
-                <InputField label="Reg No" field="regNo2" placeholder="Enter registration number" />
-                <InputField label="Fleet Excess Per Claim" field="fleetExcessPerClaim" type="number" placeholder="Enter excess per claim" />
-                <InputField label="No Of Claim Made Fleet" field="noOfClaimMadeFleet" type="number" placeholder="Enter number of claims" />
+                <Field label="Fleet Policy" field="fleetPolicy" placeholder="Enter fleet policy" />
+                <Field label="Fleet Policy Link" field="fleetPolicyLink" placeholder="Enter policy link" />
+                <Field label="Renewal Date" field="renewalDate2" type="date" />
+                <Field label="Fleet Premium Paid" field="fleetPremiumPaid" type="number" placeholder="Enter premium amount" />
+                <Field label="Reg No" field="regNo2" placeholder="Enter registration number" />
+                <Field label="Fleet Excess Per Claim" field="fleetExcessPerClaim" type="number" placeholder="Enter excess per claim" />
+                <Field label="No Of Claim Made Fleet" field="noOfClaimMadeFleet" type="number" placeholder="Enter number of claims" />
               </div>
             </div>
           )}

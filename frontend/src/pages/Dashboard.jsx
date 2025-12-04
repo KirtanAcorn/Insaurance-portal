@@ -26,6 +26,7 @@ const Dashboard = () => {
   const [selectedCompanyPolicy, setSelectedCompanyPolicy] = useState('');
   const [selectedInsuranceType, setSelectedInsuranceType] = useState('Property');
   const [policyYear, setPolicyYear] = useState('2025-2026');
+  const [availableYears, setAvailableYears] = useState(['2024-2025', '2025-2026', '2026-2027', '2027-2028']);
   const [isOpenNewClaim, setIsOpenNewClaim] = useState(false);
   const [isModalOpenNew, setIsModalOpenNew] = useState(false);
   const [openIsModalOpenNew, setOpenIsModalOpenNew] = useState(false);
@@ -84,6 +85,27 @@ const Dashboard = () => {
     };
 
     fetchQuickStats();
+  }, []);
+
+  // Fetch available years from database
+  useEffect(() => {
+    const fetchAvailableYears = async () => {
+      try {
+        const { data } = await axios.get('/api/policies/available-years');
+        if (data.years && data.years.length > 0) {
+          setAvailableYears(data.years);
+          // Set the first year as default if current policyYear is not in the list
+          if (!data.years.includes(policyYear)) {
+            setPolicyYear(data.years[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching available years:', error);
+        // Keep default years if fetch fails
+      }
+    };
+
+    fetchAvailableYears();
   }, []);
 
   // Fetch all policies for latest renewal year to drive dashboard-wide totals
@@ -425,7 +447,7 @@ const Dashboard = () => {
                   regNo2: apiData['Reg No2'] || '-',
                   fleetExcessPerClaim: apiData['Fleet Excess Per claim '] || '-',
                   noOfClaimMadeFleet: apiData['No Of claim made fleet'] || '-',
-                  renewalYear: apiData['Year'] || year // Updated to use [Year] field from new table structure
+                  renewalYear: apiData['Year '] || apiData['Year'] || year // Using [Year ] field (note trailing space)
               };
               setPolicyData(transformedData);
               setPolicyError(null);
@@ -1373,11 +1395,25 @@ const Dashboard = () => {
       }
 
     } catch (error) {
-      const errorMsg = error.response?.data?.error || error.message;
-      toast.error('Error creating policy: ' + errorMsg, {
-        duration: 5000,
-        position: 'top-center'
-      });
+      // Handle duplicate policy error (409 Conflict)
+      if (error.response?.status === 409) {
+        const message = error.response?.data?.message || 'A policy for this company and year already exists.';
+        toast.error(message, {
+          duration: 6000,
+          position: 'top-center',
+          style: {
+            background: '#FEF3C7',
+            color: '#92400E',
+            border: '1px solid #F59E0B'
+          }
+        });
+      } else {
+        const errorMsg = error.response?.data?.error || error.message;
+        toast.error('Error creating policy: ' + errorMsg, {
+          duration: 5000,
+          position: 'top-center'
+        });
+      }
     }
   };
 
@@ -1876,6 +1912,7 @@ const Dashboard = () => {
           policyCompanies={policyCompanies}
           policyYear={policyYear}
           changePolicyYear={setPolicyYear}
+          availableYears={availableYears}
           chooseSelectedInsuranceType={setSelectedInsuranceType}
           getInsuranceIcon={getInsuranceIcon}
           selectedInsuranceType={selectedInsuranceType}

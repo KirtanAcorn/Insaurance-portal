@@ -6,7 +6,8 @@ const CompanyInformation = ({
   changeSelectedCompanyPolicy, 
   policyCompanies, 
   policyYear, 
-  changePolicyYear, 
+  changePolicyYear,
+  availableYears = ['2024-2025', '2025-2026'],
   chooseSelectedInsuranceType, 
   getInsuranceIcon, 
   selectedInsuranceType,
@@ -64,8 +65,9 @@ const CompanyInformation = ({
                       onChange={(e) => changePolicyYear(e.target.value)}
                       className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-900'}`}
                     >
-                      <option value="2024-2025">2024-2025</option>
-                      <option value="2025-2026">2025-2026</option>
+                      {availableYears.map(year => (
+                        <option key={year} value={year}>{year}</option>
+                      ))}
                     </select>
                     <ChevronDownIcon className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
                   </div>

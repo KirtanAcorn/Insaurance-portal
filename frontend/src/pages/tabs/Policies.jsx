@@ -10,7 +10,8 @@ const Policies = ({
   changeSelectedCompanyPolicy, 
   policyCompanies, 
   policyYear, 
-  changePolicyYear, 
+  changePolicyYear,
+  availableYears = ['2024-2025', '2025-2026', '2026-2027', '2027-2028'],
   chooseSelectedInsuranceType, 
   getInsuranceIcon, 
   selectedInsuranceType, 
@@ -40,6 +41,7 @@ const Policies = ({
       policyCompanies={policyCompanies}
       policyYear={policyYear}
       changePolicyYear={changePolicyYear}
+      availableYears={availableYears}
       chooseSelectedInsuranceType={chooseSelectedInsuranceType}
       getInsuranceIcon={getInsuranceIcon}
       selectedInsuranceType={selectedInsuranceType}
