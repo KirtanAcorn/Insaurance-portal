@@ -193,7 +193,7 @@ const ClaimsEditModal = ({
                         >
                           <option value="">Select a user</option>
                           {Array.isArray(users) && users
-                            .filter(user => ['Admin', 'Team Member', 'Client'].includes(user.role))
+                            .filter(user => user.role === 'Admin')
                             .map(user => (
                               <option key={user.id} value={user.id}>
                                 {user.firstName} {user.lastName}
