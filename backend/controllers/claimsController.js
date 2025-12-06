@@ -2,7 +2,7 @@ const sql = require('mssql');
 const { poolPromise } = require('../db');
 const path = require('path');
 const fs = require('fs');
-const { sendClaimAssignmentEmail } = require('../services/emailService');
+const { sendClaimAssignmentEmail, sendNewClaimNotificationEmail } = require('../services/emailService');
 
 // Get all claims
 exports.getAllClaims = async (req, res) => {
@@ -75,6 +75,44 @@ exports.createClaim = async (req, res) => {
               VALUES (@claimType, @claimAmount, @companyName, @policyName, @description, @incidentDate, @supportingDocuments, @excess, @netAmount, @status, @assignedToUserID)`);
 
     const insertedId = result.recordset[0].claimID;
+
+    // Fetch the complete claim record to send in email
+    const claimRecord = await pool.request()
+      .input('claimId', sql.Int, insertedId)
+      .query('SELECT * FROM Claims WHERE claimId = @claimId');
+
+    // Send email notification for new claim creation
+    try {
+      if (claimRecord.recordset.length > 0) {
+        const claim = claimRecord.recordset[0];
+        const emailResult = await sendNewClaimNotificationEmail({
+          claimId: claim.claimId,
+          companyId: claim.companyId,
+          companyName: claim.companyName,
+          policyId: claim.policyId,
+          policyName: claim.policyName,
+          assignedToUserID: claim.assignedToUserID,
+          claimType: claim.claimType,
+          claimAmount: claim.claimAmount,
+          excess: claim.excess,
+          netAmount: claim.netAmount,
+          description: claim.description,
+          status: claim.status,
+          incidentDate: claim.incidentDate,
+          supportingDocuments: claim.supportingDocuments,
+          createdAt: claim.createdAt,
+        });
+
+        if (emailResult.success) {
+          console.log(`New claim notification email sent successfully for Claim #${insertedId}`);
+        } else {
+          console.error(`Failed to send new claim notification email: ${emailResult.error}`);
+        }
+      }
+    } catch (emailError) {
+      // Log error but don't fail the claim creation
+      console.error('Error sending new claim notification email:', emailError);
+    }
 
     res.status(201).json({
       message: 'Claim created successfully',
@@ -153,13 +191,13 @@ exports.updateClaim = async (req, res) => {
       return res.status(404).json({ error: 'Claim not found' });
     }
 
-    // Send email notification if a user is assigned and status is Approved
-    if (req.body.assignedToUserID && req.body.assignedToUserID !== '' && req.body.status === 'Approved') {
+    // Send email notification if a user is assigned (regardless of status)
+    if (req.body.assignedToUserID && req.body.assignedToUserID !== '') {
       try {
         // Fetch user details
         const userResult = await (await poolPromise).request()
           .input('userId', sql.Int, parseInt(req.body.assignedToUserID))
-          .query('SELECT id, firstName, lastName, email FROM Users WHERE id = @userId');
+          .query('SELECT id, firstName, lastName, email FROM Users_ WHERE id = @userId');
 
         if (userResult.recordset.length > 0) {
           const user = userResult.recordset[0];
@@ -172,19 +210,25 @@ exports.updateClaim = async (req, res) => {
           if (claimResult.recordset.length > 0) {
             const claim = claimResult.recordset[0];
             
-            // Send email notification
+            // Send email notification with all claim details
             const emailResult = await sendClaimAssignmentEmail(
               user.email,
               `${user.firstName} ${user.lastName}`,
               {
                 claimId: claim.claimId,
+                companyId: claim.companyId,
                 companyName: claim.companyName,
+                policyId: claim.policyId,
                 policyName: claim.policyName,
                 claimType: claim.claimType,
                 claimAmount: claim.claimAmount,
+                excess: claim.excess,
+                netAmount: claim.netAmount,
                 status: claim.status,
                 incidentDate: claim.incidentDate,
                 description: claim.description,
+                supportingDocuments: claim.supportingDocuments,
+                createdAt: claim.createdAt,
               }
             );
 
