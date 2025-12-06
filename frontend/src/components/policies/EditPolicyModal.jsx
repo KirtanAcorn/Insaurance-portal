@@ -217,7 +217,7 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
               <Field label="VAT Number" field="vatNumber" placeholder="Enter VAT number" />
               <Field label="Commodity" field="commodity" placeholder="Enter commodity" />
               <Field label="Currency" field="currency" placeholder="Enter currency" />
-              <Field label="Turnover in £ Mn" field="turnoverGBP" type="number" placeholder="Enter turnover" />
+              <Field label="Turnover in LCY" field="turnoverGBP" type="number" placeholder="Enter turnover" />
               <Field label="Insurance Agent" field="insuranceAgent" placeholder="Enter insurance agent" />
               <Field label="A/C Handler" field="accountHandler" placeholder="Enter account handler" />
               <Field label="Emp Count" field="empCount" type="number" placeholder="Enter employee count" />

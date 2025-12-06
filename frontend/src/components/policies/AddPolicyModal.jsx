@@ -201,7 +201,7 @@ const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit }) => {
               <InputField label="VAT Number" field="vatNumber" placeholder="Enter VAT number" value={formData.vatNumber} onChange={handleChange} isDark={isDark} />
               <InputField label="Commodity" field="commodity" placeholder="Enter commodity" value={formData.commodity} onChange={handleChange} isDark={isDark} />
               <InputField label="Currency" field="currency" placeholder="Enter currency (e.g., GBP, USD, EUR)" value={formData.currency} onChange={handleChange} isDark={isDark} />
-              <InputField label="Turnover in £ Mn" field="turnoverGBP" type="number" placeholder="Enter turnover in millions" value={formData.turnoverGBP} onChange={handleChange} isDark={isDark} />
+              <InputField label="Turnover in LCY" field="turnoverGBP" type="number" placeholder="Enter turnover in LCY" value={formData.turnoverGBP} onChange={handleChange} isDark={isDark} />
               <InputField label="Insurance Agent" field="insuranceAgent" placeholder="Enter insurance agent" value={formData.insuranceAgent} onChange={handleChange} isDark={isDark} />
               <InputField label="A/C Handler" field="accountHandler" placeholder="Enter account handler" value={formData.accountHandler} onChange={handleChange} isDark={isDark} />
               <InputField label="Emp Count" field="empCount" type="number" placeholder="Enter employee count" value={formData.empCount} onChange={handleChange} isDark={isDark} />

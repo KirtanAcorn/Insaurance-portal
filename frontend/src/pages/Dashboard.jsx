@@ -380,9 +380,8 @@ const Dashboard = () => {
               // Helper functions for data formatting
               const formatCurrency = (value) => {
                   if (value === null || value === undefined || value === '' || value === '-') return '-';
-                  const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]+/g, "")) : Number(value);
-                  if (!isFinite(num)) return '-';
-                  return `£${num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                  // Return the value as-is from backend (already contains currency symbol)
+                  return String(value).trim();
               };
 
               const formatDate = (dateString) => {
@@ -409,26 +408,26 @@ const Dashboard = () => {
                   vatNumber: apiData['VAT Number'] || '-',
                   commodity: apiData['Comodity'] || '-',
                   currency: apiData['Currency'] || '-',
-                  turnoverGBP: formatCurrency(apiData['Turnover in £ Mn']),
+                  turnoverGBP: apiData['Turnover in £ Mn'] || '-',
                   insuranceAgent: apiData['Insurance Agent'] || '-',
                   accountHandler: apiData['A/C HANDLER'] || '-',
                   employeeCount: apiData['Emp Count'] || '-',
                   commercialPolicy: apiData['Commercial Policy'] || '-',
                   commercialRenewalDate: formatDate(apiData['Commercial Renewal Date']),
                   commercialPolicyLink: apiData['Commercial Policy Link'] || '-',
-                  commercialPremiumPaid: allPolicies.find(p => p.type === 'Commercial Liability')?.premium || formatCurrency(apiData['Commercial Premium Paid']),
+                  commercialPremiumPaid: allPolicies.find(p => p.type === 'Commercial Liability')?.premium || (apiData['Commercial Premium Paid'] || '-'),
                   employeeLiabilityCover: apiData['Employee Liability Cover'] || '-',
                   empLiabilityRenewalDate: formatDate(apiData['Emp_Liabality Renewal Date']),
                   floatingStock: apiData['Floting stock'] || '-',
                   stockCover: apiData['Stock Cover'] || '-',
                   stockLocation: apiData['Stock Location'] || '-',
                   productLiability: apiData['Product Liability'] || '-',
-                  commercialExcessPerClaim: formatCurrency(apiData['Commercial Excess Per claim']),
+                  commercialExcessPerClaim: apiData['Commercial Excess Per claim'] || '-',
                   noOfClaimCommercial: apiData['No Of claim Commercial'] || '-',
                   marine: apiData['Marine'] || '-',
                   marinePolicyLink: apiData['Marine Policy Link'] || '-',
                   marineRenewal: formatDate(apiData['Marine Renewal']),
-                  marinePremiumPaid: allPolicies.find(p => p.type === 'Marine')?.premium || formatCurrency(apiData['Marine Premium Paid']),
+                  marinePremiumPaid: allPolicies.find(p => p.type === 'Marine')?.premium || (apiData['Marine Premium Paid'] || '-'),
                   perTransitCover: apiData['Per Transit Cover'] || '-',
                   ukUk: apiData['UK-UK'] || '-',
                   ukEu: apiData['UK-EU'] || '-',
@@ -452,7 +451,7 @@ const Dashboard = () => {
                   buildingInsurance: apiData['Building Insurance'] || '-',
                   propertyPolicyLink: apiData['Property Policy Link'] || '-',
                   renewalDate: formatDate(apiData['Renewal Date']),
-                  buildingPremiumPaid: allPolicies.find(p => p.type === 'Property')?.premium || formatCurrency(apiData['Building Premium Paid']),
+                  buildingPremiumPaid: allPolicies.find(p => p.type === 'Property')?.premium || (apiData['Building Premium Paid'] || '-'),
                   sumAssuredValueOfPremises: apiData['Sume Assure(Value of )Premises'] || '-',
                   declareValue: apiData['Declare Value'] || '-',
                   buildingLocation: apiData['Building Location'] || '-',
@@ -461,7 +460,7 @@ const Dashboard = () => {
                   fleetPolicy: apiData['Fleet Policy'] || '-',
                   fleetPolicyLink: apiData['Fleet Policy Link'] || '-',
                   renewalDate2: formatDate(apiData['Renewal Date2']),
-                  fleetPremiumPaid: allPolicies.find(p => p.type === 'Fleet')?.premium || formatCurrency(apiData['Fleet Premium Paid']),
+                  fleetPremiumPaid: allPolicies.find(p => p.type === 'Fleet')?.premium || (apiData['Fleet Premium Paid'] || '-'),
                   regNo2: apiData['Reg No2'] || '-',
                   fleetExcessPerClaim: apiData['Fleet Excess Per claim '] || '-',
                   noOfClaimMadeFleet: apiData['No Of claim made fleet'] || '-',
@@ -569,14 +568,8 @@ const Dashboard = () => {
     const formatCurrency = (amount) => {
       if (amount === null || amount === undefined || amount === '' || amount === '-') return '-';
       try {
-        const num = typeof amount === 'string' 
-          ? parseFloat(amount.replace(/[^0-9.-]+/g,"")) 
-          : Number(amount);
-        if (!isFinite(num)) return '-';
-        return `£${num.toLocaleString('en-GB', { 
-          minimumFractionDigits: 2, 
-          maximumFractionDigits: 2 
-        })}`;
+        // Return the value as-is from backend (already contains currency symbol)
+        return String(amount).trim();
       } catch (error) {
         console.error('Error formatting currency:', error);
         return '-';
@@ -1625,10 +1618,13 @@ const Dashboard = () => {
       return sum + rowTotalGBP;
     }, 0);
 
+    // Get currency symbol from first row or default to £
+    const currencySymbol = companyPolicies[0]?.['Currency']?.match(/[£$€]/)?.[0] || '£';
+    
     // Format: show K/M if large
-    if (sumGBP >= 1_000_000) return `£${(sumGBP / 1_000_000).toFixed(1)}M`;
-    if (sumGBP >= 1_000) return `£${(sumGBP / 1_000).toFixed(1)}K`;
-    return `£${sumGBP.toFixed(2)}`;
+    if (sumGBP >= 1_000_000) return `${currencySymbol}${(sumGBP / 1_000_000).toFixed(1)}M`;
+    if (sumGBP >= 1_000) return `${currencySymbol}${(sumGBP / 1_000).toFixed(1)}K`;
+    return `${currencySymbol}${sumGBP.toFixed(2)}`;
   };
 
   const statsDataDashboard = [
@@ -1658,9 +1654,11 @@ const Dashboard = () => {
       title: 'Total Premium',
       value: (() => {
         const sumGBP = latestYearSummary.totalPremiumGBP || 0;
-        if (sumGBP >= 1_000_000) return `£${(sumGBP / 1_000_000).toFixed(1)}M`;
-        if (sumGBP >= 1_000) return `£${(sumGBP / 1_000).toFixed(1)}K`;
-        return `£${sumGBP.toFixed(2)}`;
+        // Get currency symbol from latest year data or default to £
+        const currencySymbol = latestYearSummary.currency?.match(/[£$€]/)?.[0] || '£';
+        if (sumGBP >= 1_000_000) return `${currencySymbol}${(sumGBP / 1_000_000).toFixed(1)}M`;
+        if (sumGBP >= 1_000) return `${currencySymbol}${(sumGBP / 1_000).toFixed(1)}K`;
+        return `${currencySymbol}${sumGBP.toFixed(2)}`;
       })(),
       // change: '+18%',
       // changeText: 'from last month',

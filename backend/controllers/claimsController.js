@@ -2,6 +2,7 @@ const sql = require('mssql');
 const { poolPromise } = require('../db');
 const path = require('path');
 const fs = require('fs');
+const { sendClaimAssignmentEmail } = require('../services/emailService');
 
 // Get all claims
 exports.getAllClaims = async (req, res) => {
@@ -150,6 +151,54 @@ exports.updateClaim = async (req, res) => {
 
     if (result.rowsAffected[0] === 0) {
       return res.status(404).json({ error: 'Claim not found' });
+    }
+
+    // Send email notification if a user is assigned and status is Approved
+    if (req.body.assignedToUserID && req.body.assignedToUserID !== '' && req.body.status === 'Approved') {
+      try {
+        // Fetch user details
+        const userResult = await (await poolPromise).request()
+          .input('userId', sql.Int, parseInt(req.body.assignedToUserID))
+          .query('SELECT id, firstName, lastName, email FROM Users WHERE id = @userId');
+
+        if (userResult.recordset.length > 0) {
+          const user = userResult.recordset[0];
+          
+          // Fetch complete claim details
+          const claimResult = await (await poolPromise).request()
+            .input('claimId', sql.Int, claimId)
+            .query('SELECT * FROM Claims WHERE claimId = @claimId');
+
+          if (claimResult.recordset.length > 0) {
+            const claim = claimResult.recordset[0];
+            
+            // Send email notification
+            const emailResult = await sendClaimAssignmentEmail(
+              user.email,
+              `${user.firstName} ${user.lastName}`,
+              {
+                claimId: claim.claimId,
+                companyName: claim.companyName,
+                policyName: claim.policyName,
+                claimType: claim.claimType,
+                claimAmount: claim.claimAmount,
+                status: claim.status,
+                incidentDate: claim.incidentDate,
+                description: claim.description,
+              }
+            );
+
+            if (emailResult.success) {
+              console.log(`Email sent successfully to ${user.email}`);
+            } else {
+              console.error(`Failed to send email: ${emailResult.error}`);
+            }
+          }
+        }
+      } catch (emailError) {
+        // Log error but don't fail the update
+        console.error('Error sending assignment email:', emailError);
+      }
     }
     
     res.json({ message: 'Claim updated successfully' });
