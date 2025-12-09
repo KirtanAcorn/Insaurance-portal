@@ -200,82 +200,82 @@ exports.createPolicy = async (req, res) => {
       year: policyData.year
     };
 
-    // Add common company information fields
-    if (policyData.country) { fields.push('[Country]'); values.push('@country'); params.country = policyData.country; }
-    if (policyData.regAddress) { fields.push('[Reg Address]'); values.push('@regAddress'); params.regAddress = policyData.regAddress; }
-    if (policyData.warehouseOfficeAddress) { fields.push('[Warehouse/Office Address/es]'); values.push('@warehouseOfficeAddress'); params.warehouseOfficeAddress = policyData.warehouseOfficeAddress; }
-    if (policyData.regNo) { fields.push('[Reg No]'); values.push('@regNo'); params.regNo = policyData.regNo; }
-    if (policyData.regDate) { fields.push('[Reg Date]'); values.push('@regDate'); params.regDate = policyData.regDate; }
-    if (policyData.companyFirstTimePolicy) { fields.push('[Company first Time Policy]'); values.push('@companyFirstTimePolicy'); params.companyFirstTimePolicy = policyData.companyFirstTimePolicy; }
-    if (policyData.directorOwnerName) { fields.push('[Director/Owner Name]'); values.push('@directorOwnerName'); params.directorOwnerName = policyData.directorOwnerName; }
-    if (policyData.companyHandledBy) { fields.push('[Company Handle By]'); values.push('@companyHandledBy'); params.companyHandledBy = policyData.companyHandledBy; }
-    if (policyData.vatNumber) { fields.push('[VAT Number]'); values.push('@vatNumber'); params.vatNumber = policyData.vatNumber; }
-    if (policyData.commodity) { fields.push('[Comodity]'); values.push('@commodity'); params.commodity = policyData.commodity; }
-    if (policyData.currency) { fields.push('[Currency]'); values.push('@currency'); params.currency = policyData.currency; }
-    if (policyData.turnoverGBP) { fields.push('[Turnover in £ Mn]'); values.push('@turnoverGBP'); params.turnoverGBP = policyData.turnoverGBP; }
-    if (policyData.insuranceAgent) { fields.push('[Insurance Agent]'); values.push('@insuranceAgent'); params.insuranceAgent = policyData.insuranceAgent; }
-    if (policyData.accountHandler) { fields.push('[A/C HANDLER]'); values.push('@accountHandler'); params.accountHandler = policyData.accountHandler; }
-    if (policyData.empCount) { fields.push('[Emp Count]'); values.push('@empCount'); params.empCount = policyData.empCount; }
+    // Add common company information fields (check for !== undefined to allow empty strings)
+    if (policyData.country !== undefined) { fields.push('[Country]'); values.push('@country'); params.country = policyData.country; }
+    if (policyData.regAddress !== undefined) { fields.push('[Reg Address]'); values.push('@regAddress'); params.regAddress = policyData.regAddress; }
+    if (policyData.warehouseOfficeAddress !== undefined) { fields.push('[Warehouse/Office Address/es]'); values.push('@warehouseOfficeAddress'); params.warehouseOfficeAddress = policyData.warehouseOfficeAddress; }
+    if (policyData.regNo !== undefined) { fields.push('[Reg No]'); values.push('@regNo'); params.regNo = policyData.regNo; }
+    if (policyData.regDate !== undefined) { fields.push('[Reg Date]'); values.push('@regDate'); params.regDate = policyData.regDate; }
+    if (policyData.companyFirstTimePolicy !== undefined) { fields.push('[Company first Time Policy]'); values.push('@companyFirstTimePolicy'); params.companyFirstTimePolicy = policyData.companyFirstTimePolicy; }
+    if (policyData.directorOwnerName !== undefined) { fields.push('[Director/Owner Name]'); values.push('@directorOwnerName'); params.directorOwnerName = policyData.directorOwnerName; }
+    if (policyData.companyHandledBy !== undefined) { fields.push('[Company Handle By]'); values.push('@companyHandledBy'); params.companyHandledBy = policyData.companyHandledBy; }
+    if (policyData.vatNumber !== undefined) { fields.push('[VAT Number]'); values.push('@vatNumber'); params.vatNumber = policyData.vatNumber; }
+    if (policyData.commodity !== undefined) { fields.push('[Comodity]'); values.push('@commodity'); params.commodity = policyData.commodity; }
+    if (policyData.currency !== undefined) { fields.push('[Currency]'); values.push('@currency'); params.currency = policyData.currency; }
+    if (policyData.turnoverGBP !== undefined) { fields.push('[Turnover in £ Mn]'); values.push('@turnoverGBP'); params.turnoverGBP = policyData.turnoverGBP; }
+    if (policyData.insuranceAgent !== undefined) { fields.push('[Insurance Agent]'); values.push('@insuranceAgent'); params.insuranceAgent = policyData.insuranceAgent; }
+    if (policyData.accountHandler !== undefined) { fields.push('[A/C HANDLER]'); values.push('@accountHandler'); params.accountHandler = policyData.accountHandler; }
+    if (policyData.empCount !== undefined) { fields.push('[Emp Count]'); values.push('@empCount'); params.empCount = policyData.empCount; }
 
     // Add fields based on property type
     if (policyData.propertyType === 'Commercial') {
-      if (policyData.commercialPolicy) { fields.push('[Commercial Policy]'); values.push('@commercialPolicy'); params.commercialPolicy = policyData.commercialPolicy; }
-      if (policyData.commercialPolicyLink) { fields.push('[Commercial Policy Link]'); values.push('@commercialPolicyLink'); params.commercialPolicyLink = policyData.commercialPolicyLink; }
-      if (policyData.commercialRenewalDate) { fields.push('[Commercial Renewal Date]'); values.push('@commercialRenewalDate'); params.commercialRenewalDate = policyData.commercialRenewalDate; }
-      if (policyData.commercialPremiumPaid) { fields.push('[Commercial Premium Paid]'); values.push('@commercialPremiumPaid'); params.commercialPremiumPaid = policyData.commercialPremiumPaid; }
-      if (policyData.employeeLiabilityCover) { fields.push('[Employee Liability Cover]'); values.push('@employeeLiabilityCover'); params.employeeLiabilityCover = policyData.employeeLiabilityCover; }
-      if (policyData.empLiabilityRenewalDate) { fields.push('[Emp_Liabality Renewal Date]'); values.push('@empLiabilityRenewalDate'); params.empLiabilityRenewalDate = policyData.empLiabilityRenewalDate; }
-      if (policyData.floatingStock) { fields.push('[Floting stock]'); values.push('@floatingStock'); params.floatingStock = policyData.floatingStock; }
-      if (policyData.stockCover) { fields.push('[Stock Cover]'); values.push('@stockCover'); params.stockCover = policyData.stockCover; }
-      if (policyData.stockLocation) { fields.push('[Stock Location]'); values.push('@stockLocation'); params.stockLocation = policyData.stockLocation; }
-      if (policyData.productLiability) { fields.push('[Product Liability]'); values.push('@productLiability'); params.productLiability = policyData.productLiability; }
-      if (policyData.amazonVendorLiability) { fields.push('[Amazon Vendor Liability]'); values.push('@amazonVendorLiability'); params.amazonVendorLiability = policyData.amazonVendorLiability; }
-      if (policyData.legalExpenseCover) { fields.push('[Legal Expense Cover]'); values.push('@legalExpenseCover'); params.legalExpenseCover = policyData.legalExpenseCover; }
-      if (policyData.commercialExcessPerClaim) { fields.push('[Commercial Excess Per claim]'); values.push('@commercialExcessPerClaim'); params.commercialExcessPerClaim = policyData.commercialExcessPerClaim; }
-      if (policyData.noOfClaimCommercial) { fields.push('[No Of claim Commercial]'); values.push('@noOfClaimCommercial'); params.noOfClaimCommercial = policyData.noOfClaimCommercial; }
+      if (policyData.commercialPolicy !== undefined) { fields.push('[Commercial Policy]'); values.push('@commercialPolicy'); params.commercialPolicy = policyData.commercialPolicy; }
+      if (policyData.commercialPolicyLink !== undefined) { fields.push('[Commercial Policy Link]'); values.push('@commercialPolicyLink'); params.commercialPolicyLink = policyData.commercialPolicyLink; }
+      if (policyData.commercialRenewalDate !== undefined) { fields.push('[Commercial Renewal Date]'); values.push('@commercialRenewalDate'); params.commercialRenewalDate = policyData.commercialRenewalDate; }
+      if (policyData.commercialPremiumPaid !== undefined) { fields.push('[Commercial Premium Paid]'); values.push('@commercialPremiumPaid'); params.commercialPremiumPaid = policyData.commercialPremiumPaid; }
+      if (policyData.employeeLiabilityCover !== undefined) { fields.push('[Employee Liability Cover]'); values.push('@employeeLiabilityCover'); params.employeeLiabilityCover = policyData.employeeLiabilityCover; }
+      if (policyData.empLiabilityRenewalDate !== undefined) { fields.push('[Emp_Liabality Renewal Date]'); values.push('@empLiabilityRenewalDate'); params.empLiabilityRenewalDate = policyData.empLiabilityRenewalDate; }
+      if (policyData.floatingStock !== undefined) { fields.push('[Floting stock]'); values.push('@floatingStock'); params.floatingStock = policyData.floatingStock; }
+      if (policyData.stockCover !== undefined) { fields.push('[Stock Cover]'); values.push('@stockCover'); params.stockCover = policyData.stockCover; }
+      if (policyData.stockLocation !== undefined) { fields.push('[Stock Location]'); values.push('@stockLocation'); params.stockLocation = policyData.stockLocation; }
+      if (policyData.productLiability !== undefined) { fields.push('[Product Liability]'); values.push('@productLiability'); params.productLiability = policyData.productLiability; }
+      if (policyData.amazonVendorLiability !== undefined) { fields.push('[Amazon Vendor Liability]'); values.push('@amazonVendorLiability'); params.amazonVendorLiability = policyData.amazonVendorLiability; }
+      if (policyData.legalExpenseCover !== undefined) { fields.push('[Legal Expense Cover]'); values.push('@legalExpenseCover'); params.legalExpenseCover = policyData.legalExpenseCover; }
+      if (policyData.commercialExcessPerClaim !== undefined) { fields.push('[Commercial Excess Per claim]'); values.push('@commercialExcessPerClaim'); params.commercialExcessPerClaim = policyData.commercialExcessPerClaim; }
+      if (policyData.noOfClaimCommercial !== undefined) { fields.push('[No Of claim Commercial]'); values.push('@noOfClaimCommercial'); params.noOfClaimCommercial = policyData.noOfClaimCommercial; }
     } else if (policyData.propertyType === 'Marine') {
-      if (policyData.marine) { fields.push('[Marine]'); values.push('@marine'); params.marine = policyData.marine; }
-      if (policyData.marinePolicyLink) { fields.push('[Marine Policy Link]'); values.push('@marinePolicyLink'); params.marinePolicyLink = policyData.marinePolicyLink; }
-      if (policyData.marineRenewal) { fields.push('[Marine Renewal]'); values.push('@marineRenewal'); params.marineRenewal = policyData.marineRenewal; }
-      if (policyData.marinePremiumPaid) { fields.push('[Marine Premium Paid]'); values.push('@marinePremiumPaid'); params.marinePremiumPaid = policyData.marinePremiumPaid; }
-      if (policyData.perTransitCover) { fields.push('[Per Transit Cover]'); values.push('@perTransitCover'); params.perTransitCover = policyData.perTransitCover; }
-      if (policyData.ukUk) { fields.push('[UK-UK]'); values.push('@ukUk'); params.ukUk = policyData.ukUk; }
-      if (policyData.ukEu) { fields.push('[UK-EU]'); values.push('@ukEu'); params.ukEu = policyData.ukEu; }
-      if (policyData.ukUsaCanada) { fields.push('[UK-USA/Canada]'); values.push('@ukUsaCanada'); params.ukUsaCanada = policyData.ukUsaCanada; }
-      if (policyData.ukMiddleEastDubai) { fields.push('[UK-MiddelEast(Dubai)]'); values.push('@ukMiddleEastDubai'); params.ukMiddleEastDubai = policyData.ukMiddleEastDubai; }
-      if (policyData.usaMiddleEastDubai) { fields.push('[USA-Middeleast(Dubai)]'); values.push('@usaMiddleEastDubai'); params.usaMiddleEastDubai = policyData.usaMiddleEastDubai; }
-      if (policyData.euMiddleEastDubai) { fields.push('[EU-Middeleast(Dubai)]'); values.push('@euMiddleEastDubai'); params.euMiddleEastDubai = policyData.euMiddleEastDubai; }
-      if (policyData.euEu) { fields.push('[EU-EU]'); values.push('@euEu'); params.euEu = policyData.euEu; }
-      if (policyData.euUsa) { fields.push('[EU-USA]'); values.push('@euUsa'); params.euUsa = policyData.euUsa; }
-      if (policyData.usaUsa) { fields.push('[USA-USA]'); values.push('@usaUsa'); params.usaUsa = policyData.usaUsa; }
-      if (policyData.ukRow) { fields.push('[UK-ROW]'); values.push('@ukRow'); params.ukRow = policyData.ukRow; }
-      if (policyData.usaRow) { fields.push('[USA-ROW]'); values.push('@usaRow'); params.usaRow = policyData.usaRow; }
-      if (policyData.euRow) { fields.push('[EU-ROW]'); values.push('@euRow'); params.euRow = policyData.euRow; }
-      if (policyData.rowRow) { fields.push('[ROW-ROW]'); values.push('@rowRow'); params.rowRow = policyData.rowRow; }
-      if (policyData.crossVoyage) { fields.push('[CROSS VOYAGE]'); values.push('@crossVoyage'); params.crossVoyage = policyData.crossVoyage; }
-      if (policyData.airSeaRail) { fields.push('[AIR/SEA/RAIL]'); values.push('@airSeaRail'); params.airSeaRail = policyData.airSeaRail; }
-      if (policyData.road) { fields.push('[ROAD]'); values.push('@road'); params.road = policyData.road; }
-      if (policyData.anyLocationInOrdinaryCourseOfTransit) { fields.push('[ANYONE LOACTION IN ORDINARY COURSE OF TRANSIT]'); values.push('@anyLocationInOrdinaryCourseOfTransit'); params.anyLocationInOrdinaryCourseOfTransit = policyData.anyLocationInOrdinaryCourseOfTransit; }
-      if (policyData.cargoExcessPerClaim) { fields.push('[Cargo Excess Excess Per claim]'); values.push('@cargoExcessPerClaim'); params.cargoExcessPerClaim = policyData.cargoExcessPerClaim; }
-      if (policyData.noOfClaimCargo) { fields.push('[No Of claim Cargo]'); values.push('@noOfClaimCargo'); params.noOfClaimCargo = policyData.noOfClaimCargo; }
+      if (policyData.marine !== undefined) { fields.push('[Marine]'); values.push('@marine'); params.marine = policyData.marine; }
+      if (policyData.marinePolicyLink !== undefined) { fields.push('[Marine Policy Link]'); values.push('@marinePolicyLink'); params.marinePolicyLink = policyData.marinePolicyLink; }
+      if (policyData.marineRenewal !== undefined) { fields.push('[Marine Renewal]'); values.push('@marineRenewal'); params.marineRenewal = policyData.marineRenewal; }
+      if (policyData.marinePremiumPaid !== undefined) { fields.push('[Marine Premium Paid]'); values.push('@marinePremiumPaid'); params.marinePremiumPaid = policyData.marinePremiumPaid; }
+      if (policyData.perTransitCover !== undefined) { fields.push('[Per Transit Cover]'); values.push('@perTransitCover'); params.perTransitCover = policyData.perTransitCover; }
+      if (policyData.ukUk !== undefined) { fields.push('[UK-UK]'); values.push('@ukUk'); params.ukUk = policyData.ukUk; }
+      if (policyData.ukEu !== undefined) { fields.push('[UK-EU]'); values.push('@ukEu'); params.ukEu = policyData.ukEu; }
+      if (policyData.ukUsaCanada !== undefined) { fields.push('[UK-USA/Canada]'); values.push('@ukUsaCanada'); params.ukUsaCanada = policyData.ukUsaCanada; }
+      if (policyData.ukMiddleEastDubai !== undefined) { fields.push('[UK-MiddelEast(Dubai)]'); values.push('@ukMiddleEastDubai'); params.ukMiddleEastDubai = policyData.ukMiddleEastDubai; }
+      if (policyData.usaMiddleEastDubai !== undefined) { fields.push('[USA-Middeleast(Dubai)]'); values.push('@usaMiddleEastDubai'); params.usaMiddleEastDubai = policyData.usaMiddleEastDubai; }
+      if (policyData.euMiddleEastDubai !== undefined) { fields.push('[EU-Middeleast(Dubai)]'); values.push('@euMiddleEastDubai'); params.euMiddleEastDubai = policyData.euMiddleEastDubai; }
+      if (policyData.euEu !== undefined) { fields.push('[EU-EU]'); values.push('@euEu'); params.euEu = policyData.euEu; }
+      if (policyData.euUsa !== undefined) { fields.push('[EU-USA]'); values.push('@euUsa'); params.euUsa = policyData.euUsa; }
+      if (policyData.usaUsa !== undefined) { fields.push('[USA-USA]'); values.push('@usaUsa'); params.usaUsa = policyData.usaUsa; }
+      if (policyData.ukRow !== undefined) { fields.push('[UK-ROW]'); values.push('@ukRow'); params.ukRow = policyData.ukRow; }
+      if (policyData.usaRow !== undefined) { fields.push('[USA-ROW]'); values.push('@usaRow'); params.usaRow = policyData.usaRow; }
+      if (policyData.euRow !== undefined) { fields.push('[EU-ROW]'); values.push('@euRow'); params.euRow = policyData.euRow; }
+      if (policyData.rowRow !== undefined) { fields.push('[ROW-ROW]'); values.push('@rowRow'); params.rowRow = policyData.rowRow; }
+      if (policyData.crossVoyage !== undefined) { fields.push('[CROSS VOYAGE]'); values.push('@crossVoyage'); params.crossVoyage = policyData.crossVoyage; }
+      if (policyData.airSeaRail !== undefined) { fields.push('[AIR/SEA/RAIL]'); values.push('@airSeaRail'); params.airSeaRail = policyData.airSeaRail; }
+      if (policyData.road !== undefined) { fields.push('[ROAD]'); values.push('@road'); params.road = policyData.road; }
+      if (policyData.anyLocationInOrdinaryCourseOfTransit !== undefined) { fields.push('[ANYONE LOACTION IN ORDINARY COURSE OF TRANSIT]'); values.push('@anyLocationInOrdinaryCourseOfTransit'); params.anyLocationInOrdinaryCourseOfTransit = policyData.anyLocationInOrdinaryCourseOfTransit; }
+      if (policyData.cargoExcessPerClaim !== undefined) { fields.push('[Cargo Excess Excess Per claim]'); values.push('@cargoExcessPerClaim'); params.cargoExcessPerClaim = policyData.cargoExcessPerClaim; }
+      if (policyData.noOfClaimCargo !== undefined) { fields.push('[No Of claim Cargo]'); values.push('@noOfClaimCargo'); params.noOfClaimCargo = policyData.noOfClaimCargo; }
     } else if (policyData.propertyType === 'Property') {
-      if (policyData.buildingInsurance) { fields.push('[Building Insurance]'); values.push('@buildingInsurance'); params.buildingInsurance = policyData.buildingInsurance; }
-      if (policyData.propertyPolicyLink) { fields.push('[Property Policy Link]'); values.push('@propertyPolicyLink'); params.propertyPolicyLink = policyData.propertyPolicyLink; }
-      if (policyData.renewalDate) { fields.push('[Renewal Date]'); values.push('@renewalDate'); params.renewalDate = policyData.renewalDate; }
-      if (policyData.buildingPremiumPaid) { fields.push('[Building Premium Paid]'); values.push('@buildingPremiumPaid'); params.buildingPremiumPaid = policyData.buildingPremiumPaid; }
-      if (policyData.sumAssuredValueOfPremises) { fields.push('[Sume Assure(Value of )Premises]'); values.push('@sumAssuredValueOfPremises'); params.sumAssuredValueOfPremises = policyData.sumAssuredValueOfPremises; }
-      if (policyData.declareValue) { fields.push('[Declare Value]'); values.push('@declareValue'); params.declareValue = policyData.declareValue; }
-      if (policyData.buildingLocation) { fields.push('[Building Location]'); values.push('@buildingLocation'); params.buildingLocation = policyData.buildingLocation; }
-      if (policyData.buildingExcessPerClaim) { fields.push('[Building Excess Per claim]'); values.push('@buildingExcessPerClaim'); params.buildingExcessPerClaim = policyData.buildingExcessPerClaim; }
-      if (policyData.noOfClaimBuilding) { fields.push('[No Of claim Building]'); values.push('@noOfClaimBuilding'); params.noOfClaimBuilding = policyData.noOfClaimBuilding; }
+      if (policyData.buildingInsurance !== undefined) { fields.push('[Building Insurance]'); values.push('@buildingInsurance'); params.buildingInsurance = policyData.buildingInsurance; }
+      if (policyData.propertyPolicyLink !== undefined) { fields.push('[Property Policy Link]'); values.push('@propertyPolicyLink'); params.propertyPolicyLink = policyData.propertyPolicyLink; }
+      if (policyData.renewalDate !== undefined) { fields.push('[Renewal Date]'); values.push('@renewalDate'); params.renewalDate = policyData.renewalDate; }
+      if (policyData.buildingPremiumPaid !== undefined) { fields.push('[Building Premium Paid]'); values.push('@buildingPremiumPaid'); params.buildingPremiumPaid = policyData.buildingPremiumPaid; }
+      if (policyData.sumAssuredValueOfPremises !== undefined) { fields.push('[Sume Assure(Value of )Premises]'); values.push('@sumAssuredValueOfPremises'); params.sumAssuredValueOfPremises = policyData.sumAssuredValueOfPremises; }
+      if (policyData.declareValue !== undefined) { fields.push('[Declare Value]'); values.push('@declareValue'); params.declareValue = policyData.declareValue; }
+      if (policyData.buildingLocation !== undefined) { fields.push('[Building Location]'); values.push('@buildingLocation'); params.buildingLocation = policyData.buildingLocation; }
+      if (policyData.buildingExcessPerClaim !== undefined) { fields.push('[Building Excess Per claim]'); values.push('@buildingExcessPerClaim'); params.buildingExcessPerClaim = policyData.buildingExcessPerClaim; }
+      if (policyData.noOfClaimBuilding !== undefined) { fields.push('[No Of claim Building]'); values.push('@noOfClaimBuilding'); params.noOfClaimBuilding = policyData.noOfClaimBuilding; }
     } else if (policyData.propertyType === 'Fleet') {
-      if (policyData.fleetPolicy) { fields.push('[Fleet Policy]'); values.push('@fleetPolicy'); params.fleetPolicy = policyData.fleetPolicy; }
-      if (policyData.fleetPolicyLink) { fields.push('[Fleet Policy Link]'); values.push('@fleetPolicyLink'); params.fleetPolicyLink = policyData.fleetPolicyLink; }
-      if (policyData.renewalDate2) { fields.push('[Renewal Date2]'); values.push('@renewalDate2'); params.renewalDate2 = policyData.renewalDate2; }
-      if (policyData.fleetPremiumPaid) { fields.push('[Fleet Premium Paid]'); values.push('@fleetPremiumPaid'); params.fleetPremiumPaid = policyData.fleetPremiumPaid; }
-      if (policyData.regNo2) { fields.push('[Reg No2]'); values.push('@regNo2'); params.regNo2 = policyData.regNo2; }
-      if (policyData.fleetExcessPerClaim) { fields.push('[Fleet Excess Per claim ]'); values.push('@fleetExcessPerClaim'); params.fleetExcessPerClaim = policyData.fleetExcessPerClaim; }
-      if (policyData.noOfClaimMadeFleet) { fields.push('[No Of claim made fleet]'); values.push('@noOfClaimMadeFleet'); params.noOfClaimMadeFleet = policyData.noOfClaimMadeFleet; }
+      if (policyData.fleetPolicy !== undefined) { fields.push('[Fleet Policy]'); values.push('@fleetPolicy'); params.fleetPolicy = policyData.fleetPolicy; }
+      if (policyData.fleetPolicyLink !== undefined) { fields.push('[Fleet Policy Link]'); values.push('@fleetPolicyLink'); params.fleetPolicyLink = policyData.fleetPolicyLink; }
+      if (policyData.renewalDate2 !== undefined) { fields.push('[Renewal Date2]'); values.push('@renewalDate2'); params.renewalDate2 = policyData.renewalDate2; }
+      if (policyData.fleetPremiumPaid !== undefined) { fields.push('[Fleet Premium Paid]'); values.push('@fleetPremiumPaid'); params.fleetPremiumPaid = policyData.fleetPremiumPaid; }
+      if (policyData.regNo2 !== undefined) { fields.push('[Reg No2]'); values.push('@regNo2'); params.regNo2 = policyData.regNo2; }
+      if (policyData.fleetExcessPerClaim !== undefined) { fields.push('[Fleet Excess Per claim ]'); values.push('@fleetExcessPerClaim'); params.fleetExcessPerClaim = policyData.fleetExcessPerClaim; }
+      if (policyData.noOfClaimMadeFleet !== undefined) { fields.push('[No Of claim made fleet]'); values.push('@noOfClaimMadeFleet'); params.noOfClaimMadeFleet = policyData.noOfClaimMadeFleet; }
     }
 
     const query = `
@@ -285,7 +285,11 @@ exports.createPolicy = async (req, res) => {
 
     const request = pool.request();
     Object.keys(params).forEach(key => {
-      request.input(key, sql.NVarChar, params[key]);
+      // Convert null/undefined to null for SQL, and ensure strings are valid
+      const value = params[key] === undefined || params[key] === null || params[key] === '' 
+        ? null 
+        : String(params[key]);
+      request.input(key, sql.NVarChar, value);
     });
 
     await request.query(query);
@@ -403,7 +407,15 @@ exports.updatePolicy = async (req, res) => {
 
     const request = pool.request();
     Object.keys(params).forEach(key => {
-      request.input(key, sql.NVarChar, params[key]);
+      if (key === 'id') {
+        request.input(key, sql.Int, params[key]);
+      } else {
+        // Convert null/undefined to null for SQL, and ensure strings are valid
+        const value = params[key] === undefined || params[key] === null || params[key] === '' 
+          ? null 
+          : String(params[key]);
+        request.input(key, sql.NVarChar, value);
+      }
     });
 
     await request.query(query);

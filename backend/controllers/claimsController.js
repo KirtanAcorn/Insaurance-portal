@@ -194,10 +194,10 @@ exports.updateClaim = async (req, res) => {
     // Send email notification if a user is assigned (regardless of status)
     if (req.body.assignedToUserID && req.body.assignedToUserID !== '') {
       try {
-        // Fetch user details
+        // Fetch user details - using SELECT * to get all columns
         const userResult = await (await poolPromise).request()
           .input('userId', sql.Int, parseInt(req.body.assignedToUserID))
-          .query('SELECT id, firstName, lastName, email FROM Users_ WHERE id = @userId');
+          .query('SELECT * FROM Users_ WHERE id = @userId');
 
         if (userResult.recordset.length > 0) {
           const user = userResult.recordset[0];
@@ -210,10 +210,15 @@ exports.updateClaim = async (req, res) => {
           if (claimResult.recordset.length > 0) {
             const claim = claimResult.recordset[0];
             
+            // Build user name from available fields (handle different possible column names)
+            const userName = user.firstName && user.lastName 
+              ? `${user.firstName} ${user.lastName}`
+              : user.name || user.email || 'User';
+            
             // Send email notification with all claim details
             const emailResult = await sendClaimAssignmentEmail(
               user.email,
-              `${user.firstName} ${user.lastName}`,
+              userName,
               {
                 claimId: claim.claimId,
                 companyId: claim.companyId,

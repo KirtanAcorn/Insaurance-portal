@@ -1442,6 +1442,11 @@ const Dashboard = () => {
         }
       }
 
+      // Reload the page to show updated values
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+
     } catch (error) {
       const errorMsg = error.response?.data?.error || error.message;
       toast.error('Error updating policy: ' + errorMsg, {
