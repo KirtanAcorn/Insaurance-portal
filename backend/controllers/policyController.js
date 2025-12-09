@@ -64,14 +64,64 @@ exports.getPoliciesByYear = async (req, res) => {
     // Aggregate totals per currency on the server to avoid client parsing issues
     const totalsQuery = `
       SELECT
-        UPPER(REPLACE(REPLACE(LTRIM(RTRIM(ISNULL([Currency], 'GBP'))), '£', 'GBP'), ' ', '')) AS currency,
-        SUM(TRY_CONVERT(decimal(18,2), REPLACE(REPLACE(ISNULL([Commercial Premium Paid], '0'), ',', ''), '£', ''))) AS commercialTotal,
-        SUM(TRY_CONVERT(decimal(18,2), REPLACE(REPLACE(ISNULL([Marine Premium Paid], '0'), ',', ''), '£', ''))) AS marineTotal,
-        SUM(TRY_CONVERT(decimal(18,2), REPLACE(REPLACE(ISNULL([Building Premium Paid], '0'), ',', ''), '£', ''))) AS buildingTotal,
-        SUM(TRY_CONVERT(decimal(18,2), REPLACE(REPLACE(ISNULL([Fleet Premium Paid], '0'), ',', ''), '£', ''))) AS fleetTotal
+        CASE 
+          WHEN UPPER([Currency]) LIKE '%GBP%' OR UPPER([Currency]) LIKE '%£%' THEN 'GBP'
+          WHEN UPPER([Currency]) LIKE '%USD%' OR UPPER([Currency]) LIKE '%$%' THEN 'USD'
+          WHEN UPPER([Currency]) LIKE '%EUR%' OR UPPER([Currency]) LIKE '%€%' THEN 'EUR'
+          WHEN UPPER([Currency]) LIKE '%INR%' OR UPPER([Currency]) LIKE '%₹%' THEN 'INR'
+          WHEN UPPER([Currency]) LIKE '%PLN%' OR UPPER([Currency]) LIKE '%ZL%' THEN 'PLN'
+          ELSE 'GBP'
+        END AS currency,
+        SUM(
+          CASE 
+            WHEN [Commercial Premium Paid] IS NULL OR LTRIM(RTRIM([Commercial Premium Paid])) = '' OR LTRIM(RTRIM([Commercial Premium Paid])) = '-' THEN 0
+            ELSE TRY_CONVERT(decimal(18,2), 
+              REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                LTRIM(RTRIM([Commercial Premium Paid])), 
+                ',', ''), '£', ''), '$', ''), '€', ''), '₹', ''), ' ', ''), CHAR(13), ''), CHAR(10), '')
+            )
+          END
+        ) AS commercialTotal,
+        SUM(
+          CASE 
+            WHEN [Marine Premium Paid] IS NULL OR LTRIM(RTRIM([Marine Premium Paid])) = '' OR LTRIM(RTRIM([Marine Premium Paid])) = '-' THEN 0
+            ELSE TRY_CONVERT(decimal(18,2), 
+              REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                LTRIM(RTRIM([Marine Premium Paid])), 
+                ',', ''), '£', ''), '$', ''), '€', ''), '₹', ''), ' ', ''), CHAR(13), ''), CHAR(10), '')
+            )
+          END
+        ) AS marineTotal,
+        SUM(
+          CASE 
+            WHEN [Building Premium Paid] IS NULL OR LTRIM(RTRIM([Building Premium Paid])) = '' OR LTRIM(RTRIM([Building Premium Paid])) = '-' THEN 0
+            ELSE TRY_CONVERT(decimal(18,2), 
+              REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                LTRIM(RTRIM([Building Premium Paid])), 
+                ',', ''), '£', ''), '$', ''), '€', ''), '₹', ''), ' ', ''), CHAR(13), ''), CHAR(10), '')
+            )
+          END
+        ) AS buildingTotal,
+        SUM(
+          CASE 
+            WHEN [Fleet Premium Paid] IS NULL OR LTRIM(RTRIM([Fleet Premium Paid])) = '' OR LTRIM(RTRIM([Fleet Premium Paid])) = '-' THEN 0
+            ELSE TRY_CONVERT(decimal(18,2), 
+              REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                LTRIM(RTRIM([Fleet Premium Paid])), 
+                ',', ''), '£', ''), '$', ''), '€', ''), '₹', ''), ' ', ''), CHAR(13), ''), CHAR(10), '')
+            )
+          END
+        ) AS fleetTotal
       FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
       WHERE [Year ] = @renewalYear
-      GROUP BY UPPER(REPLACE(REPLACE(LTRIM(RTRIM(ISNULL([Currency], 'GBP'))), '£', 'GBP'), ' ', ''))
+      GROUP BY CASE 
+          WHEN UPPER([Currency]) LIKE '%GBP%' OR UPPER([Currency]) LIKE '%£%' THEN 'GBP'
+          WHEN UPPER([Currency]) LIKE '%USD%' OR UPPER([Currency]) LIKE '%$%' THEN 'USD'
+          WHEN UPPER([Currency]) LIKE '%EUR%' OR UPPER([Currency]) LIKE '%€%' THEN 'EUR'
+          WHEN UPPER([Currency]) LIKE '%INR%' OR UPPER([Currency]) LIKE '%₹%' THEN 'INR'
+          WHEN UPPER([Currency]) LIKE '%PLN%' OR UPPER([Currency]) LIKE '%ZL%' THEN 'PLN'
+          ELSE 'GBP'
+        END
     `;
 
     const totalsResult = await pool.request()

@@ -161,8 +161,13 @@ const Dashboard = () => {
         if (Array.isArray(data.currencyTotals) && data.currencyTotals.length > 0) {
           totalPremiumGBP = data.currencyTotals.reduce((acc, ct) => {
             const currency = ct.currency || 'GBP';
-            const curTotal = Number(ct.commercialTotal || 0) + Number(ct.marineTotal || 0) + Number(ct.buildingTotal || 0) + Number(ct.fleetTotal || 0);
-            return acc + toGBP(curTotal, currency);
+            const commercialTotal = Number(ct.commercialTotal) || 0;
+            const marineTotal = Number(ct.marineTotal) || 0;
+            const buildingTotal = Number(ct.buildingTotal) || 0;
+            const fleetTotal = Number(ct.fleetTotal) || 0;
+            const curTotal = commercialTotal + marineTotal + buildingTotal + fleetTotal;
+            const gbpAmount = toGBP(curTotal, currency);
+            return acc + gbpAmount;
           }, 0);
         } else {
           // Fallback: Sum all premiums per row, converting by detected currency
