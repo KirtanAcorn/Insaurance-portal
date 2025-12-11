@@ -501,7 +501,7 @@ const SubmitNewClaimModal = ({
                     }`}>Drag and drop files here, or click to select files</p>
                     <p className={`text-sm mb-4 ${
                       isDark ? 'text-gray-500' : 'text-gray-500'
-                    }`}>Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB each)</p>
+                    }`}>Supported formats: PDF, JPG, PNG, DOC, DOCX, ZIP, RAR (No size limit)</p>
                     <button className={`px-4 py-2 rounded-lg transition-colors ${
                       isDark 
                         ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' 
@@ -586,7 +586,7 @@ const SubmitNewClaimModal = ({
                             <p className={`text-xs ${
                               isDark ? 'text-gray-500' : 'text-gray-400'
                             }`}>
-                              PDF, JPG, PNG, DOC, DOCX (Max 10MB)
+                              PDF, JPG, PNG, DOC, DOCX, ZIP, RAR (No size limit)
                             </p>
                           </div>
                           
@@ -604,18 +604,11 @@ const SubmitNewClaimModal = ({
                         id="supportingDocument"
                         name="supportingDocument"
                         type="file"
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.zip,.rar"
                         className="sr-only"
                         onChange={(e) => {
                           if (e.target.files && e.target.files[0]) {
                             const file = e.target.files[0];
-                            const fileSizeMB = file.size / (1024 * 1024);
-                            
-                            if (fileSizeMB > 10) {
-                              alert('File size exceeds 10MB limit');
-                              return;
-                            }
-                            
                             handleInputChangeNewClaim("supportingDocument", file);
                           }
                         }}
