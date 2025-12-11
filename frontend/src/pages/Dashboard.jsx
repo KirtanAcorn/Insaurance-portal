@@ -1922,6 +1922,7 @@ const Dashboard = () => {
 
         {activeTab === 'Policies' && <Policies
           isDark={isDark}
+          role={role}
           selectedCompanyPolicy={selectedCompanyPolicy}
           changeSelectedCompanyPolicy={setSelectedCompanyPolicy}
           policyCompanies={policyCompanies}

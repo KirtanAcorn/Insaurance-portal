@@ -6,6 +6,7 @@ import PoliciesHeader from "../../components/policies/PoliciesHeader"
 
 const Policies = ({
   isDark, 
+  role,
   selectedCompanyPolicy, 
   changeSelectedCompanyPolicy, 
   policyCompanies, 
@@ -32,7 +33,7 @@ const Policies = ({
   }, [selectedCompanyPolicy, policyYear, selectedInsuranceType, policyData, isLoading, error]);
   return (
     <>
-    <PoliciesHeader openIsModalOpenNew={() => openIsModalOpenNew(true)}/>
+    <PoliciesHeader role={role} openIsModalOpenNew={() => openIsModalOpenNew(true)}/>
 
     <CompanyInformation
       isDark={isDark}
@@ -60,6 +61,7 @@ const Policies = ({
     
     <AllPolicies
       isDark={isDark}
+      role={role}
       getInsuranceIcon={getInsuranceIcon}
       allPolicies={allPolicies}
       isLoading={isPoliciesLoading}
