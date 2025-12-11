@@ -83,7 +83,7 @@ const SubmitNewClaimModal = ({
       return {
         title: "Commercial Liability Insurance",
         policyId: policyData["Commercial Policy"] || "N/A",
-        status: "Active",
+        status: policyData["Policy Status"] || policyData["Status"] || "Active",
         sumAssured: formatCurrency(policyData["Employee Liability Cover"], policyData?.Currency) || "N/A",
         excess: formatCurrency(policyData["Commercial Excess Per claim"], policyData?.Currency) || "N/A",
         location: policyData["Stock Location"] || "N/A",
@@ -99,7 +99,7 @@ const SubmitNewClaimModal = ({
       return {
         title: "Property Insurance",
         policyId: policyData["Building Insurance"] || "N/A",
-        status: "Active",
+        status: policyData["Policy Status"] || policyData["Status"] || "Active",
         sumAssured: formatCurrency(policyData["Sume Assure(Value of )Premises"], policyData?.Currency) || "N/A",
         excess: formatCurrency(policyData["Building Excess Per claim"], policyData?.Currency) || "N/A",
         location: policyData["Building Location"] || "N/A",
@@ -115,14 +115,12 @@ const SubmitNewClaimModal = ({
       return {
         title: "Marine Insurance",
         policyId: policyData["Marine"] || "N/A",
-        status: "Active",
+        status: policyData["Policy Status"] || policyData["Status"] || "Active",
         sumAssured: formatCurrency(policyData["Per Transit Cover"], policyData?.Currency) || "N/A",
         excess: formatCurrency(policyData["Cargo Excess Excess Per claim"], policyData?.Currency) || "N/A",
-        location: "Multiple Locations",
         claims: policyData["No Of claim Cargo"] ?? "N/A",
         coverage: [
           { label: "Per Transit Cover", value: formatCurrency(policyData["Per Transit Cover"], policyData?.Currency) || "N/A" },
-          { label: "UK-EU", value: formatCurrency(policyData["UK-EU"], policyData?.Currency) || "N/A" },
           { label: "Cross Voyage", value: formatCurrency(policyData["CROSS VOYAGE"], policyData?.Currency) || "N/A" },
         ],
       };
@@ -131,15 +129,15 @@ const SubmitNewClaimModal = ({
       return {
         title: "Fleet Insurance",
         policyId: policyData["Fleet Policy"] || "N/A",
-        status: "Active",
+        status: policyData["Policy Status"] || policyData["Status"] || "Active",
         sumAssured: formatCurrency(policyData["fleetSumAssured"], policyData?.Currency) || "N/A",
         excess: formatCurrency(policyData["Fleet Excess Per claim "], policyData?.Currency) || "N/A",
         location: policyData["fleetLocation"] || "Multiple Locations",
         claims: policyData["No Of claim made fleet"] ?? "N/A",
         coverage: [
           { label: "Registration Numbers", value: policyData["Reg No2"] || "N/A" },
-          { label: "Coverage Type", value: "Comprehensive" },
-          { label: "Policy Type", value: "Fleet" },
+          { label: "Coverage Type", value: policyData["Coverage Type"] || policyData["Fleet Coverage Type"] || "N/A" },
+          { label: "Policy Type", value: policyData["Policy Type"] || "Fleet" },
         ],
       };
     }
@@ -686,14 +684,6 @@ const SubmitNewClaimModal = ({
                           <div className="flex justify-between">
                             <span className={isDark ? "text-gray-400" : "text-gray-600"}>Excess Per Claim:</span>
                             <span className="font-medium text-red-600">{selectedPolicyDetails.excess}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className={isDark ? "text-gray-400" : "text-gray-600"}>Location:</span>
-                            <span className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>{selectedPolicyDetails.location}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className={isDark ? "text-gray-400" : "text-gray-600"}>Claims Made:</span>
-                            <span className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>{selectedPolicyDetails.claims}</span>
                           </div>
                         </div>
                       </>
