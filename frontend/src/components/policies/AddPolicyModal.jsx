@@ -186,17 +186,17 @@ const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit, companies = [] }) =
               <InputField label="Reg Address" field="regAddress" placeholder="Enter registered address" value={formData.regAddress} onChange={handleChange} isDark={isDark} />
               <InputField label="Warehouse/Office Address" field="warehouseOfficeAddress" placeholder="Enter warehouse/office address" value={formData.warehouseOfficeAddress} onChange={handleChange} isDark={isDark} />
               <InputField label="Reg No" field="regNo" placeholder="Enter registration number" value={formData.regNo} onChange={handleChange} isDark={isDark} />
-              <InputField label="Reg Date" field="regDate" type="date" value={formData.regDate} onChange={handleChange} isDark={isDark} />
+              <InputField label="Reg Date" field="regDate" type="text" value={formData.regDate} onChange={handleChange} isDark={isDark} />
               <InputField label="Company First Time Policy" field="companyFirstTimePolicy" placeholder="Enter first time policy" value={formData.companyFirstTimePolicy} onChange={handleChange} isDark={isDark} />
               <InputField label="Director/Owner Name" field="directorOwnerName" placeholder="Enter director/owner name" value={formData.directorOwnerName} onChange={handleChange} isDark={isDark} />
               <InputField label="Company Handle By" field="companyHandledBy" placeholder="Enter handler name" value={formData.companyHandledBy} onChange={handleChange} isDark={isDark} />
               <InputField label="VAT Number" field="vatNumber" placeholder="Enter VAT number" value={formData.vatNumber} onChange={handleChange} isDark={isDark} />
               <InputField label="Commodity" field="commodity" placeholder="Enter commodity" value={formData.commodity} onChange={handleChange} isDark={isDark} />
               <InputField label="Currency" field="currency" placeholder="Enter currency (e.g., GBP, USD, EUR)" value={formData.currency} onChange={handleChange} isDark={isDark} />
-              <InputField label="Turnover in LCY" field="turnoverGBP" type="number" placeholder="Enter turnover in LCY" value={formData.turnoverGBP} onChange={handleChange} isDark={isDark} />
+              <InputField label="Turnover in LCY" field="turnoverGBP" type="text" placeholder="Enter turnover in LCY" value={formData.turnoverGBP} onChange={handleChange} isDark={isDark} />
               <InputField label="Insurance Agent" field="insuranceAgent" placeholder="Enter insurance agent" value={formData.insuranceAgent} onChange={handleChange} isDark={isDark} />
               <InputField label="A/C Handler" field="accountHandler" placeholder="Enter account handler" value={formData.accountHandler} onChange={handleChange} isDark={isDark} />
-              <InputField label="Emp Count" field="empCount" type="number" placeholder="Enter employee count" value={formData.empCount} onChange={handleChange} isDark={isDark} />
+              <InputField label="Emp Count" field="empCount" type="text" placeholder="Enter employee count" value={formData.empCount} onChange={handleChange} isDark={isDark} />
             </div>
           </div>
 
@@ -209,18 +209,18 @@ const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit, companies = [] }) =
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Commercial Policy" field="commercialPolicy" placeholder="Enter policy number" value={formData.commercialPolicy} onChange={handleChange} isDark={isDark} />
                 <InputField label="Commercial Policy Link" field="commercialPolicyLink" placeholder="Enter policy link" value={formData.commercialPolicyLink} onChange={handleChange} isDark={isDark} />
-                <InputField label="Commercial Renewal Date" field="commercialRenewalDate" type="date" value={formData.commercialRenewalDate} onChange={handleChange} isDark={isDark} />
-                <InputField label="Commercial Premium Paid" field="commercialPremiumPaid" type="number" placeholder="Enter premium amount" value={formData.commercialPremiumPaid} onChange={handleChange} isDark={isDark} />
-                <InputField label="Employee Liability Cover" field="employeeLiabilityCover" type="number" placeholder="Enter cover amount" value={formData.employeeLiabilityCover} onChange={handleChange} isDark={isDark} />
-                <InputField label="EMP Liability Renewal Date" field="empLiabilityRenewalDate" type="date" value={formData.empLiabilityRenewalDate} onChange={handleChange} isDark={isDark} />
+                <InputField label="Commercial Renewal Date" field="commercialRenewalDate" type="text" value={formData.commercialRenewalDate} onChange={handleChange} isDark={isDark} />
+                <InputField label="Commercial Premium Paid" field="commercialPremiumPaid" type="text" placeholder="Enter premium amount" value={formData.commercialPremiumPaid} onChange={handleChange} isDark={isDark} />
+                <InputField label="Employee Liability Cover" field="employeeLiabilityCover" type="text" placeholder="Enter cover amount" value={formData.employeeLiabilityCover} onChange={handleChange} isDark={isDark} />
+                <InputField label="EMP Liability Renewal Date" field="empLiabilityRenewalDate" type="text" value={formData.empLiabilityRenewalDate} onChange={handleChange} isDark={isDark} />
                 <InputField label="Floating Stock" field="floatingStock" placeholder="Enter floating stock" value={formData.floatingStock} onChange={handleChange} isDark={isDark} />
-                <InputField label="Stock Cover" field="stockCover" type="number" placeholder="Enter stock cover" value={formData.stockCover} onChange={handleChange} isDark={isDark} />
+                <InputField label="Stock Cover" field="stockCover" type="text" placeholder="Enter stock cover" value={formData.stockCover} onChange={handleChange} isDark={isDark} />
                 <InputField label="Stock Location" field="stockLocation" placeholder="Enter stock location" value={formData.stockLocation} onChange={handleChange} isDark={isDark} />
-                <InputField label="Product Liability" field="productLiability" type="number" placeholder="Enter product liability" value={formData.productLiability} onChange={handleChange} isDark={isDark} />
+                <InputField label="Product Liability" field="productLiability" type="text" placeholder="Enter product liability" value={formData.productLiability} onChange={handleChange} isDark={isDark} />
                 <InputField label="Amazon Vendor Liability" field="amazonVendorLiability" placeholder="Enter amazon vendor liability" value={formData.amazonVendorLiability} onChange={handleChange} isDark={isDark} />
-                <InputField label="Legal Expense Cover" field="legalExpenseCover" type="number" placeholder="Enter legal expense cover" value={formData.legalExpenseCover} onChange={handleChange} isDark={isDark} />
-                <InputField label="Commercial Excess Per Claim" field="commercialExcessPerClaim" type="number" placeholder="Enter excess per claim" value={formData.commercialExcessPerClaim} onChange={handleChange} isDark={isDark} />
-                <InputField label="Number of Claims Commercial" field="noOfClaimCommercial" type="number" placeholder="Enter number of claims" value={formData.noOfClaimCommercial} onChange={handleChange} isDark={isDark} />
+                <InputField label="Legal Expense Cover" field="legalExpenseCover" type="text" placeholder="Enter legal expense cover" value={formData.legalExpenseCover} onChange={handleChange} isDark={isDark} />
+                <InputField label="Commercial Excess Per Claim" field="commercialExcessPerClaim" type="text" placeholder="Enter excess per claim" value={formData.commercialExcessPerClaim} onChange={handleChange} isDark={isDark} />
+                <InputField label="Number of Claims Commercial" field="noOfClaimCommercial" type="text" placeholder="Enter number of claims" value={formData.noOfClaimCommercial} onChange={handleChange} isDark={isDark} />
               </div>
             </div>
           )}
@@ -234,9 +234,9 @@ const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit, companies = [] }) =
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Marine" field="marine" placeholder="Enter marine policy" value={formData.marine} onChange={handleChange} isDark={isDark} />
                 <InputField label="Marine Policy Link" field="marinePolicyLink" placeholder="Enter policy link" value={formData.marinePolicyLink} onChange={handleChange} isDark={isDark} />
-                <InputField label="Marine Renewal" field="marineRenewal" type="date" value={formData.marineRenewal} onChange={handleChange} isDark={isDark} />
-                <InputField label="Marine Premium Paid" field="marinePremiumPaid" type="number" placeholder="Enter premium amount" value={formData.marinePremiumPaid} onChange={handleChange} isDark={isDark} />
-                <InputField label="Per Transit Cover" field="perTransitCover" type="number" placeholder="Enter per transit cover" value={formData.perTransitCover} onChange={handleChange} isDark={isDark} />
+                <InputField label="Marine Renewal" field="marineRenewal" type="text" value={formData.marineRenewal} onChange={handleChange} isDark={isDark} />
+                <InputField label="Marine Premium Paid" field="marinePremiumPaid" type="text" placeholder="Enter premium amount" value={formData.marinePremiumPaid} onChange={handleChange} isDark={isDark} />
+                <InputField label="Per Transit Cover" field="perTransitCover" type="text" placeholder="Enter per transit cover" value={formData.perTransitCover} onChange={handleChange} isDark={isDark} />
                 <InputField label="UK-UK" field="ukUk" placeholder="Enter UK-UK" value={formData.ukUk} onChange={handleChange} isDark={isDark} />
                 <InputField label="UK-EU" field="ukEu" placeholder="Enter UK-EU" value={formData.ukEu} onChange={handleChange} isDark={isDark} />
                 <InputField label="UK-USA/Canada" field="ukUsaCanada" placeholder="Enter UK-USA/Canada" value={formData.ukUsaCanada} onChange={handleChange} isDark={isDark} />
@@ -254,8 +254,8 @@ const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit, companies = [] }) =
                 <InputField label="AIR/SEA/RAIL" field="airSeaRail" placeholder="Enter air/sea/rail" value={formData.airSeaRail} onChange={handleChange} isDark={isDark} />
                 <InputField label="ROAD" field="road" placeholder="Enter road" value={formData.road} onChange={handleChange} isDark={isDark} />
                 <InputField label="Any Location In Ordinary Course Of Transit" field="anyLocationInOrdinaryCourseOfTransit" placeholder="Enter location" value={formData.anyLocationInOrdinaryCourseOfTransit} onChange={handleChange} isDark={isDark} />
-                <InputField label="Cargo Excess Per Claim" field="cargoExcessPerClaim" type="number" placeholder="Enter excess per claim" value={formData.cargoExcessPerClaim} onChange={handleChange} isDark={isDark} />
-                <InputField label="No Of Claim Cargo" field="noOfClaimCargo" type="number" placeholder="Enter number of claims" value={formData.noOfClaimCargo} onChange={handleChange} isDark={isDark} />
+                <InputField label="Cargo Excess Per Claim" field="cargoExcessPerClaim" type="text" placeholder="Enter excess per claim" value={formData.cargoExcessPerClaim} onChange={handleChange} isDark={isDark} />
+                <InputField label="No Of Claim Cargo" field="noOfClaimCargo" type="text" placeholder="Enter number of claims" value={formData.noOfClaimCargo} onChange={handleChange} isDark={isDark} />
               </div>
             </div>
           )}
@@ -269,13 +269,13 @@ const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit, companies = [] }) =
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Building Insurance" field="buildingInsurance" placeholder="Enter building insurance" value={formData.buildingInsurance} onChange={handleChange} isDark={isDark} />
                 <InputField label="Property Policy Link" field="propertyPolicyLink" placeholder="Enter policy link" value={formData.propertyPolicyLink} onChange={handleChange} isDark={isDark} />
-                <InputField label="Renewal Date" field="renewalDate" type="date" value={formData.renewalDate} onChange={handleChange} isDark={isDark} />
-                <InputField label="Building Premium Paid" field="buildingPremiumPaid" type="number" placeholder="Enter premium amount" value={formData.buildingPremiumPaid} onChange={handleChange} isDark={isDark} />
-                <InputField label="Sum Assured Value of Premises" field="sumAssuredValueOfPremises" type="number" placeholder="Enter sum assured" value={formData.sumAssuredValueOfPremises} onChange={handleChange} isDark={isDark} />
-                <InputField label="Declared Value" field="declareValue" type="number" placeholder="Enter declared value" value={formData.declareValue} onChange={handleChange} isDark={isDark} />
+                <InputField label="Renewal Date" field="renewalDate" type="text" value={formData.renewalDate} onChange={handleChange} isDark={isDark} />
+                <InputField label="Building Premium Paid" field="buildingPremiumPaid" type="text" placeholder="Enter premium amount" value={formData.buildingPremiumPaid} onChange={handleChange} isDark={isDark} />
+                <InputField label="Sum Assured Value of Premises" field="sumAssuredValueOfPremises" type="text" placeholder="Enter sum assured" value={formData.sumAssuredValueOfPremises} onChange={handleChange} isDark={isDark} />
+                <InputField label="Declared Value" field="declareValue" type="text" placeholder="Enter declared value" value={formData.declareValue} onChange={handleChange} isDark={isDark} />
                 <InputField label="Building Location" field="buildingLocation" placeholder="Enter building location" value={formData.buildingLocation} onChange={handleChange} isDark={isDark} />
-                <InputField label="Building Excess Per Claim" field="buildingExcessPerClaim" type="number" placeholder="Enter excess per claim" value={formData.buildingExcessPerClaim} onChange={handleChange} isDark={isDark} />
-                <InputField label="No Of Claim Building" field="noOfClaimBuilding" type="number" placeholder="Enter number of claims" value={formData.noOfClaimBuilding} onChange={handleChange} isDark={isDark} />
+                <InputField label="Building Excess Per Claim" field="buildingExcessPerClaim" type="text" placeholder="Enter excess per claim" value={formData.buildingExcessPerClaim} onChange={handleChange} isDark={isDark} />
+                <InputField label="No Of Claim Building" field="noOfClaimBuilding" type="text" placeholder="Enter number of claims" value={formData.noOfClaimBuilding} onChange={handleChange} isDark={isDark} />
               </div>
             </div>
           )}
@@ -289,11 +289,11 @@ const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit, companies = [] }) =
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Fleet Policy" field="fleetPolicy" placeholder="Enter fleet policy" value={formData.fleetPolicy} onChange={handleChange} isDark={isDark} />
                 <InputField label="Fleet Policy Link" field="fleetPolicyLink" placeholder="Enter policy link" value={formData.fleetPolicyLink} onChange={handleChange} isDark={isDark} />
-                <InputField label="Renewal Date" field="renewalDate2" type="date" value={formData.renewalDate2} onChange={handleChange} isDark={isDark} />
-                <InputField label="Fleet Premium Paid" field="fleetPremiumPaid" type="number" placeholder="Enter premium amount" value={formData.fleetPremiumPaid} onChange={handleChange} isDark={isDark} />
+                <InputField label="Renewal Date" field="renewalDate2" type="text" value={formData.renewalDate2} onChange={handleChange} isDark={isDark} />
+                <InputField label="Fleet Premium Paid" field="fleetPremiumPaid" type="text" placeholder="Enter premium amount" value={formData.fleetPremiumPaid} onChange={handleChange} isDark={isDark} />
                 <InputField label="Reg No" field="regNo2" placeholder="Enter registration number" value={formData.regNo2} onChange={handleChange} isDark={isDark} />
-                <InputField label="Fleet Excess Per Claim" field="fleetExcessPerClaim" type="number" placeholder="Enter excess per claim" value={formData.fleetExcessPerClaim} onChange={handleChange} isDark={isDark} />
-                <InputField label="No Of Claim Made Fleet" field="noOfClaimMadeFleet" type="number" placeholder="Enter number of claims" value={formData.noOfClaimMadeFleet} onChange={handleChange} isDark={isDark} />
+                <InputField label="Fleet Excess Per Claim" field="fleetExcessPerClaim" type="text" placeholder="Enter excess per claim" value={formData.fleetExcessPerClaim} onChange={handleChange} isDark={isDark} />
+                <InputField label="No Of Claim Made Fleet" field="noOfClaimMadeFleet" type="text" placeholder="Enter number of claims" value={formData.noOfClaimMadeFleet} onChange={handleChange} isDark={isDark} />
               </div>
             </div>
           )}
