@@ -1,5 +1,4 @@
-import { FileText, Calendar, Eye, Edit } from "lucide-react";
-import { useState } from 'react';
+import { FileText, Calendar, Eye, Edit, User } from "lucide-react";
 import { getCurrencySymbol } from "../../utils/currency";
 
 const ClaimsOverview = ({
@@ -12,7 +11,6 @@ const ClaimsOverview = ({
   getStatusDarkColorr, 
   openEditModalOpenClaim
 }) => {
-  const [documentUrl, setDocumentUrl] = useState(null);
 
   const handleViewDocument = async (documentName) => {
     if (!documentName) {
@@ -80,6 +78,7 @@ const ClaimsOverview = ({
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Type</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Status</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Claim Amount</th>
+                  <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Created By</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Date</th>
                   <th className={`px-6 py-4 text-left text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Actions</th>
                 </tr>
@@ -129,6 +128,17 @@ const ClaimsOverview = ({
                       <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         {formatCurrency(claim.claimAmount, claim.Currency)}
                       </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-2">
+                        <User className={`w-4 h-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
+                        <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                          {claim.createdByFirstName && claim.createdByLastName 
+                            ? `${claim.createdByFirstName} ${claim.createdByLastName}`
+                            : claim.createdByEmail || 'Unknown'
+                          }
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">

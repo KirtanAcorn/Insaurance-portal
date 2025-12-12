@@ -15,8 +15,10 @@ const ClaimsEditModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    console.log('Edit form data received:', editFormDataClaim); // Debug log
+    console.log('Available users:', users); // Debug log
     setFormData(editFormDataClaim);
-  }, [editFormDataClaim]);
+  }, [editFormDataClaim, users]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -183,7 +185,7 @@ const ClaimsEditModal = ({
                         </label>
                         <select
                           name="assignedToUserID"
-                          value={formData.assignedToUserID || ''}
+                          value={String(formData.assignedToUserID || '')}
                           onChange={handleInputChange}
                           className={`w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                             isDark 
@@ -193,9 +195,9 @@ const ClaimsEditModal = ({
                         >
                           <option value="">Select a user</option>
                           {Array.isArray(users) && users
-                            .filter(user => user.role === 'Admin')
+                            .filter(user => user.userRole === 'Admin' || user.userRole === 'Team Member')
                             .map(user => (
-                              <option key={user.id} value={user.id}>
+                              <option key={user.id} value={String(user.id)}>
                                 {user.firstName} {user.lastName}
                               </option>
                             ))

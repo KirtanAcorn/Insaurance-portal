@@ -10,13 +10,22 @@ exports.getAllClaims = async (req, res) => {
     const { userRole, userEmail } = req.query;
     const pool = await poolPromise;
     
-    let query = 'SELECT * FROM Claims';
+    // Join with Users table to get creator information
+    let query = `
+      SELECT 
+        c.*,
+        u.firstName as createdByFirstName,
+        u.lastName as createdByLastName,
+        u.email as createdByEmail
+      FROM Claims c
+      LEFT JOIN Users_ u ON c.createdByUserId = u.id
+    `;
     let request = pool.request();
     
     // Filter claims based on user role
     if (userRole === 'Client') {
       // Clients can only see their own claims
-      query += ' WHERE createdByUserId = (SELECT id FROM Users_ WHERE email = @userEmail)';
+      query += ' WHERE c.createdByUserId = (SELECT id FROM Users_ WHERE email = @userEmail)';
       request.input('userEmail', sql.VarChar, userEmail);
     }
     // Admin and Team Member can see all claims (no WHERE clause needed)
@@ -93,6 +102,7 @@ exports.createClaim = async (req, res) => {
     console.log('Form data received:', {
       claimType, claimAmount, companyName, policyName,
       description, incidentDate, excess, netAmount, status,
+      createdByUserId,
       hasFile: !!req.file
     });
 

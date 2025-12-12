@@ -787,13 +787,14 @@ const Dashboard = () => {
   
   // Function to open edit modal with claim data
   const handleEditClaim = (claim) => {
+    console.log('Editing claim:', claim); // Debug log to see the actual claim data
     setSelectedClaim(claim);
     setEditFormDataClaim({
       claimId: claim.claimId,
       claimType: claim.claimType,
       claimAmount: claim.claimAmount,
       status: claim.status,
-      assignedTo: claim.assignedTo || '',
+      assignedToUserID: claim.assignedToUserID || claim.assignedTo || '', // Use the correct field name
       description: claim.description || '',
       policyId: claim.policyId || '',
       companyName: claim.companyName || claim.company || '', // Handle both old and new field names
@@ -1319,7 +1320,8 @@ const Dashboard = () => {
       // Use the correct case that matches the form field name (description with lowercase d)
       formData.append('description', formValues.description || '');
       formData.append('incidentDate', formValues.incidentDate);
-      formData.append('createdByEmail', userData?.email || '');
+      formData.append('createdByUserId', userData?.id || '');
+      console.log('Creating claim with user ID:', userData?.id); // Debug log
 
       if (file) {
         formData.append('supportingDocuments', file);
