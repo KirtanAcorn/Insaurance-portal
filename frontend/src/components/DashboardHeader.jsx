@@ -20,10 +20,10 @@ const DashboardHeader = ({theme, setTheme, isDark, role}) => {
             </div>
             <div>
               <h1 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Insurance Portal
+                Enterprise Insurance Hub
               </h1>
               <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                Next-Gen Insurance Management
+                Centralized Policy & Claim Monitoring
               </p>
             </div>
             <div className="ml-4 px-3 py-1 bg-blue-500 text-white text-xs font-medium rounded-full">

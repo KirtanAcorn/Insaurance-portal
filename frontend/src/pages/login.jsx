@@ -124,12 +124,13 @@ const Login = () => {
                 <h2 className={`text-3xl font-bold mb-6 ${
                   isDark ? 'text-white' : 'text-gray-900'
                 }`}>
-                  GROUP - COMPANY INSURANCE DETAILS
+                  Insurance Portal for Group of Companies & Claim management
                 </h2>
                 <p className={`text-sm mb-10 leading-relaxed ${
                   isDark ? 'text-gray-400' : 'text-gray-900'
                 }`}>
-                  Company insurance, also known as business insurance, protects a company from financial losses due to unexpected events such as property damage, legal liabilities, employee-related risks, and operational disruptions. It helps businesses mitigate risks and comply with regulations, ensuring smooth operations.
+                  This portal provides a centralized platform for managing insurance details across all group companies. It enables users to review policy information, track coverage, and manage claims efficiently. Designed to support smooth operations, the portal helps organizations minimize financial risks, handle incidents, and maintain compliance with regulatory requirements.
+                  Access your company’s insurance data, submit claims, and monitor claim progress—all in one secure place.
                 </p>
                 
                 {/* Insurance Details Image */}
