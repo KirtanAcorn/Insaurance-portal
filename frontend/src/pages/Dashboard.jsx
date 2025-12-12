@@ -152,39 +152,34 @@ const Dashboard = () => {
       try {
         const { data } = await axios.get('/api/policies/by-year', { params: { _t: Date.now() } });
         if (cancelled || !data || !Array.isArray(data.rows)) return;
-        const rows = data.rows;
+        const allRows = data.rows;
         const year = data.renewalYear || null;
 
-        // Count = number of rows for the latest year
+        // Filter rows based on user's company access
+        const accessibleCompanyNames = policyCompanies.map(company => company.name);
+        const rows = allRows.filter(row => {
+          const companyName = row['Company Name'] || row.companyName || '';
+          return accessibleCompanyNames.includes(companyName);
+        });
+
+        // Count = number of rows for companies user has access to
         const policyCount = rows.length;
 
-        // Prefer server-side currency buckets for accuracy
+        // Calculate total premium from filtered rows (user's accessible companies only)
         let totalPremiumGBP = 0;
-        if (Array.isArray(data.currencyTotals) && data.currencyTotals.length > 0) {
-          totalPremiumGBP = data.currencyTotals.reduce((acc, ct) => {
-            const currency = ct.currency || 'GBP';
-            const commercialTotal = Number(ct.commercialTotal) || 0;
-            const marineTotal = Number(ct.marineTotal) || 0;
-            const buildingTotal = Number(ct.buildingTotal) || 0;
-            const fleetTotal = Number(ct.fleetTotal) || 0;
-            const curTotal = commercialTotal + marineTotal + buildingTotal + fleetTotal;
-            const gbpAmount = toGBP(curTotal, currency);
-            return acc + gbpAmount;
-          }, 0);
-        } else {
-          // Fallback: Sum all premiums per row, converting by detected currency
-          totalPremiumGBP = rows.reduce((sum, row) => {
-            const currency = row['Currency'] || row.currency || 'GBP';
-            const premiums = [
-              row['Commercial Premium Paid'],
-              row['Marine Premium Paid'],
-              row['Building Premium Paid'],
-              row['Fleet Premium Paid']
-            ];
-            const rowSum = premiums.reduce((s, p) => s + toGBP(p, currency), 0);
-            return sum + rowSum;
-          }, 0);
-        }
+        
+        // Always use row-by-row calculation to ensure we only include accessible companies
+        totalPremiumGBP = rows.reduce((sum, row) => {
+          const currency = row['Currency'] || row.currency || 'GBP';
+          const premiums = [
+            row['Commercial Premium Paid'],
+            row['Marine Premium Paid'],
+            row['Building Premium Paid'],
+            row['Fleet Premium Paid']
+          ];
+          const rowSum = premiums.reduce((s, p) => s + toGBP(p, currency), 0);
+          return sum + rowSum;
+        }, 0);
 
         if (!cancelled) {
           setLatestYearSummary({ year, policyCount, totalPremiumGBP });
