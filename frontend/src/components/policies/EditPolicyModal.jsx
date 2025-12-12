@@ -270,7 +270,7 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
                 <InputField label="AIR/SEA/RAIL" field="airSeaRail" placeholder="Enter air/sea/rail" value={formData.airSeaRail} onChange={handleChange} isDark={isDark} />
                 <InputField label="ROAD" field="road" placeholder="Enter road" value={formData.road} onChange={handleChange} isDark={isDark} />
                 <InputField label="Any Location In Ordinary Course Of Transit" field="anyLocationInOrdinaryCourseOfTransit" placeholder="Enter location" value={formData.anyLocationInOrdinaryCourseOfTransit} onChange={handleChange} isDark={isDark} />
-                <InputField label="Cargo Excess Per Claim" field="cargoExcessPerClaim" type="number" placeholder="Enter excess per claim" value={formData.cargoExcessPerClaim} onChange={handleChange} isDark={isDark} />
+                <InputField label="Cargo Excess Per Claim" field="cargoExcessPerClaim" type="text" placeholder="Enter excess per claim" value={formData.cargoExcessPerClaim} onChange={handleChange} isDark={isDark} />
                 <InputField label="No Of Claim Cargo" field="noOfClaimCargo" type="number" placeholder="Enter number of claims" value={formData.noOfClaimCargo} onChange={handleChange} isDark={isDark} />
               </div>
             </div>

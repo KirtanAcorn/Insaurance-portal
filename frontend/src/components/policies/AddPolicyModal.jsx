@@ -17,7 +17,7 @@ const InputField = ({ label, field, type = 'text', placeholder, value, onChange,
   </div>
 );
 
-const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit }) => {
+const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit, companies = [] }) => {
   const initialState = {
     // Common fields for all property types
     companyName: '', year: '', propertyType: '',
@@ -100,14 +100,6 @@ const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit }) => {
   console.log('AddPolicyModal - isOpen:', isOpen);
   
   if (!isOpen) return null;
-
-  const companies = ['Astute Healthcare limited', 'Beauty Magasin Ltd', 'The Future Center Storage and Distribution Limited',
-    'Jambo Supplies Limited', 'Virtual Works 360 Limited', 'Acme Pharma Ltd', 'London Luxury Product',
-    'Activecare Online', 'Hardlow Lubricants Limited', 'Safe Storage and Distribution Limited', 'Jambo BV',
-    'Doc Pharm GmbH', 'Beauty Care Global sp. Zoo', 'Lifexa BVBA', 'Beauty Store LLC', 'Beyondtrend USA LLC',
-    'Jambo Wholesale Corporation LLC', 'Global Brand Storage & Ditribution LLC', 'AHA Goods Wholeseller LLC',
-    'A2Z (Acorn USA)', 'J & D International Business', 'Acorn Solution Ltd', 'Astute Wholesale Limited',
-    'GCET Limited', 'The Future Center Property Management Limited', 'Hetasveeben & Pratibhakumari - Landlord', 'AUCLLP'];
 
   const years = ['2024-2025', '2025-2026', '2026-2027', '2027-2028'];
   const propertyTypes = ['Commercial', 'Marine', 'Property', 'Fleet'];

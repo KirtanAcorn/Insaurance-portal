@@ -8,6 +8,7 @@ import SubmitNewClaimModal from '../../components/claims/SubmitNewClaimModal'
 const Claims = ({
                  role,
                  isDark, 
+                 policyCompanies,
                  claims, 
                  getStatusColorr, 
                  getPolicyTypeColorr, 
@@ -80,6 +81,7 @@ const Claims = ({
 
     <SubmitNewClaimModal
     isDark={isDark}
+    policyCompanies={policyCompanies}
     isOpenNewClaim={isOpenNewClaim}
     openIsOpenNewClaim={openIsOpenNewClaim}
     handleSubmitNewClaim={handleSubmitNewClaim}

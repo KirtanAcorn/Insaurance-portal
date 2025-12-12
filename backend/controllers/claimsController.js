@@ -7,8 +7,21 @@ const { sendClaimAssignmentEmail, sendNewClaimNotificationEmail } = require('../
 // Get all claims
 exports.getAllClaims = async (req, res) => {
   try {
+    const { userRole, userEmail } = req.query;
     const pool = await poolPromise;
-    const result = await pool.request().query('SELECT * FROM Claims');
+    
+    let query = 'SELECT * FROM Claims';
+    let request = pool.request();
+    
+    // Filter claims based on user role
+    if (userRole === 'Client') {
+      // Clients can only see their own claims
+      query += ' WHERE createdByEmail = @userEmail';
+      request.input('userEmail', sql.VarChar, userEmail);
+    }
+    // Admin and Team Member can see all claims (no WHERE clause needed)
+    
+    const result = await request.query(query);
     res.json(result.recordset);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -39,7 +52,7 @@ exports.createClaim = async (req, res) => {
     const {
       claimType, claimAmount, companyName, policyName,
       description, incidentDate, excess, netAmount, status,
-      assignedToUserID
+      assignedToUserID, createdByEmail
     } = req.body;
     
     // Handle file upload
@@ -69,10 +82,11 @@ exports.createClaim = async (req, res) => {
       .input('status', sql.VarChar, status)
       .input('supportingDocuments', sql.VarChar, supportingDocuments)
       .input('assignedToUserID', sql.Int, assignedToUserID || null)
+      .input('createdByEmail', sql.VarChar, createdByEmail)
       .query(`INSERT INTO Claims
-              (claimType, claimAmount, companyName, policyName, description, incidentDate, supportingDocuments, excess, netAmount, status, assignedToUserID)
+              (claimType, claimAmount, companyName, policyName, description, incidentDate, supportingDocuments, excess, netAmount, status, assignedToUserID, createdByEmail)
               OUTPUT INSERTED.claimID
-              VALUES (@claimType, @claimAmount, @companyName, @policyName, @description, @incidentDate, @supportingDocuments, @excess, @netAmount, @status, @assignedToUserID)`);
+              VALUES (@claimType, @claimAmount, @companyName, @policyName, @description, @incidentDate, @supportingDocuments, @excess, @netAmount, @status, @assignedToUserID, @createdByEmail)`);
 
     const insertedId = result.recordset[0].claimID;
 

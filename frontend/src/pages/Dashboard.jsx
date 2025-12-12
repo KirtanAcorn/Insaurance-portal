@@ -45,6 +45,8 @@ const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const role = location.state?.role;
+  const userData = location.state?.userData;
+  const userCompanyAccess = userData?.companyAccess || [];
 
   // Live FX rates (GBP base) for converting premiums to GBP on the dashboard
   const [fxRates, setFxRates] = useState({});
@@ -282,8 +284,8 @@ const Dashboard = () => {
     renewalYear: ''
   };
 
-  // Company data with id and name for dropdown
-  const policyCompanies = [
+  // All available companies
+  const allPolicyCompanies = [
     { id: 'astute-healthcare', name: 'Astute Healthcare limited' },
     { id: 'beauty-magasin', name: 'Beauty Magasin Ltd' },
     { id: 'future-center', name: 'The Future Center Storage and Distribution Limited' },
@@ -312,6 +314,11 @@ const Dashboard = () => {
     { id: 'landlord', name: 'Hetasveeben & Pratibhakumari - Landlord' },
     { id: 'aucllp', name: 'AUCLLP' }
   ];
+
+  // Filter companies based on user access (Admin sees all, others see only assigned companies)
+  const policyCompanies = role === 'Admin' 
+    ? allPolicyCompanies 
+    : allPolicyCompanies.filter(company => userCompanyAccess.includes(company.name));
 
   const [policyData, setPolicyData] = useState(policyDataShape);
   const [isLoadingPolicy, setIsLoadingPolicy] = useState(false);
@@ -1317,6 +1324,7 @@ const Dashboard = () => {
       // Use the correct case that matches the form field name (description with lowercase d)
       formData.append('description', formValues.description || '');
       formData.append('incidentDate', formValues.incidentDate);
+      formData.append('createdByEmail', userData?.email || '');
 
       if (file) {
         formData.append('supportingDocuments', file);
@@ -1462,35 +1470,7 @@ const Dashboard = () => {
   };
 
 
-  const companies = [
-    'Astute Healthcare limited',
-    'Beauty Magasin Ltd',
-    'The Future Center Storage and Distribution Limited',
-    'Jambo Supplies Limited',
-    'Virtual Works 360 Limited',
-    'Acme Pharma Ltd',
-    'London Luxury Product',
-    'Activecare Online',
-    'Hardlow Lubricants Limited',
-    'Safe Storage and Distribution Limited',
-    'Jambo BV',
-    'Doc Pharm GmbH',
-    'Beauty Care Global sp. Zoo',
-    'Lifexa BVBA',
-    'Beauty Store LLC',
-    'Beyondtrend USA LLC',
-    'Jambo Wholesale Corporation LLC',
-    'Global Brand Storage & Ditribution LLC',
-    'AHA Goods Wholeseller LLC',
-    'A2Z (Acorn USA)',
-    'J & D International Business',
-    'Acorn Solution Ltd',
-    'Astute Wholesale Limited',
-    'GCET Limited',
-    'The Future Center Property Management Limited',
-    'Hetasveeben & Pratibhakumari - Landlord',
-    'AUCLLP'
-  ];
+  const companies = allPolicyCompanies.map(company => company.name);
 
   const updateStats = (users) => {
     const totalUsers = users.length;
@@ -1558,7 +1538,12 @@ const Dashboard = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get('/api/claims');
+      const response = await axios.get('/api/claims', {
+        params: {
+          userRole: role,
+          userEmail: userData?.email
+        }
+      });
       setClaims(response.data);
     } catch (err) {
       console.error('Error fetching claims:', err);
@@ -1888,6 +1873,7 @@ const Dashboard = () => {
         {activeTab === 'Claims' && <Claims 
         role={role} 
         isDark={isDark}
+        policyCompanies={policyCompanies}
         claims={claims}
         getStatusColorr={getStatusColorr}
         getPolicyTypeColorr={getPolicyTypeColorr}
@@ -1958,6 +1944,7 @@ const Dashboard = () => {
         isOpen={openIsModalOpenNew}
         onClose={() => setOpenIsModalOpenNew(false)}
         onSubmit={handleCreatePolicy}
+        companies={companies}
       />
 
       {/* Edit Policy Modal */}

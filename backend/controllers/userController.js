@@ -211,7 +211,7 @@ exports.login = async (req, res) => {
       SELECT 
         id, firstName, lastName, email, 
         temporaryPassword,  -- Using temporaryPassword instead of password
-        userRole, isActive, department, location
+        userRole, isActive, department, location, companyAccess
       FROM Users_ 
       WHERE email = @email
     `;
@@ -279,7 +279,8 @@ exports.login = async (req, res) => {
       userRole: user.userRole,
       // Include other necessary user data, but never send password back
       department: user.department,
-      location: user.location
+      location: user.location,
+      companyAccess: user.companyAccess ? JSON.parse(user.companyAccess) : []
     });
   } catch (err) {
     console.error("Login error:", err);
