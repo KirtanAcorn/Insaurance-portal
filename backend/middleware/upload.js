@@ -9,10 +9,15 @@ const storage = multer.diskStorage({
     cb(null, sharepointPath);
   },
   filename: function (req, file, cb) {
-    // Create a sanitized filename with timestamp and original name
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    // Create a more unique filename with timestamp, random number, and original name
+    const timestamp = Date.now();
+    const randomSuffix = Math.round(Math.random() * 1E9);
     const sanitizedOriginalName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-    cb(null, uniqueSuffix + '-' + sanitizedOriginalName);
+    const fileExtension = path.extname(sanitizedOriginalName);
+    const baseName = path.basename(sanitizedOriginalName, fileExtension);
+    
+    // Format: TIMESTAMP-RANDOM-BASENAME.ext
+    cb(null, `${timestamp}-${randomSuffix}-${baseName}${fileExtension}`);
   }
 });
 

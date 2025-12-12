@@ -16,7 +16,7 @@ exports.getAllClaims = async (req, res) => {
     // Filter claims based on user role
     if (userRole === 'Client') {
       // Clients can only see their own claims
-      query += ' WHERE createdByEmail = @userEmail';
+      query += ' WHERE createdByUserId = (SELECT id FROM Users_ WHERE email = @userEmail)';
       request.input('userEmail', sql.VarChar, userEmail);
     }
     // Admin and Team Member can see all claims (no WHERE clause needed)
@@ -52,11 +52,43 @@ exports.createClaim = async (req, res) => {
     const {
       claimType, claimAmount, companyName, policyName,
       description, incidentDate, excess, netAmount, status,
-      assignedToUserID, createdByEmail
+      assignedToUserID, createdByUserId
     } = req.body;
     
     // Handle file upload
     const supportingDocuments = req.file ? req.file.filename : null;
+    
+    // Check for duplicate claims (same company, policy, amount, and description within last 5 minutes)
+    const pool = await poolPromise;
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    
+    const duplicateCheck = await pool.request()
+      .input('companyName', sql.VarChar, companyName)
+      .input('policyName', sql.VarChar, policyName)
+      .input('claimAmount', sql.Decimal(10, 2), claimAmount)
+      .input('description', sql.VarChar, description)
+      .input('fiveMinutesAgo', sql.DateTime, fiveMinutesAgo)
+      .query(`SELECT claimId FROM Claims 
+              WHERE companyName = @companyName 
+              AND policyName = @policyName 
+              AND claimAmount = @claimAmount 
+              AND description = @description 
+              AND createdAt > @fiveMinutesAgo`);
+    
+    if (duplicateCheck.recordset.length > 0) {
+      // Delete the uploaded file if it's a duplicate
+      if (req.file) {
+        const filePath = path.join('C:\\Users\\Priyal.Makwana\\Acorn Solution\\Facilities - Insurance_portal Claims', req.file.filename);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+      return res.status(409).json({ 
+        error: 'Duplicate claim detected', 
+        message: 'A similar claim was already submitted recently',
+        existingClaimId: duplicateCheck.recordset[0].claimId
+      });
+    }
     
     console.log('Form data received:', {
       claimType, claimAmount, companyName, policyName,
@@ -66,8 +98,6 @@ exports.createClaim = async (req, res) => {
 
     // Validate and format incidentDate
     const incidentDateForDB = incidentDate ? new Date(incidentDate) : null;
-
-    const pool = await poolPromise;
 
     // Insert into DB
     const result = await pool.request()
@@ -82,11 +112,11 @@ exports.createClaim = async (req, res) => {
       .input('status', sql.VarChar, status)
       .input('supportingDocuments', sql.VarChar, supportingDocuments)
       .input('assignedToUserID', sql.Int, assignedToUserID || null)
-      .input('createdByEmail', sql.VarChar, createdByEmail)
+      .input('createdByUserId', sql.Int, createdByUserId || null)
       .query(`INSERT INTO Claims
-              (claimType, claimAmount, companyName, policyName, description, incidentDate, supportingDocuments, excess, netAmount, status, assignedToUserID, createdByEmail)
+              (claimType, claimAmount, companyName, policyName, description, incidentDate, supportingDocuments, excess, netAmount, status, assignedToUserID, createdByUserId)
               OUTPUT INSERTED.claimID
-              VALUES (@claimType, @claimAmount, @companyName, @policyName, @description, @incidentDate, @supportingDocuments, @excess, @netAmount, @status, @assignedToUserID, @createdByEmail)`);
+              VALUES (@claimType, @claimAmount, @companyName, @policyName, @description, @incidentDate, @supportingDocuments, @excess, @netAmount, @status, @assignedToUserID, @createdByUserId)`);
 
     const insertedId = result.recordset[0].claimID;
 
