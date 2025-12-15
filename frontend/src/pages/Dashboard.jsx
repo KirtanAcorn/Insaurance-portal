@@ -924,9 +924,14 @@ const Dashboard = () => {
   const fetchUsersClaim = async () => {
     try {
       setIsUsersLoading(true);
+      console.log('Fetching users from /api/users...'); // Debug log
       const response = await axios.get('/api/users');
+      console.log('Users API response:', response.data); // Debug log
       if (response.data && Array.isArray(response.data)) {
+        console.log('Setting users:', response.data); // Debug log
         setUsers(response.data);
+      } else {
+        console.log('Invalid users data format:', response.data); // Debug log
       }
     } catch (error) {
       console.error('Error fetching users:', error);

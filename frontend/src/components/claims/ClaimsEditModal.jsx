@@ -17,6 +17,8 @@ const ClaimsEditModal = ({
   useEffect(() => {
     console.log('Edit form data received:', editFormDataClaim); // Debug log
     console.log('Available users:', users); // Debug log
+    console.log('Users array length:', users?.length); // Debug log
+    console.log('Admin users:', users?.filter(user => (user.userRole || user.role) === 'Admin')); // Debug log
     setFormData(editFormDataClaim);
   }, [editFormDataClaim, users]);
 
@@ -195,7 +197,7 @@ const ClaimsEditModal = ({
                         >
                           <option value="">Select a user</option>
                           {Array.isArray(users) && users
-                            .filter(user => user.userRole === 'Admin' || user.userRole === 'Team Member')
+                            .filter(user => (user.userRole || user.role) === 'Admin')
                             .map(user => (
                               <option key={user.id} value={String(user.id)}>
                                 {user.firstName} {user.lastName}
