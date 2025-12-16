@@ -1256,23 +1256,31 @@ const Dashboard = () => {
 
   const handleCreateUser = async () => {
     try {
-
-      const response = await axios.post(
-        "/api/users", formData
-      );
-      fetchUsers();
-      setIsCreateModalOpen(false);
-      toast.success('User created successfully!');
-
+      const response = await axios.post("/api/users", formData);
+      
       if (response.status === 201 || response.status === 200) {
+        fetchUsers();
+        setIsCreateModalOpen(false);
         setFormData({});
+        toast.success('User created successfully!');
       } else {
         console.warn("Unexpected response:", response);
+        toast.error('Failed to create user. Please try again.');
       }
 
     } catch (error) {
       console.error("Error creating user:", error);
-
+      
+      // Handle specific error messages from the API
+      if (error.response?.data?.error) {
+        toast.error(error.response.data.error);
+      } else if (error.response?.status === 400) {
+        toast.error('Invalid user data. Please check all fields and try again.');
+      } else if (error.response?.status === 500) {
+        toast.error('Server error. Please try again later.');
+      } else {
+        toast.error('Failed to create user. Please try again.');
+      }
     }
   };
 

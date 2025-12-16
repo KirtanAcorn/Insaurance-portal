@@ -45,6 +45,17 @@ exports.createUser = async (req, res) => {
   try {
     const pool = await poolPromise;
 
+    // First check if user with this email already exists
+    const existingUser = await pool.request()
+      .input("checkEmail", sql.VarChar, email)
+      .query("SELECT id FROM Users_ WHERE email = @checkEmail");
+
+    if (existingUser.recordset.length > 0) {
+      return res.status(400).json({ 
+        error: "A user with this email address already exists. Please use a different email address." 
+      });
+    }
+
     await pool.request()
       .input("firstName", sql.VarChar, firstName)
       .input("lastName", sql.VarChar, lastName)
@@ -81,7 +92,15 @@ exports.createUser = async (req, res) => {
     res.status(200).json({ message: "User created successfully" });
   } catch (err) {
     console.error("Error creating user:", err);
-    res.status(500).json({ error: err.message });
+    
+    // Handle specific database constraint errors
+    if (err.number === 2627) { // UNIQUE constraint violation
+      return res.status(400).json({ 
+        error: "A user with this email address already exists. Please use a different email address." 
+      });
+    }
+    
+    res.status(500).json({ error: "An error occurred while creating the user. Please try again." });
   }
 };
 
