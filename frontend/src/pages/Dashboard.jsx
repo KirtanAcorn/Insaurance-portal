@@ -48,6 +48,8 @@ const Dashboard = () => {
   const role = location.state?.role;
   const userData = location.state?.userData;
   const userCompanyAccess = userData?.companyAccess || [];
+  
+
 
   // Live FX rates (GBP base) for converting premiums to GBP on the dashboard
   const [fxRates, setFxRates] = useState({});
@@ -158,6 +160,7 @@ const Dashboard = () => {
 
         // Filter rows based on user's company access
         const accessibleCompanyNames = policyCompanies.map(company => company.name);
+        
         const rows = allRows.filter(row => {
           const companyName = row['Company Name'] || row.companyName || '';
           return accessibleCompanyNames.includes(companyName);
@@ -315,6 +318,8 @@ const Dashboard = () => {
   const policyCompanies = role === 'Admin' 
     ? allPolicyCompanies 
     : allPolicyCompanies.filter(company => userCompanyAccess.includes(company.name));
+    
+
 
   const [policyData, setPolicyData] = useState(policyDataShape);
   const [isLoadingPolicy, setIsLoadingPolicy] = useState(false);
@@ -477,7 +482,7 @@ const Dashboard = () => {
               setPolicyData(transformedData);
               setPolicyError(null);
           } else {
-              console.log('No policy data found for the selected company and year');
+
               setPolicyData(policyDataShape);
               setPolicyError(new Error('No policy data found for the selected company and year'));
               toast.error('No policy data found for the selected company and year');
@@ -521,10 +526,7 @@ const Dashboard = () => {
                 setPolicyData(policyDataShape);
             }
         } else if (isMounted) {
-            console.log('Missing required data for fetch:', { 
-                hasSelectedCompany: !!selectedCompanyPolicy, 
-                hasPolicyYear: !!policyYear 
-            });
+
         }
     };
     
@@ -788,7 +790,7 @@ const Dashboard = () => {
   
   // Function to open edit modal with claim data
   const handleEditClaim = (claim) => {
-    console.log('Editing claim:', claim); // Debug log to see the actual claim data
+
     setSelectedClaim(claim);
     setEditFormDataClaim({
       claimId: claim.claimId,
@@ -925,14 +927,14 @@ const Dashboard = () => {
   const fetchUsersClaim = async () => {
     try {
       setIsUsersLoading(true);
-      console.log('Fetching users from /api/users...'); // Debug log
+
       const response = await axios.get('/api/users');
-      console.log('Users API response:', response.data); // Debug log
+
       if (response.data && Array.isArray(response.data)) {
-        console.log('Setting users:', response.data); // Debug log
+
         setUsers(response.data);
       } else {
-        console.log('Invalid users data format:', response.data); // Debug log
+
       }
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -1288,11 +1290,11 @@ const Dashboard = () => {
 
   const handleCloseDeleteModal = () => setDeleteModalOpen(false);
   const handleConfirmDelete = async (selectedUser) => {
-    console.log("inside handle confirm delete", selectedUser);
+
 
 
     if (!selectedUser?.id) {
-      console.log("userid is not found");
+
       return;
     }
     try {
@@ -1338,7 +1340,7 @@ const Dashboard = () => {
       formData.append('description', formValues.description || '');
       formData.append('incidentDate', formValues.incidentDate);
       formData.append('createdByUserId', userData?.id || '');
-      console.log('Creating claim with user ID:', userData?.id); // Debug log
+
 
       if (file) {
         formData.append('supportingDocuments', file);

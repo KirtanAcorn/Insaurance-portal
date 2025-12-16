@@ -69,11 +69,7 @@ const Policies = ({
       rawPolicyRow={rawPolicyRow}
       onEditPolicy={onEditPolicy}
     />
-    {console.log('Policies - AllPolicies props:', {
-      allPolicies,
-      isLoading: isPoliciesLoading,
-      error: policiesError
-    })}
+
     </>
   )
 }
