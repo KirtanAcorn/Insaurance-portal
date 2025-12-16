@@ -153,6 +153,10 @@ exports.updateUser = async (req, res) => {
       setClauses.push("accountStatus = @accountStatus");
       request.input("accountStatus", sql.VarChar, updates.accountStatus);
     }
+    if (updates.temporaryPassword !== undefined) {
+      setClauses.push("temporaryPassword = @temporaryPassword");
+      request.input("temporaryPassword", sql.VarChar, updates.temporaryPassword);
+    }
 
     // ⛔ Prevent running empty update
     if (setClauses.length === 0) {

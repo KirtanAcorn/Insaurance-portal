@@ -34,7 +34,8 @@ const Userr = ({
   isDeleteModalOpen,
   handleCloseDeleteModal,
   handleConfirmDelete,
-  handleDeleteUser
+  handleDeleteUser,
+  currentUserRole
 }) => {
 
 
@@ -92,6 +93,7 @@ const Userr = ({
         editFormData={editFormData}
         handleFormChange={handleFormChange}
         handleUpdateUser={handleUpdateUser}
+        currentUserRole={currentUserRole}
         />
 
 

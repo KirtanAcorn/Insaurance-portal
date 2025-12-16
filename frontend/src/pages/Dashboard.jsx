@@ -899,7 +899,8 @@ const Dashboard = () => {
     department: '',
     location: '',
     userRole: '',
-    accountActive: true
+    accountActive: true,
+    temporaryPassword: ''
   });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -1132,28 +1133,49 @@ const Dashboard = () => {
       : 'text-red-400 bg-red-900 border-red-700';
   };
 
-  const handleEditUser = (user) => {
-    setSelectedUser(user);
+  const handleEditUser = async (user) => {
+    try {
+      setSelectedUser(user);
 
-    // Use userRole if available, otherwise fall back to role
-    const userRole = user.userRole || user.role;
-    // Determine account status, checking multiple possible properties
-    const accountStatus = user.accountStatus ||
-      (user.isActive === 1 || user.isActive === true || user.status === 'Active' ? 'Active' : 'Inactive');
+      // Use userRole if available, otherwise fall back to role
+      const userRole = user.userRole || user.role;
+      // Determine account status, checking multiple possible properties
+      const accountStatus = user.accountStatus ||
+        (user.isActive === 1 || user.isActive === true || user.status === 'Active' ? 'Active' : 'Inactive');
 
-    setEditFormData({
-      id: user.id,
-      firstName: user.firstName || '',
-      lastName: user.lastName || '',
-      email: user.email || '',
-      phoneNumber: user.phoneNumber || '',
-      department: user.department || '',
-      location: user.location || '',
-      userRole: userRole || 'Client', // Default to 'Client' if no role is set
-      accountStatus: accountStatus,
-      isActive: accountStatus === 'Active'
-    });
-    setIsEditModalOpen(true);
+      // Initialize form data first
+      let formData = {
+        id: user.id,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phoneNumber: user.phoneNumber || '',
+        department: user.department || '',
+        location: user.location || '',
+        userRole: userRole || 'Client',
+        accountStatus: accountStatus,
+        isActive: accountStatus === 'Active',
+        temporaryPassword: '' // Start with empty
+      };
+
+      // For Admin users, fetch complete user data including password
+      if (role === 'Admin') {
+        try {
+          const response = await axios.get(`/api/users/id/${user.id}`);
+          const currentPassword = response.data.temporaryPassword || '';
+          formData.temporaryPassword = currentPassword;
+        } catch (error) {
+          console.error('Error fetching user details:', error);
+          formData.temporaryPassword = '';
+        }
+      }
+      
+      setEditFormData(formData);
+      setIsEditModalOpen(true);
+    } catch (error) {
+      console.error('Error in handleEditUser:', error);
+      toast.error('Failed to load user details');
+    }
   };
 
   const handleDeleteUser = (user) => {
@@ -1167,13 +1189,16 @@ const Dashboard = () => {
     setIsEditModalOpen(false);
     setSelectedUser(null);
     setEditFormData({
-      fullName: '',
+      firstName: '',
+      lastName: '',
       email: '',
       phoneNumber: '',
       department: '',
       location: '',
       userRole: '',
-      accountActive: true
+      accountStatus: 'Active',
+      isActive: true,
+      temporaryPassword: ''
     });
   };
   const handleUpdateUser = async (e) => {
@@ -1194,6 +1219,11 @@ const Dashboard = () => {
         userRole: editFormData.userRole || 'Client',
         isActive: editFormData.accountStatus === 'Active' ? 1 : 0
       };
+
+      // Include password if current user is Admin and password field has a value
+      if (role === 'Admin' && editFormData.temporaryPassword !== undefined) {
+        updatedUser.temporaryPassword = editFormData.temporaryPassword.trim();
+      }
 
       await axios.put(
         `/api/users/${editFormData.id}`,
@@ -1885,6 +1915,7 @@ const Dashboard = () => {
           handleCloseDeleteModal={handleCloseDeleteModal}
           handleConfirmDelete={handleConfirmDelete}
           handleDeleteUser={handleDeleteUser}
+          currentUserRole={role}
 
         />)}
 
