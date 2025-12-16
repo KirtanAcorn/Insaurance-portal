@@ -18,6 +18,7 @@ const SubmitNewClaimModal = ({
   const [policyData, setPolicyData] = useState(null);
   const [isPolicyLoading, setIsPolicyLoading] = useState(false);
   const [policyError, setPolicyError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const normalizeType = (name) => {
     if (!name) return "";
@@ -143,6 +144,19 @@ const SubmitNewClaimModal = ({
       };
     }
     return null;
+  };
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return; // Prevent double submission
+    
+    setIsSubmitting(true);
+    try {
+      await handleSubmitNewClaim(formDataNewClaim, formDataNewClaim.supportingDocument);
+    } catch (error) {
+      console.error('Error submitting claim:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const selectedPolicyDetails = getDetailsForSelectedPolicy();
@@ -717,10 +731,15 @@ const SubmitNewClaimModal = ({
                 Cancel
               </button>
               <button
-                onClick={() => handleSubmitNewClaim(formDataNewClaim, formDataNewClaim.supportingDocument)}
-                className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={`ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 py-2 ${
+                  isSubmitting 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600'
+                } text-white`}
               >
-                Submit Claim
+                {isSubmitting ? 'Submitting...' : 'Submit Claim'}
               </button>
             </div>
           </div>

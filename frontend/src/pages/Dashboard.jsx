@@ -29,6 +29,7 @@ const Dashboard = () => {
   const [availableYears, setAvailableYears] = useState(['2024-2025', '2025-2026', '2026-2027', '2027-2028']);
   const [isOpenNewClaim, setIsOpenNewClaim] = useState(false);
   const [isModalOpenNew, setIsModalOpenNew] = useState(false);
+  const [isSubmittingClaim, setIsSubmittingClaim] = useState(false);
   const [openIsModalOpenNew, setOpenIsModalOpenNew] = useState(false);
   const [isEditPolicyModalOpen, setIsEditPolicyModalOpen] = useState(false);
   const [selectedPolicy, setSelectedPolicy] = useState(null);
@@ -1312,6 +1313,9 @@ const Dashboard = () => {
 
 
   const handleSubmitNewClaim = async (formValues, file) => {
+    if (isSubmittingClaim) return; // Prevent double submission
+    
+    setIsSubmittingClaim(true);
     try {
       const formData = new FormData();
       formData.append('companyName', formValues.companyName);
@@ -1387,6 +1391,8 @@ const Dashboard = () => {
         duration: 5000,
         position: 'top-center'
       });
+    } finally {
+      setIsSubmittingClaim(false);
     }
   };
 

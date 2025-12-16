@@ -4,6 +4,9 @@ const path = require('path');
 const fs = require('fs');
 const { sendClaimAssignmentEmail, sendNewClaimNotificationEmail } = require('../services/emailService');
 
+// Simple in-memory cache to prevent duplicate submissions
+const recentSubmissions = new Map();
+
 // Get all claims
 exports.getAllClaims = async (req, res) => {
   try {
@@ -64,25 +67,52 @@ exports.createClaim = async (req, res) => {
       assignedToUserID, createdByUserId
     } = req.body;
     
+    // Create a unique key for this submission
+    const submissionKey = `${companyName}-${policyName}-${claimAmount}-${description}-${createdByUserId}`;
+    const now = Date.now();
+    
+    // Check if this exact submission was made recently (within 30 seconds)
+    if (recentSubmissions.has(submissionKey)) {
+      const lastSubmission = recentSubmissions.get(submissionKey);
+      if (now - lastSubmission < 30000) { // 30 seconds
+        return res.status(409).json({ 
+          error: 'Duplicate submission detected', 
+          message: 'This claim was already submitted recently. Please wait before submitting again.' 
+        });
+      }
+    }
+    
+    // Record this submission
+    recentSubmissions.set(submissionKey, now);
+    
+    // Clean up old entries (older than 5 minutes)
+    for (const [key, timestamp] of recentSubmissions.entries()) {
+      if (now - timestamp > 300000) { // 5 minutes
+        recentSubmissions.delete(key);
+      }
+    }
+    
     // Handle file upload
     const supportingDocuments = req.file ? req.file.filename : null;
     
-    // Check for duplicate claims (same company, policy, amount, and description within last 5 minutes)
+    // Check for duplicate claims (same company, policy, amount, and description within last 2 minutes)
     const pool = await poolPromise;
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
     
     const duplicateCheck = await pool.request()
       .input('companyName', sql.VarChar, companyName)
       .input('policyName', sql.VarChar, policyName)
       .input('claimAmount', sql.Decimal(10, 2), claimAmount)
       .input('description', sql.VarChar, description)
-      .input('fiveMinutesAgo', sql.DateTime, fiveMinutesAgo)
+      .input('createdByUserId', sql.Int, createdByUserId || null)
+      .input('twoMinutesAgo', sql.DateTime, twoMinutesAgo)
       .query(`SELECT claimId FROM Claims 
               WHERE companyName = @companyName 
               AND policyName = @policyName 
               AND claimAmount = @claimAmount 
               AND description = @description 
-              AND createdAt > @fiveMinutesAgo`);
+              AND (createdByUserId = @createdByUserId OR createdByUserId IS NULL)
+              AND createdAt > @twoMinutesAgo`);
     
     if (duplicateCheck.recordset.length > 0) {
       // Delete the uploaded file if it's a duplicate
@@ -168,6 +198,9 @@ exports.createClaim = async (req, res) => {
       console.error('Error sending new claim notification email:', emailError);
     }
 
+    // Clean up the submission record after successful creation
+    recentSubmissions.delete(submissionKey);
+    
     res.status(201).json({
       message: 'Claim created successfully',
       claimId: insertedId
