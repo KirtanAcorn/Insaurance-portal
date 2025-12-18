@@ -1,8 +1,8 @@
 
 const NavigationTabs = ({isDark, tabs, activeTabChanger, role}) => {
 
-    // Filter out "Users" tab for clients
-  const visibleTabs = role === "Client"
+    // Filter out "Users" tab for clients and team members
+  const visibleTabs = (role === "Client" || role === "Team Member")
     ? tabs.filter((tab) => tab.name !== "Users")
     : tabs;
 

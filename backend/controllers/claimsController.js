@@ -102,7 +102,7 @@ exports.createClaim = async (req, res) => {
     const duplicateCheck = await pool.request()
       .input('companyName', sql.VarChar, companyName)
       .input('policyName', sql.VarChar, policyName)
-      .input('claimAmount', sql.Decimal(10, 2), claimAmount)
+      .input('claimAmount', sql.VarChar, claimAmount)
       .input('description', sql.VarChar, description)
       .input('createdByUserId', sql.Int, createdByUserId || null)
       .input('twoMinutesAgo', sql.DateTime, twoMinutesAgo)
@@ -142,7 +142,7 @@ exports.createClaim = async (req, res) => {
     // Insert into DB
     const result = await pool.request()
       .input('claimType', sql.VarChar, claimType)
-      .input('claimAmount', sql.Decimal(10, 2), claimAmount)
+      .input('claimAmount', sql.VarChar, claimAmount)
       .input('companyName', sql.VarChar, companyName)
       .input('policyName', sql.VarChar, policyName)
       .input('description', sql.VarChar, description)
@@ -244,7 +244,7 @@ exports.updateClaim = async (req, res) => {
     if (req.body.companyName !== undefined) addField('companyName', sql.VarChar, req.body.companyName);
     if (req.body.policyName !== undefined) addField('policyName', sql.VarChar, req.body.policyName);
     if (req.body.claimType !== undefined) addField('claimType', sql.VarChar, req.body.claimType);
-    if (req.body.claimAmount !== undefined) addField('claimAmount', sql.Decimal(10, 2), parseFloat(req.body.claimAmount));
+    if (req.body.claimAmount !== undefined) addField('claimAmount', sql.VarChar, req.body.claimAmount);
     if (req.body.description !== undefined) addField('description', sql.VarChar, req.body.description);
     if (req.body.incidentDate !== undefined) {
       const dateValue = req.body.incidentDate ? new Date(req.body.incidentDate) : null;

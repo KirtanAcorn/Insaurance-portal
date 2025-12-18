@@ -151,13 +151,13 @@ const getInitials = (name) => {
                         >
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button
+                        {/* <button
                         onClick={() => handleDeleteUser(user)} 
                         className={`p-2 rounded-lg hover:bg-opacity-10 transition-colors cursor-pointer ${
                           isDark ? 'text-gray-400 hover:bg-gray-600' : 'text-gray-500 hover:bg-gray-100'
                         }`}>
                           <Trash2 className="w-4 h-4" />
-                        </button>
+                        </button> */}
                       </div>
                     </td>
                   </tr>

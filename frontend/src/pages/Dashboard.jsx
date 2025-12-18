@@ -1360,8 +1360,8 @@ const Dashboard = () => {
 
       const claimAmount = formValues.claimAmount;
 
-      if (!claimAmount || isNaN(Number(claimAmount))) {
-        alert('Please enter a valid claim amount.');
+      if (!claimAmount || claimAmount.trim() === '') {
+        alert('Please enter a claim amount.');
         return;
       }
 
@@ -1884,7 +1884,7 @@ const Dashboard = () => {
           getColorClassesDashbaord={getColorClassesDashbaord}
         />
       )}
-        {activeTab === 'Users' && (
+        {activeTab === 'Users' && role !== 'Client' && role !== 'Team Member' && (
         <Userr 
           openCreateModal={openCreateModal}
           stats={stats}

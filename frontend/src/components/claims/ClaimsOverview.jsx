@@ -1,5 +1,4 @@
 import { FileText, Calendar, Eye, Edit, User } from "lucide-react";
-import { getCurrencySymbol } from "../../utils/currency";
 
 const ClaimsOverview = ({
   isDark, 
@@ -34,13 +33,11 @@ const ClaimsOverview = ({
       alert('Failed to open document. Please try again.');
     }
   };
-  // Format currency
+  // Display claim amount as-is without any formatting
   const formatCurrency = (amount, currencyCode = 'GBP') => {
-    if (amount === null || amount === undefined || amount === '' || amount === '-') return '-';
-    const num = typeof amount === 'string' ? parseFloat(amount.replace(/[^0-9.-]+/g, '')) : Number(amount);
-    if (!isFinite(num)) return '-';
-    const symbol = getCurrencySymbol(currencyCode);
-    return `${symbol}${num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (amount === null || amount === undefined || amount === '') return '-';
+    // Return the amount exactly as entered by the user
+    return String(amount);
   };
 
   return (

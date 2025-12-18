@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Sun, Moon, Monitor, FileText } from 'lucide-react';
+import { ChevronDown, Sun, Moon, Monitor, FileText, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import astuteLogo from '../assets/Astute logo.png';
 import infoImg from '../assets/infoImg.png';
@@ -9,6 +9,7 @@ const Login = () => {
   const [isDark, setIsDark] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loginAs, setLoginAs] = useState('Client');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loginMessage, setLoginMessage] = useState(''); // State for displaying messages
@@ -201,18 +202,35 @@ const Login = () => {
                 }`}>
                   Password
                 </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                  className={`w-full px-4 py-3 text-sm rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    isDark 
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  }`}
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                    className={`w-full px-4 py-3 pr-12 text-sm rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      isDark 
+                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors ${
+                      isDark 
+                        ? 'text-gray-400 hover:text-gray-300' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Login As Dropdown */}

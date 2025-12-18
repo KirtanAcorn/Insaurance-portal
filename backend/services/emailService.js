@@ -222,18 +222,18 @@ const generateClaimAssignmentEmailTemplate = (userName, claimDetails) => {
             </tr>
             <tr>
               <td class="label">Claim Amount:</td>
-              <td class="value"><strong>£${parseFloat(claimAmount || 0).toFixed(2)}</strong></td>
+              <td class="value"><strong>${claimAmount || 'N/A'}</strong></td>
             </tr>
             ${excess ? `
             <tr>
               <td class="label">Excess:</td>
-              <td class="value">£${parseFloat(excess || 0).toFixed(2)}</td>
+              <td class="value">${excess}</td>
             </tr>
             ` : ''}
             ${netAmount ? `
             <tr>
               <td class="label">Net Amount:</td>
-              <td class="value"><strong>£${parseFloat(netAmount || 0).toFixed(2)}</strong></td>
+              <td class="value"><strong>${netAmount || 'N/A'}</strong></td>
             </tr>
             ` : ''}
           </table>
@@ -452,15 +452,15 @@ const generateNewClaimEmailTemplate = (claimDetails) => {
             </tr>
             <tr>
               <td class="label">Claim Amount:</td>
-              <td class="value"><strong>£${parseFloat(claimAmount || 0).toFixed(2)}</strong></td>
+              <td class="value"><strong>${claimAmount || 'N/A'}</strong></td>
             </tr>
             <tr>
               <td class="label">Excess:</td>
-              <td class="value">£${parseFloat(excess || 0).toFixed(2)}</td>
+              <td class="value">${excess || 'N/A'}</td>
             </tr>
             <tr>
               <td class="label">Net Amount:</td>
-              <td class="value"><strong>£${parseFloat(netAmount || 0).toFixed(2)}</strong></td>
+              <td class="value"><strong>${netAmount || 'N/A'}</strong></td>
             </tr>
           </table>
 

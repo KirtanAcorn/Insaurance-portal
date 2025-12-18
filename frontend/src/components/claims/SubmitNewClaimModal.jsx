@@ -393,7 +393,7 @@ const SubmitNewClaimModal = ({
                         Claim Amount
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         placeholder="Enter claim amount"
                         value={formDataNewClaim.claimAmount}
                         onChange={(e) =>
@@ -699,16 +699,31 @@ const SubmitNewClaimModal = ({
                     )}
                   </div>
                   {(() => {
-                    const enteredAmount = Number(formDataNewClaim?.claimAmount) || 0;
+                    // Try to parse the claim amount as a number, but handle text gracefully
+                    const claimAmountValue = formDataNewClaim?.claimAmount || '';
+                    const enteredAmount = parseFloat(claimAmountValue.toString().replace(/[^0-9.-]/g, '')) || 0;
                     const excessAmount = parseCurrency(selectedPolicyDetails?.excess);
                     const claimable = Math.max(0, enteredAmount - excessAmount);
+                    
+                    // Only show calculation if the claim amount contains numeric values
+                    const hasNumericValue = /\d/.test(claimAmountValue);
+                    
+                    if (!hasNumericValue) {
                       return (
                         <div className="flex justify-between pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
                           <span className={isDark ? "text-gray-400" : "text-green-400"}>Claimable Amount:</span>
-                          <span className={`font-semibold ${isDark ? "text-white" : "text-green-400"}`}>{formatCurrency(claimable, policyData?.Currency)}</span>
+                          <span className={`font-semibold ${isDark ? "text-white" : "text-green-400"}`}>N/A (Non-numeric claim amount)</span>
                         </div>
-                        );
-                      })()}
+                      );
+                    }
+                    
+                    return (
+                      <div className="flex justify-between pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
+                        <span className={isDark ? "text-gray-400" : "text-green-400"}>Claimable Amount:</span>
+                        <span className={`font-semibold ${isDark ? "text-white" : "text-green-400"}`}>{formatCurrency(claimable, policyData?.Currency)}</span>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
