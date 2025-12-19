@@ -27,9 +27,42 @@ exports.getAllClaims = async (req, res) => {
     
     // Filter claims based on user role
     if (userRole === 'Client') {
-      // Clients can only see their own claims
-      query += ' WHERE c.createdByUserId = (SELECT id FROM Users_ WHERE email = @userEmail)';
-      request.input('userEmail', sql.VarChar, userEmail);
+      // Clients can only see claims from companies they are assigned to
+      // First get the user's company access
+      const userResult = await pool.request()
+        .input('userEmail', sql.VarChar, userEmail)
+        .query('SELECT companyAccess FROM Users_ WHERE email = @userEmail');
+      
+      if (userResult.recordset.length > 0) {
+        const companyAccess = userResult.recordset[0].companyAccess;
+        if (companyAccess) {
+          try {
+            const assignedCompanies = JSON.parse(companyAccess);
+            if (assignedCompanies && assignedCompanies.length > 0) {
+              // Create placeholders for company names
+              const companyPlaceholders = assignedCompanies.map((_, index) => `@company${index}`).join(', ');
+              query += ` WHERE c.companyName IN (${companyPlaceholders})`;
+              
+              // Add company names as parameters
+              assignedCompanies.forEach((company, index) => {
+                request.input(`company${index}`, sql.VarChar, company);
+              });
+            } else {
+              // If no companies assigned, show no claims
+              query += ' WHERE 1 = 0';
+            }
+          } catch (parseError) {
+            // If JSON parsing fails, show no claims
+            query += ' WHERE 1 = 0';
+          }
+        } else {
+          // If no company access defined, show no claims
+          query += ' WHERE 1 = 0';
+        }
+      } else {
+        // If user not found, show no claims
+        query += ' WHERE 1 = 0';
+      }
     }
     // Admin and Team Member can see all claims (no WHERE clause needed)
     
