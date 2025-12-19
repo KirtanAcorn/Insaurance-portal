@@ -307,6 +307,7 @@ const SubmitNewClaimModal = ({
                             : "bg-white border-gray-300 text-gray-900"
                         }`}
                       >
+                        <option value="">Choose a policy...</option>
                         <option value="Property Insurance">
                         Property Insurance
                         </option>
