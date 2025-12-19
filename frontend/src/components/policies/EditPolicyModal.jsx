@@ -202,7 +202,7 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
               <InputField label="Reg Address" field="regAddress" placeholder="Enter registered address" value={formData.regAddress} onChange={handleChange} isDark={isDark} />
               <InputField label="Warehouse/Office Address" field="warehouseOfficeAddress" placeholder="Enter warehouse/office address" value={formData.warehouseOfficeAddress} onChange={handleChange} isDark={isDark} />
               <InputField label="Reg No" field="regNo" placeholder="Enter registration number" value={formData.regNo} onChange={handleChange} isDark={isDark} />
-              <InputField label="Reg Date" field="regDate" type="text" value={formData.regDate} onChange={handleChange} isDark={isDark} />
+              <InputField label="Reg Date" field="regDate" type="date" value={formData.regDate} onChange={handleChange} isDark={isDark} />
               <InputField label="Company First Time Policy" field="companyFirstTimePolicy" placeholder="Enter first time policy" value={formData.companyFirstTimePolicy} onChange={handleChange} isDark={isDark} />
               <InputField label="Director/Owner Name" field="directorOwnerName" placeholder="Enter director/owner name" value={formData.directorOwnerName} onChange={handleChange} isDark={isDark} />
               <InputField label="Company Handle By" field="companyHandledBy" placeholder="Enter handler name" value={formData.companyHandledBy} onChange={handleChange} isDark={isDark} />
@@ -225,10 +225,10 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Commercial Policy" field="commercialPolicy" placeholder="Enter policy number" value={formData.commercialPolicy} onChange={handleChange} isDark={isDark} />
                 <InputField label="Commercial Policy Link" field="commercialPolicyLink" placeholder="Enter policy link" value={formData.commercialPolicyLink} onChange={handleChange} isDark={isDark} />
-                <InputField label="Commercial Renewal Date" field="commercialRenewalDate" type="text" value={formData.commercialRenewalDate} onChange={handleChange} isDark={isDark} />
+                <InputField label="Commercial Renewal Date" field="commercialRenewalDate" type="date" value={formData.commercialRenewalDate} onChange={handleChange} isDark={isDark} />
                 <InputField label="Commercial Premium Paid" field="commercialPremiumPaid" type="text" placeholder="Enter premium amount" value={formData.commercialPremiumPaid} onChange={handleChange} isDark={isDark} />
                 <InputField label="Employee Liability Cover" field="employeeLiabilityCover" type="text" placeholder="Enter cover amount" value={formData.employeeLiabilityCover} onChange={handleChange} isDark={isDark} />
-                <InputField label="EMP Liability Renewal Date" field="empLiabilityRenewalDate" type="text" value={formData.empLiabilityRenewalDate} onChange={handleChange} isDark={isDark} />
+                <InputField label="EMP Liability Renewal Date" field="empLiabilityRenewalDate" type="date" value={formData.empLiabilityRenewalDate} onChange={handleChange} isDark={isDark} />
                 <InputField label="Floating Stock" field="floatingStock" placeholder="Enter floating stock" value={formData.floatingStock} onChange={handleChange} isDark={isDark} />
                 <InputField label="Stock Cover" field="stockCover" type="text" placeholder="Enter stock cover" value={formData.stockCover} onChange={handleChange} isDark={isDark} />
                 <InputField label="Stock Location" field="stockLocation" placeholder="Enter stock location" value={formData.stockLocation} onChange={handleChange} isDark={isDark} />
@@ -250,7 +250,7 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Marine" field="marine" placeholder="Enter marine policy" value={formData.marine} onChange={handleChange} isDark={isDark} />
                 <InputField label="Marine Policy Link" field="marinePolicyLink" placeholder="Enter policy link" value={formData.marinePolicyLink} onChange={handleChange} isDark={isDark} />
-                <InputField label="Marine Renewal" field="marineRenewal" type="text" value={formData.marineRenewal} onChange={handleChange} isDark={isDark} />
+                <InputField label="Marine Renewal" field="marineRenewal" type="date" value={formData.marineRenewal} onChange={handleChange} isDark={isDark} />
                 <InputField label="Marine Premium Paid" field="marinePremiumPaid" type="text" placeholder="Enter premium amount" value={formData.marinePremiumPaid} onChange={handleChange} isDark={isDark} />
                 <InputField label="Per Transit Cover" field="perTransitCover" type="text" placeholder="Enter per transit cover" value={formData.perTransitCover} onChange={handleChange} isDark={isDark} />
                 <InputField label="UK-UK" field="ukUk" placeholder="Enter UK-UK" value={formData.ukUk} onChange={handleChange} isDark={isDark} />
@@ -285,7 +285,7 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Building Insurance" field="buildingInsurance" placeholder="Enter building insurance" value={formData.buildingInsurance} onChange={handleChange} isDark={isDark} />
                 <InputField label="Property Policy Link" field="propertyPolicyLink" placeholder="Enter policy link" value={formData.propertyPolicyLink} onChange={handleChange} isDark={isDark} />
-                <InputField label="Renewal Date" field="renewalDate" type="text" value={formData.renewalDate} onChange={handleChange} isDark={isDark} />
+                <InputField label="Renewal Date" field="renewalDate" type="date" value={formData.renewalDate} onChange={handleChange} isDark={isDark} />
                 <InputField label="Building Premium Paid" field="buildingPremiumPaid" type="text" placeholder="Enter premium amount" value={formData.buildingPremiumPaid} onChange={handleChange} isDark={isDark} />
                 <InputField label="Sum Assured Value of Premises" field="sumAssuredValueOfPremises" type="text" placeholder="Enter sum assured" value={formData.sumAssuredValueOfPremises} onChange={handleChange} isDark={isDark} />
                 <InputField label="Declared Value" field="declareValue" type="text" placeholder="Enter declared value" value={formData.declareValue} onChange={handleChange} isDark={isDark} />
@@ -305,7 +305,7 @@ const EditPolicyModal = ({ isDark, isOpen, onClose, onSubmit, policyData }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField label="Fleet Policy" field="fleetPolicy" placeholder="Enter fleet policy" value={formData.fleetPolicy} onChange={handleChange} isDark={isDark} />
                 <InputField label="Fleet Policy Link" field="fleetPolicyLink" placeholder="Enter policy link" value={formData.fleetPolicyLink} onChange={handleChange} isDark={isDark} />
-                <InputField label="Renewal Date" field="renewalDate2" type="text" value={formData.renewalDate2} onChange={handleChange} isDark={isDark} />
+                <InputField label="Renewal Date" field="renewalDate2" type="date" value={formData.renewalDate2} onChange={handleChange} isDark={isDark} />
                 <InputField label="Fleet Premium Paid" field="fleetPremiumPaid" type="text" placeholder="Enter premium amount" value={formData.fleetPremiumPaid} onChange={handleChange} isDark={isDark} />
                 <InputField label="Reg No" field="regNo2" placeholder="Enter registration number" value={formData.regNo2} onChange={handleChange} isDark={isDark} />
                 <InputField label="Fleet Excess Per Claim" field="fleetExcessPerClaim" type="text" placeholder="Enter excess per claim" value={formData.fleetExcessPerClaim} onChange={handleChange} isDark={isDark} />
