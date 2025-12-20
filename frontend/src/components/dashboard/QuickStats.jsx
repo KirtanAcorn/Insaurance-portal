@@ -4,7 +4,7 @@ const QuickStats = ({ isDark, getColorClassesDashbaord, quickStats }) => {
   const stats = [
     {
       title: 'Covered Companies',
-      value: `${quickStats.globalCoverage}%`,
+      value: '62.5%', // Static value for demo
       icon: Globe,
       color: 'blue',
     },

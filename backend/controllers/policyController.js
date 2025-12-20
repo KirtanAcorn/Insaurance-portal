@@ -351,6 +351,153 @@ exports.createPolicy = async (req, res) => {
   }
 };
 
+// Get policy details for claims (matches policy management structure)
+exports.getPolicyDetailsForClaim = async (req, res) => {
+  const { companyName, renewalYear } = req.query;
+  if (!companyName || !renewalYear) {
+    return res.status(400).json({ error: "Company name and Renewal Year are required" });
+  }
+
+  const decodedCompany = decodeURIComponent(companyName).replace(/-/g, ' ').trim();
+  const decodedYear = decodeURIComponent(renewalYear).trim();
+
+  let pool;
+  try {
+    pool = await poolPromise;
+    
+    // Query with new table structure - using [Year ] field (note the trailing space)
+    const query = `
+      SELECT TOP 1 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      WHERE 
+        [Company Name] = @companyName AND
+        [Year ] = @renewalYear
+    `;
+    
+    const request = pool.request();
+    request.input("companyName", sql.NVarChar(255), decodedCompany);
+    request.input("renewalYear", sql.NVarChar(50), decodedYear);
+    
+    const result = await request.query(query);
+    
+    if (result.recordset.length > 0) {
+      const apiData = result.recordset[0];
+      
+      // Helper functions for data formatting
+      const formatCurrency = (value) => {
+        if (value === null || value === undefined || value === '' || value === '-') return '-';
+        return String(value).trim();
+      };
+
+      const formatDate = (dateString) => {
+        if (!dateString || dateString === 'N/A' || dateString === '-') return '-';
+        const date = new Date(dateString);
+        return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        });
+      };
+
+      // Transform data to match policy management structure
+      const transformedData = {
+        companyName: apiData['Company Name'] || '-',
+        country: apiData['Country'] || '-',
+        regAddress: apiData['Reg Address'] || '-',
+        warehouseOfficeAddress: apiData['Warehouse/Office Address/es'] || '-',
+        regNo: apiData['Reg No'] || '-',
+        regDate: formatDate(apiData['Reg Date']),
+        companyFirstTimePolicy: apiData['Company first Time Policy'] || '-',
+        directorOwnerName: apiData['Director/Owner Name'] || '-',
+        companyHandledBy: apiData['Company Handle By'] || '-',
+        vatNumber: apiData['VAT Number'] || '-',
+        commodity: apiData['Comodity'] || '-',
+        currency: apiData['Currency'] || '-',
+        turnoverGBP: apiData['Turnover in £ Mn'] || '-',
+        insuranceAgent: apiData['Insurance Agent'] || '-',
+        accountHandler: apiData['A/C HANDLER'] || '-',
+        employeeCount: apiData['Emp Count'] || '-',
+        
+        // Commercial Insurance
+        commercialPolicy: apiData['Commercial Policy'] || '-',
+        commercialRenewalDate: formatDate(apiData['Commercial Renewal Date']),
+        commercialPolicyLink: apiData['Commercial Policy Link'] || '-',
+        commercialPremiumPaid: apiData['Commercial Premium Paid'] || '-',
+        employeeLiabilityCover: apiData['Employee Liability Cover'] || '-',
+        empLiabilityRenewalDate: formatDate(apiData['Emp_Liabality Renewal Date']),
+        floatingStock: apiData['Floting stock'] || '-',
+        stockCover: apiData['Stock Cover'] || '-',
+        stockLocation: apiData['Stock Location'] || '-',
+        productLiability: apiData['Product Liability'] || '-',
+        amazonVendorLiability: apiData['Amazon Vendor Liability'] || '-',
+        legalExpenseCover: apiData['Legal Expense Cover'] || '-',
+        commercialExcessPerClaim: apiData['Commercial Excess Per claim'] || '-',
+        noOfClaimCommercial: apiData['No Of claim Commercial'] || '-',
+        
+        // Marine Insurance
+        marine: apiData['Marine'] || '-',
+        marinePolicyLink: apiData['Marine Policy Link'] || '-',
+        marineRenewal: formatDate(apiData['Marine Renewal']),
+        marinePremiumPaid: apiData['Marine Premium Paid'] || '-',
+        perTransitCover: apiData['Per Transit Cover'] || '-',
+        ukUk: apiData['UK-UK'] || '-',
+        ukEu: apiData['UK-EU'] || '-',
+        ukUsaCanada: apiData['UK-USA/Canada'] || '-',
+        ukMiddleEastDubai: apiData['UK-MiddelEast(Dubai)'] || '-',
+        usaMiddleEastDubai: apiData['USA-Middeleast(Dubai)'] || '-',
+        euMiddleEastDubai: apiData['EU-Middeleast(Dubai)'] || '-',
+        euEu: apiData['EU-EU'] || '-',
+        euUsa: apiData['EU-USA'] || '-',
+        usaUsa: apiData['USA-USA'] || '-',
+        ukRow: apiData['UK-ROW'] || '-',
+        usaRow: apiData['USA-ROW'] || '-',
+        euRow: apiData['EU-ROW'] || '-',
+        rowRow: apiData['ROW-ROW'] || '-',
+        crossVoyage: apiData['CROSS VOYAGE'] || '-',
+        airSeaRail: apiData['AIR/SEA/RAIL'] || '-',
+        road: apiData['ROAD'] || '-',
+        anyoneLocationInOrdinaryCourseOfTransit: apiData['ANYONE LOACTION IN ORDINARY COURSE OF TRANSIT'] || '-',
+        cargoExcessPerClaim: apiData['Cargo Excess Excess Per claim'] || '-',
+        noOfClaimCargo: apiData['No Of claim Cargo'] || '-',
+        
+        // Property Insurance
+        buildingInsurance: apiData['Building Insurance'] || '-',
+        propertyPolicyLink: apiData['Property Policy Link'] || '-',
+        renewalDate: formatDate(apiData['Renewal Date']),
+        buildingPremiumPaid: apiData['Building Premium Paid'] || '-',
+        sumAssuredValueOfPremises: apiData['Sume Assure(Value of )Premises'] || '-',
+        declareValue: apiData['Declare Value'] || '-',
+        buildingLocation: apiData['Building Location'] || '-',
+        buildingExcessPerClaim: apiData['Building Excess Per claim'] || '-',
+        noOfClaimBuilding: apiData['No Of claim Building'] || '-',
+        
+        // Fleet Insurance
+        fleetPolicy: apiData['Fleet Policy'] || '-',
+        fleetPolicyLink: apiData['Fleet Policy Link'] || '-',
+        renewalDate2: formatDate(apiData['Renewal Date2']),
+        fleetPremiumPaid: apiData['Fleet Premium Paid'] || '-',
+        regNo2: apiData['Reg No2'] || '-',
+        fleetExcessPerClaim: apiData['Fleet Excess Per claim '] || '-',
+        noOfClaimMadeFleet: apiData['No Of claim made fleet'] || '-',
+        
+        renewalYear: apiData['Year '] || apiData['Year'] || renewalYear
+      };
+      
+      return res.json(transformedData);
+    } else {
+      return res.status(404).json({ 
+        message: "No matching policy found",
+        searchParameters: { companyName: decodedCompany, renewalYear: decodedYear }
+      });
+    }
+  } catch (error) {
+    console.error("Error in getPolicyDetailsForClaim:", error);
+    return res.status(500).json({ 
+      error: "Failed to fetch policy details for claim",
+      details: error.message
+    });
+  }
+};
+
 // Update an existing policy
 exports.updatePolicy = async (req, res) => {
   const policyData = req.body;

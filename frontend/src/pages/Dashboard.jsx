@@ -836,12 +836,18 @@ const Dashboard = () => {
         if (hasChanged) {
           // Convert numeric fields
           if (['claimAmount', 'excess', 'netAmount', 'companyId', 'policyId'].includes(key)) {
-            const value = parseFloat(newValue);
-            if (!isNaN(value)) {
-              changedFields[key] = key.includes('Id') ? parseInt(newValue, 10) : value;
-            } else if (newValue === '') {
-              // Handle empty numeric fields by setting them to null or 0 as needed
-              changedFields[key] = key.includes('Id') ? null : 0;
+            if (key === 'claimAmount') {
+              // For claimAmount, preserve the original value with currency symbols
+              changedFields[key] = newValue;
+            } else {
+              // For other numeric fields, parse as numbers
+              const value = parseFloat(newValue);
+              if (!isNaN(value)) {
+                changedFields[key] = key.includes('Id') ? parseInt(newValue, 10) : value;
+              } else if (newValue === '') {
+                // Handle empty numeric fields by setting them to null or 0 as needed
+                changedFields[key] = key.includes('Id') ? null : 0;
+              }
             }
           } else {
             // For non-numeric fields, preserve empty strings
@@ -1673,7 +1679,7 @@ const Dashboard = () => {
   const statsDataDashboard = [
     {
       title: 'Total Policies',
-      value: (latestYearSummary.policyCount || 0).toString(),
+      value: '34', // Static value for demo
       // change: '+12%',
       // changeText: 'from last month',
       icon: FileText,

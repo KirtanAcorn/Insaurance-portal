@@ -12,6 +12,15 @@ const policyController = require('../controllers/policyController');
 router.get('/company-details', policyController.getCompanyDetails);
 
 /**
+ * @route   GET /api/policies/claim-details
+ * @desc    Get policy details for claims (matches policy management structure)
+ * @access  Private
+ * @query   {string} companyName - Name of the company
+ * @query   {string} renewalYear - Renewal year
+ */
+router.get('/claim-details', policyController.getPolicyDetailsForClaim);
+
+/**
  * @route   GET /api/policies/company/:companyName
  * @desc    Get all policies for a specific company
  * @access  Private

@@ -63,11 +63,11 @@ const SubmitNewClaimModal = ({
       setIsPolicyLoading(true);
       setPolicyError(null);
       try {
-        const res = await axios.get(`/api/policies/company-details`, {
+        const res = await axios.get(`/api/policies/claim-details`, {
           params: { companyName, renewalYear: policyYear, _t: Date.now() },
         });
-        const apiData = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
-        setPolicyData(apiData || null);
+        // The new endpoint returns the transformed data directly, not an array
+        setPolicyData(res.data || null);
       } catch (err) {
         setPolicyData(null);
         setPolicyError(err?.response?.data?.message || err.message || "Failed to load policy details");
@@ -81,68 +81,74 @@ const SubmitNewClaimModal = ({
   const getDetailsForSelectedPolicy = () => {
     if (!policyData) return null;
     const type = normalizeType(formDataNewClaim?.policyName);
+    
     if (type === "Commercial Liability") {
       return {
         title: "Commercial Liability Insurance",
-        policyId: policyData["Commercial Policy"] || "N/A",
-        status: policyData["Policy Status"] || policyData["Status"] || "Active",
-        sumAssured: formatCurrency(policyData["Employee Liability Cover"], policyData?.Currency) || "N/A",
-        excess: formatCurrency(policyData["Commercial Excess Per claim"], policyData?.Currency) || "N/A",
-        location: policyData["Stock Location"] || "N/A",
-        claims: policyData["No Of claim Commercial"] ?? "N/A",
+        policyId: policyData.commercialPolicy || "N/A",
+        status: "Active",
+        sumAssured: policyData.employeeLiabilityCover || "N/A",
+        excess: policyData.commercialExcessPerClaim || "N/A",
         coverage: [
-          { label: "Public Liability", value: formatCurrency(policyData["Employee Liability Cover"], policyData?.Currency) || "N/A" },
-          { label: "Product Liability", value: formatCurrency(policyData["Product Liability"], policyData?.Currency) || "N/A" },
-          { label: "Floating Stock", value: formatCurrency(policyData["Floting stock"], policyData?.Currency) || "N/A" },
+          { label: "Employee Liability Cover", value: policyData.employeeLiabilityCover || "-" },
+          { label: "Product Liability", value: policyData.productLiability || "-" },
+          { label: "Floating Stock", value: policyData.floatingStock || "-" },
+          { label: "Stock Cover", value: policyData.stockCover || "-" },
+          { label: "Amazon Vendor Liability", value: policyData.amazonVendorLiability || "-" },
+          { label: "Legal Expense Cover", value: policyData.legalExpenseCover || "-" },
         ],
       };
     }
+    
     if (type === "Property") {
       return {
         title: "Property Insurance",
-        policyId: policyData["Building Insurance"] || "N/A",
-        status: policyData["Policy Status"] || policyData["Status"] || "Active",
-        sumAssured: formatCurrency(policyData["Sume Assure(Value of )Premises"], policyData?.Currency) || "N/A",
-        excess: formatCurrency(policyData["Building Excess Per claim"], policyData?.Currency) || "N/A",
-        location: policyData["Building Location"] || "N/A",
-        claims: policyData["No Of claim Building"] ?? "N/A",
+        policyId: policyData.buildingInsurance || "N/A",
+        status: "Active",
+        sumAssured: policyData.sumAssuredValueOfPremises || "N/A",
+        excess: policyData.buildingExcessPerClaim || "N/A",
         coverage: [
-          { label: "Building Value", value: formatCurrency(policyData["Sume Assure(Value of )Premises"], policyData?.Currency) || "N/A" },
-          { label: "Declared Value", value: formatCurrency(policyData["Declare Value"], policyData?.Currency) || "N/A" },
-          { label: "Location", value: policyData["Building Location"] || "N/A" },
+          { label: "Sum Assured (Value of Premises)", value: policyData.sumAssuredValueOfPremises || "-" },
+          { label: "Declared Value", value: policyData.declareValue || "-" },
+          { label: "Building Location", value: policyData.buildingLocation || "-" },
         ],
       };
     }
+    
     if (type === "Marine") {
       return {
         title: "Marine Insurance",
-        policyId: policyData["Marine"] || "N/A",
-        status: policyData["Policy Status"] || policyData["Status"] || "Active",
-        sumAssured: formatCurrency(policyData["Per Transit Cover"], policyData?.Currency) || "N/A",
-        excess: formatCurrency(policyData["Cargo Excess Excess Per claim"], policyData?.Currency) || "N/A",
-        claims: policyData["No Of claim Cargo"] ?? "N/A",
+        policyId: policyData.marine || "N/A",
+        status: "Active",
+        sumAssured: policyData.perTransitCover || "N/A",
+        excess: policyData.cargoExcessPerClaim || "N/A",
         coverage: [
-          { label: "Per Transit Cover", value: formatCurrency(policyData["Per Transit Cover"], policyData?.Currency) || "N/A" },
-          { label: "Cross Voyage", value: formatCurrency(policyData["CROSS VOYAGE"], policyData?.Currency) || "N/A" },
+          { label: "Per Transit Cover", value: policyData.perTransitCover || "-" },
+          { label: "UK-EU", value: policyData.ukEu || "-" },
+          { label: "EU-MiddleEast(Dubai)", value: policyData.euMiddleEastDubai || "-" },
+          { label: "EU-EU", value: policyData.euEu || "-" },
+          { label: "Air/Sea/Rail", value: policyData.airSeaRail || "-" },
+          { label: "Road", value: policyData.road || "-" },
+          { label: "Cargo Excess Per Claim", value: policyData.cargoExcessPerClaim || "-" },
         ],
       };
     }
+    
     if (type === "Fleet") {
       return {
         title: "Fleet Insurance",
-        policyId: policyData["Fleet Policy"] || "N/A",
-        status: policyData["Policy Status"] || policyData["Status"] || "Active",
-        sumAssured: formatCurrency(policyData["fleetSumAssured"], policyData?.Currency) || "N/A",
-        excess: formatCurrency(policyData["Fleet Excess Per claim "], policyData?.Currency) || "N/A",
-        location: policyData["fleetLocation"] || "Multiple Locations",
-        claims: policyData["No Of claim made fleet"] ?? "N/A",
+        policyId: policyData.fleetPolicy || "N/A",
+        status: "Active",
+        sumAssured: "N/A",
+        excess: policyData.fleetExcessPerClaim || "N/A",
         coverage: [
-          { label: "Registration Numbers", value: policyData["Reg No2"] || "N/A" },
-          { label: "Coverage Type", value: policyData["Coverage Type"] || policyData["Fleet Coverage Type"] || "N/A" },
-          { label: "Policy Type", value: policyData["Policy Type"] || "Fleet" },
+          { label: "Registration Numbers", value: policyData.regNo2 || "-" },
+          { label: "Fleet Premium Paid", value: policyData.fleetPremiumPaid || "-" },
+          { label: "Fleet Excess Per Claim", value: policyData.fleetExcessPerClaim || "-" },
         ],
       };
     }
+    
     return null;
   };
 
@@ -718,10 +724,28 @@ const SubmitNewClaimModal = ({
                       );
                     }
                     
+                    // Extract currency symbol directly from policy details (from excess amount)
+                    const extractCurrencySymbol = (amountString) => {
+                      if (!amountString || amountString === 'N/A' || amountString === '-') return '';
+                      
+                      // Extract currency symbols from the beginning of the string
+                      const match = amountString.match(/^([£€$¥₹PLN\(\)zl]+)/);
+                      return match ? match[1] : '';
+                    };
+
+                    // Get currency symbol from the excess amount (which already has the correct symbol)
+                    const currencySymbol = extractCurrencySymbol(selectedPolicyDetails?.excess) || '';
+                    const formattedAmount = claimable.toLocaleString('en-GB', { 
+                      minimumFractionDigits: 2, 
+                      maximumFractionDigits: 2 
+                    });
+
                     return (
                       <div className="flex justify-between pt-2 mt-2 border-t border-gray-200 dark:border-gray-700">
                         <span className={isDark ? "text-gray-400" : "text-green-400"}>Claimable Amount:</span>
-                        <span className={`font-semibold ${isDark ? "text-white" : "text-green-400"}`}>{formatCurrency(claimable, policyData?.Currency)}</span>
+                        <span className={`font-semibold ${isDark ? "text-white" : "text-green-400"}`}>
+                          {currencySymbol}{formattedAmount}
+                        </span>
                       </div>
                     );
                   })()}
