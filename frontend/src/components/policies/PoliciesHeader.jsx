@@ -1,6 +1,6 @@
-import { FileText, Plus } from "lucide-react"
+import { FileText, Plus, Download } from "lucide-react"
 
-const PoliciesHeader = ({ role, openIsModalOpenNew }) => {
+const PoliciesHeader = ({ role, openIsModalOpenNew, onExportData }) => {
   return (
     <>
         <div className={`mb-6 p-6 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white`}>
@@ -15,15 +15,23 @@ const PoliciesHeader = ({ role, openIsModalOpenNew }) => {
               </div>
             </div>
             {role === 'Admin' && (
-              <button 
-              onClick={() => {
-                console.log('New Policy button clicked');
-                openIsModalOpenNew(true);
-              }}
-              className="flex items-center space-x-2 px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-colors text-black cursor-pointer">
-                <Plus className="w-4 h-4" />
-                <span className="font-medium">New Policy</span>
-              </button>
+              <div className="flex items-center space-x-3">
+                <button 
+                  onClick={onExportData}
+                  className="flex items-center space-x-2 px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-colors text-black cursor-pointer">
+                  <Download className="w-4 h-4" />
+                  <span className="font-medium">Export Data</span>
+                </button>
+                <button 
+                onClick={() => {
+                  console.log('New Policy button clicked');
+                  openIsModalOpenNew(true);
+                }}
+                className="flex items-center space-x-2 px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-colors text-black cursor-pointer">
+                  <Plus className="w-4 h-4" />
+                  <span className="font-medium">New Policy</span>
+                </button>
+              </div>
             )}
           </div>
     </div>

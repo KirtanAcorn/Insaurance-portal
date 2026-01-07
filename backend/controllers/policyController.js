@@ -726,3 +726,57 @@ exports.getCompanyPolicies = async (req, res) => {
     // No need to close the pool as it's managed by poolPromise
   }
 };
+// Export all policy data to Excel (Admin only)
+exports.exportPolicyData = async (req, res) => {
+  const XLSX = require('xlsx');
+  
+  let pool;
+  try {
+    pool = await poolPromise;
+
+    // Query to get ALL policy data from the table
+    const query = `
+      SELECT * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      ORDER BY [Company Name], [Year ]
+    `;
+
+    const request = pool.request();
+    const result = await request.query(query);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: 'No policy data found in the database' });
+    }
+
+    // Create workbook and worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(result.recordset);
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'All_Policies');
+
+    // Generate Excel buffer
+    const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    // Create filename with current date and time
+    const now = new Date();
+    const dateTime = now.toISOString().replace(/[:.]/g, '-').split('T');
+    const date = dateTime[0];
+    const time = dateTime[1].split('.')[0];
+    const filename = `Policy_Management_Data.xlsx`;
+
+    // Set response headers for file download
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Length', excelBuffer.length);
+
+    // Send the Excel file
+    return res.send(excelBuffer);
+
+  } catch (error) {
+    console.error('Error in exportPolicyData:', error);
+    return res.status(500).json({ 
+      error: 'Failed to export policy data', 
+      details: error.message 
+    });
+  }
+};

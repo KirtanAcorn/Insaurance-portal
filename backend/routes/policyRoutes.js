@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const policyController = require('../controllers/policyController');
+const { verifyAdmin } = require('../middleware/adminAuth');
 
 /**
  * @route   GET /api/policies/company-details
@@ -58,5 +59,13 @@ router.post('/create', policyController.createPolicy);
  * @body    {object} policyData - Policy data including id and fields to update
  */
 router.put('/update', policyController.updatePolicy);
+
+/**
+ * @route   GET /api/policies/export
+ * @desc    Export all policy data to Excel (Admin only)
+ * @access  Admin
+ * @query   {number} userId - User ID for admin verification
+ */
+router.get('/export', verifyAdmin, policyController.exportPolicyData);
 
 module.exports = router;

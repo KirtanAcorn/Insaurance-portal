@@ -2090,6 +2090,7 @@ const Dashboard = () => {
         {activeTab === 'Policies' && <Policies
           isDark={isDark}
           role={role}
+          userId={userData?.id}
           selectedCompanyPolicy={selectedCompanyPolicy}
           changeSelectedCompanyPolicy={setSelectedCompanyPolicy}
           policyCompanies={policyCompanies}

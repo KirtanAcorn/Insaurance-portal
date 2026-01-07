@@ -26,14 +26,75 @@ const Policies = ({
   isPoliciesLoading = false,
   policiesError = null,
   rawPolicyRow = null,
-  onEditPolicy
+  onEditPolicy,
+  userId // Add userId prop for admin verification
 }) => {
   // Log all props when they change
   useEffect(() => {
   }, [selectedCompanyPolicy, policyYear, selectedInsuranceType, policyData, isLoading, error]);
+
+  // Handle export data
+  const handleExportData = async () => {
+    if (role !== 'Admin') {
+      alert('Access denied. Admin role required.');
+      return;
+    }
+
+    if (!userId) {
+      alert('User ID is required for export.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/policies/export?userId=${userId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Export failed');
+      }
+
+      // Create blob and download file
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get filename from response headers or create default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `Policy_Management_Data.xlsx`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      alert('All policy data exported successfully!');
+    } catch (error) {
+      console.error('Export error:', error);
+      alert(`Export failed: ${error.message}`);
+    }
+  };
+
   return (
     <>
-    <PoliciesHeader role={role} openIsModalOpenNew={() => openIsModalOpenNew(true)}/>
+    <PoliciesHeader 
+      role={role} 
+      openIsModalOpenNew={() => openIsModalOpenNew(true)}
+      onExportData={handleExportData}
+    />
 
     <CompanyInformation
       isDark={isDark}
