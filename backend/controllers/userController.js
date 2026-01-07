@@ -1,12 +1,108 @@
 const { poolPromise, sql } = require("../db");
 
-// Get all users
-exports.getAllUsers = async (req, res) => {
+// Get user statistics
+exports.getUserStats = async (req, res) => {
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query("SELECT * FROM Users_ WHERE isActive = 1");
-    res.json(result.recordset);
+    
+    // Get total users count
+    const totalResult = await pool.request()
+      .query("SELECT COUNT(*) as total FROM Users_ WHERE isActive = 1");
+    
+    // Get active users count
+    const activeResult = await pool.request()
+      .query("SELECT COUNT(*) as active FROM Users_ WHERE isActive = 1 AND accountStatus = 'Active'");
+    
+    // Get team members count
+    const teamMembersResult = await pool.request()
+      .query("SELECT COUNT(*) as teamMembers FROM Users_ WHERE isActive = 1 AND userRole = 'Team Member'");
+    
+    // Get clients count
+    const clientsResult = await pool.request()
+      .query("SELECT COUNT(*) as clients FROM Users_ WHERE isActive = 1 AND userRole = 'Client'");
+
+    res.json({
+      totalUsers: totalResult.recordset[0].total,
+      activeUsers: activeResult.recordset[0].active,
+      teamMembers: teamMembersResult.recordset[0].teamMembers,
+      clients: clientsResult.recordset[0].clients
+    });
   } catch (err) {
+    console.error("Error fetching user stats:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get all users with pagination and search
+exports.getAllUsers = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15; // Default to 15 users per page
+    const search = req.query.search || '';
+    const offset = (page - 1) * limit;
+
+    const pool = await poolPromise;
+    
+    // Build search condition
+    let whereClause = "WHERE isActive = 1";
+    let searchParams = {};
+    
+    if (search.trim()) {
+      // Simple case-insensitive search with better null handling
+      whereClause += ` AND (
+        LOWER(ISNULL(firstName, '')) LIKE LOWER(@search) OR 
+        LOWER(ISNULL(lastName, '')) LIKE LOWER(@search) OR 
+        LOWER(ISNULL(email, '')) LIKE LOWER(@search) OR
+        LOWER(ISNULL(firstName, '') + ' ' + ISNULL(lastName, '')) LIKE LOWER(@search)
+      )`;
+      searchParams.search = `%${search.trim()}%`;
+    }
+    
+    // Get total count of filtered users
+    const countQuery = `SELECT COUNT(*) as total FROM Users_ ${whereClause}`;
+    const countRequest = pool.request();
+    
+    if (search.trim()) {
+      countRequest.input("search", sql.VarChar, searchParams.search);
+    }
+    
+    const countResult = await countRequest.query(countQuery);
+    const totalUsers = countResult.recordset[0].total;
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    // Get paginated and filtered users
+    const dataQuery = `
+      SELECT * FROM Users_ 
+      ${whereClause}
+      ORDER BY createdAt DESC
+      OFFSET @offset ROWS 
+      FETCH NEXT @limit ROWS ONLY
+    `;
+    
+    const dataRequest = pool.request()
+      .input("limit", sql.Int, limit)
+      .input("offset", sql.Int, offset);
+    
+    if (search.trim()) {
+      dataRequest.input("search", sql.VarChar, searchParams.search);
+    }
+    
+    const result = await dataRequest.query(dataQuery);
+
+    res.json({
+      users: result.recordset,
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalUsers: totalUsers,
+        limit: limit,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        search: search
+      }
+    });
+  } catch (err) {
+    console.error("Error fetching users:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -156,6 +252,36 @@ exports.updateUser = async (req, res) => {
     if (updates.temporaryPassword !== undefined) {
       setClauses.push("temporaryPassword = @temporaryPassword");
       request.input("temporaryPassword", sql.VarChar, updates.temporaryPassword);
+    }
+
+    // Handle permissions
+    if (updates.canViewClaims !== undefined) {
+      setClauses.push("canViewClaims = @canViewClaims");
+      request.input("canViewClaims", sql.Bit, updates.canViewClaims ? 1 : 0);
+    }
+    if (updates.canProcessClaims !== undefined) {
+      setClauses.push("canProcessClaims = @canProcessClaims");
+      request.input("canProcessClaims", sql.Bit, updates.canProcessClaims ? 1 : 0);
+    }
+    if (updates.canCreatePolicies !== undefined) {
+      setClauses.push("canCreatePolicies = @canCreatePolicies");
+      request.input("canCreatePolicies", sql.Bit, updates.canCreatePolicies ? 1 : 0);
+    }
+    if (updates.canManageUsers !== undefined) {
+      setClauses.push("canManageUsers = @canManageUsers");
+      request.input("canManageUsers", sql.Bit, updates.canManageUsers ? 1 : 0);
+    }
+
+    // Handle company access
+    if (updates.companyAccess !== undefined) {
+      setClauses.push("companyAccess = @companyAccess");
+      request.input("companyAccess", sql.VarChar, JSON.stringify(updates.companyAccess));
+    }
+
+    // Handle additional notes
+    if (updates.additionalNotes !== undefined) {
+      setClauses.push("additionalNotes = @additionalNotes");
+      request.input("additionalNotes", sql.VarChar, updates.additionalNotes);
     }
 
     // ⛔ Prevent running empty update

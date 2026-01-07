@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FileText, ChevronDownIcon, UserIcon, Sun, Moon, Monitor, ChevronDown, BarChart3, FileCheck, Shield, Users, UserPlus, Mail, MapPin, Clock, Edit, Trash2, X, User, Building, Key, Eye, Settings, ClipboardList, BuildingIcon, TruckIcon, ShipIcon, AlertCircle, DollarSign, Activity, CheckCircle, Home, AlertTriangle, Truck, Globe } from 'lucide-react';
 import DashboardHeader from '../components/DashboardHeader';
 import NavigationTabs from '../components/NavigationTabs';
@@ -905,8 +905,16 @@ const Dashboard = () => {
     department: '',
     location: '',
     userRole: '',
-    accountActive: true,
-    temporaryPassword: ''
+    accountStatus: 'Active',
+    temporaryPassword: '',
+    companyAccess: [],
+    permissions: {
+      viewClaims: false,
+      processClaims: false,
+      createPolicies: false,
+      manageUsers: false
+    },
+    additionalNotes: ''
   });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -929,6 +937,7 @@ const Dashboard = () => {
     additionalNotes: ''
   });
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+  const userTableRef = useRef(null);
 
   // Fetch users from the API
   const fetchUsersClaim = async () => {
@@ -1161,17 +1170,43 @@ const Dashboard = () => {
         userRole: userRole || 'Client',
         accountStatus: accountStatus,
         isActive: accountStatus === 'Active',
-        temporaryPassword: '' // Start with empty
+        temporaryPassword: '', // Start with empty
+        companyAccess: [], // Initialize empty array
+        permissions: {
+          viewClaims: false,
+          processClaims: false,
+          createPolicies: false,
+          manageUsers: false
+        },
+        additionalNotes: '' // Initialize empty
       };
 
-      // For Admin users, fetch complete user data including password
-      if (role === 'Admin') {
-        try {
-          const response = await axios.get(`/api/users/id/${user.id}`);
-          const currentPassword = response.data.temporaryPassword || '';
-          formData.temporaryPassword = currentPassword;
-        } catch (error) {
-          console.error('Error fetching user details:', error);
+      // Fetch complete user data including password, permissions, and company access
+      try {
+        const response = await axios.get(`/api/users/id/${user.id}`);
+        const userData = response.data;
+        
+        // Parse company access
+        formData.companyAccess = userData.companyAccess ? JSON.parse(userData.companyAccess) : [];
+        
+        // Set permissions
+        formData.permissions = {
+          viewClaims: userData.canViewClaims || false,
+          processClaims: userData.canProcessClaims || false,
+          createPolicies: userData.canCreatePolicies || false,
+          manageUsers: userData.canManageUsers || false
+        };
+
+        // For Admin users, also fetch password
+        if (role === 'Admin') {
+          formData.temporaryPassword = userData.temporaryPassword || '';
+        }
+
+        // Set additional notes
+        formData.additionalNotes = userData.additionalNotes || '';
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+        if (role === 'Admin') {
           formData.temporaryPassword = '';
         }
       }
@@ -1203,8 +1238,15 @@ const Dashboard = () => {
       location: '',
       userRole: '',
       accountStatus: 'Active',
-      isActive: true,
-      temporaryPassword: ''
+      temporaryPassword: '',
+      companyAccess: [],
+      permissions: {
+        viewClaims: false,
+        processClaims: false,
+        createPolicies: false,
+        manageUsers: false
+      },
+      additionalNotes: ''
     });
   };
   const handleUpdateUser = async (e) => {
@@ -1220,10 +1262,17 @@ const Dashboard = () => {
         firstName: editFormData.firstName,
         lastName: editFormData.lastName,
         email: editFormData.email,
+        phoneNumber: editFormData.phoneNumber || null,
         department: editFormData.department || null,
         location: editFormData.location || null,
         userRole: editFormData.userRole || 'Client',
-        isActive: editFormData.accountStatus === 'Active' ? 1 : 0
+        isActive: editFormData.accountStatus === 'Active' ? 1 : 0,
+        companyAccess: editFormData.companyAccess || [],
+        canViewClaims: editFormData.permissions?.viewClaims || false,
+        canProcessClaims: editFormData.permissions?.processClaims || false,
+        canCreatePolicies: editFormData.permissions?.createPolicies || false,
+        canManageUsers: editFormData.permissions?.manageUsers || false,
+        additionalNotes: editFormData.additionalNotes || ''
       };
 
       // Include password if current user is Admin and password field has a value
@@ -1237,7 +1286,10 @@ const Dashboard = () => {
       );
 
       // Refresh the users list and close the modal
-      await fetchUsers();
+      if (userTableRef.current) {
+        userTableRef.current.refresh();
+      }
+      fetchUserStats(); // Refresh stats after updating user
       setIsEditModalOpen(false);
       toast.success('User updated successfully!');
     } catch (error) {
@@ -1289,6 +1341,26 @@ const Dashboard = () => {
     }));
   };
 
+  // Edit modal handlers for company access and permissions
+  const handleEditCompanyAccessChange = (company) => {
+    setEditFormData(prev => ({
+      ...prev,
+      companyAccess: prev.companyAccess.includes(company)
+        ? prev.companyAccess.filter(c => c !== company)
+        : [...prev.companyAccess, company]
+    }));
+  };
+
+  const handleEditPermissionChange = (permission) => {
+    setEditFormData(prev => ({
+      ...prev,
+      permissions: {
+        ...prev.permissions,
+        [permission]: !prev.permissions[permission]
+      }
+    }));
+  };
+
   const handleCloseModalCreateUser = () => {
     setIsCreateModalOpen(false);
   };
@@ -1298,7 +1370,11 @@ const Dashboard = () => {
       const response = await axios.post("/api/users", formData);
       
       if (response.status === 201 || response.status === 200) {
-        fetchUsers();
+        // Refresh the UserTable
+        if (userTableRef.current) {
+          userTableRef.current.refreshToFirstPage();
+        }
+        fetchUserStats(); // Refresh stats after creating user
         setIsCreateModalOpen(false);
         setFormData({});
         toast.success('User created successfully!');
@@ -1337,7 +1413,10 @@ const Dashboard = () => {
       await axios.delete(`/api/users/${selectedUser.id}`);
 
 
-      fetchUsers();
+      if (userTableRef.current) {
+        userTableRef.current.refresh();
+      }
+      fetchUserStats(); // Refresh stats after deleting user
       setDeleteModalOpen(false);
       setSelectedUser(null);
       toast.success('User deleted successfully!');
@@ -1563,28 +1642,73 @@ const Dashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('/api/users');
+      const response = await axios.get('/api/users?page=1&limit=15');
 
-      const formattedUsers = response.data.map((user, index) => ({
-        id: user.id,
-        avatar: getInitials(user.firstName || user.name || ""),
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        location: user.location || 'N/A',
-        role: user.userRole,
-        status: user.accountStatus,
-        phoneNumber: user.phoneNumber,
-        department: user.department,
-        policies: user.policies || 0,
-        claims: user.claims || 0,
-      }));
+      if (response.data && response.data.users) {
+        const formattedUsers = response.data.users.map((user, index) => ({
+          id: user.id,
+          avatar: getInitials(user.firstName || user.name || ""),
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          location: user.location || 'N/A',
+          role: user.userRole,
+          status: user.accountStatus,
+          phoneNumber: user.phoneNumber,
+          department: user.department,
+          policies: user.policies || 0,
+          claims: user.claims || 0,
+        }));
 
-      setUsers(formattedUsers);
-      updateStats(formattedUsers);
-
+        setUsers(formattedUsers);
+        
+        // Fetch stats separately to get accurate counts
+        fetchUserStats();
+      }
     } catch (error) {
       console.error("Error fetching users:", error);
+    }
+  };
+
+  const fetchUserStats = async () => {
+    try {
+      const response = await axios.get('/api/users/stats');
+      if (response.data) {
+        const { totalUsers, activeUsers, teamMembers, clients } = response.data;
+        
+        setStats([
+          {
+            title: 'Total Users',
+            value: totalUsers.toString(),
+            changeType: totalUsers > 0 ? 'positive' : 'neutral',
+            change: `${totalUsers} registered`,
+            color: 'bg-blue-500'
+          },
+          {
+            title: 'Active Users',
+            value: activeUsers.toString(),
+            changeType: activeUsers > 0 ? 'positive' : 'neutral',
+            change: `${activeUsers} active`,
+            color: 'bg-green-500'
+          },
+          {
+            title: 'Team Members',
+            value: teamMembers.toString(),
+            changeType: teamMembers > 0 ? 'positive' : 'neutral',
+            change: `${teamMembers} team members`,
+            color: 'bg-purple-500'
+          },
+          {
+            title: 'Clients',
+            value: clients.toString(),
+            changeType: clients > 0 ? 'positive' : 'neutral',
+            change: `${clients} clients`,
+            color: 'bg-orange-500'
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error("Error fetching user stats:", error);
     }
   };
 
@@ -1895,8 +2019,6 @@ const Dashboard = () => {
           openCreateModal={openCreateModal}
           stats={stats}
           isDark={isDark}
-          users={users}
-          changeUsers={changeUsers}
           getRoleDarkColor={getRoleDarkColor}
           getRoleColor={getRoleColor}
           getStatusDarkColor={getStatusDarkColor}
@@ -1922,6 +2044,10 @@ const Dashboard = () => {
           handleConfirmDelete={handleConfirmDelete}
           handleDeleteUser={handleDeleteUser}
           currentUserRole={role}
+          refreshStats={fetchUserStats}
+          userTableRef={userTableRef}
+          handleEditCompanyAccessChange={handleEditCompanyAccessChange}
+          handleEditPermissionChange={handleEditPermissionChange}
 
         />)}
 

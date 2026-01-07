@@ -4,14 +4,13 @@ import UserTable from "../../components/users/UserTable"
 import AddUserModal from "../../components/users/AddUserModal"
 import EditUserModal from "../../components/users/EditUserModal"
 import DeleteUserModal from "../../components/users/DeleteUserModal"
+import { useRef } from "react"
 
 
 const Userr = ({
   openCreateModal,
   stats,
   isDark,
-  users,
-  changeUsers,
   getRoleDarkColor,
   getRoleColor,
   getStatusDarkColor,
@@ -35,7 +34,11 @@ const Userr = ({
   handleCloseDeleteModal,
   handleConfirmDelete,
   handleDeleteUser,
-  currentUserRole
+  currentUserRole,
+  refreshStats,
+  userTableRef,
+  handleEditCompanyAccessChange,
+  handleEditPermissionChange
 }) => {
 
 
@@ -56,17 +59,14 @@ const Userr = ({
 
         {/* All Users Section */}
         <UserTable
+        ref={userTableRef}
         isDark={isDark}
-        users={users}
-        changeUsers={changeUsers}
         getRoleDarkColor={getRoleDarkColor}
         getRoleColor={getRoleColor}
         getStatusDarkColor={getStatusDarkColor}
         getStatusColor={getStatusColor}
         handleEditUser={handleEditUser}
-        handleConfirmDelete={handleConfirmDelete}
-        isDeleteModalOpen={isDeleteModalOpen}
-        handleDeleteUser={handleDeleteUser}
+        refreshStats={refreshStats}
         />
 
         {/* Create User Modal */}
@@ -94,6 +94,9 @@ const Userr = ({
         handleFormChange={handleFormChange}
         handleUpdateUser={handleUpdateUser}
         currentUserRole={currentUserRole}
+        companies={companies}
+        handleEditCompanyAccessChange={handleEditCompanyAccessChange}
+        handleEditPermissionChange={handleEditPermissionChange}
         />
 
 
