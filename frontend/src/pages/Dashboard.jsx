@@ -482,10 +482,10 @@ const Dashboard = () => {
               setPolicyData(transformedData);
               setPolicyError(null);
           } else {
-
+              // No data found - set empty state without error
               setPolicyData(policyDataShape);
-              setPolicyError(new Error('No policy data found for the selected company and year'));
-              toast.error('No policy data found for the selected company and year');
+              setPolicyError(null); // Don't set error for empty results
+              // Don't show toast error for empty results
           }
       } catch (error) {
           console.error('Error fetching policy data:', error);
@@ -700,7 +700,7 @@ const Dashboard = () => {
             setPoliciesError(null);
           } else {
             setCompanyPolicies([]);
-            setPoliciesError(`No policies found for ${companyName} in ${policyYear}`);
+            setPoliciesError(null); // Don't show error for empty results
           }
         }
       } catch (error) {

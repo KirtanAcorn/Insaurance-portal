@@ -186,10 +186,7 @@ exports.getCompanyDetails = async (req, res) => {
         return res.json(likeResult.recordset);
       }
       
-      return res.status(404).json({ 
-        message: "No matching records found",
-        searchParameters: { companyName: decodedCompany, renewalYear: decodedYear }
-      });
+      return res.json([]);
     }
   } catch (error) {
     console.error("Error in getCompanyDetails:", {
