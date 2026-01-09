@@ -168,6 +168,26 @@ exports.getCompanyDetails = async (req, res) => {
     if (result.recordset.length > 0) {
       return res.json(result.recordset);
     } else {
+      // Special case: Try with original company name (for companies that have hyphens in database)
+      // This handles the "Hetasveeben & Pratibhakumari - Landlord" company specifically
+      const originalCompanyName = decodeURIComponent(companyName).trim();
+      const originalQuery = `
+        SELECT TOP 50 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+        WHERE 
+          [Company Name] = @originalCompanyName AND
+          [Year ] = @renewalYear
+      `;
+      
+      const originalRequest = pool.request();
+      originalRequest.input("originalCompanyName", sql.NVarChar(255), originalCompanyName);
+      originalRequest.input("renewalYear", sql.NVarChar(50), decodedYear);
+      
+      const originalResult = await originalRequest.query(originalQuery);
+      
+      if (originalResult.recordset.length > 0) {
+        return res.json(originalResult.recordset);
+      }
+      
       // Try with a more flexible search if no exact match found
       const likeQuery = `
         SELECT TOP 50 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
@@ -481,6 +501,109 @@ exports.getPolicyDetailsForClaim = async (req, res) => {
       
       return res.json(transformedData);
     } else {
+      // Special case: Try with original company name (for companies that have hyphens in database)
+      // This handles the "Hetasveeben & Pratibhakumari - Landlord" company specifically
+      const originalCompanyName = decodeURIComponent(companyName).trim();
+      const originalQuery = `
+        SELECT TOP 1 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+        WHERE 
+          [Company Name] = @originalCompanyName AND
+          [Year ] = @renewalYear
+      `;
+      
+      const originalRequest = pool.request();
+      originalRequest.input("originalCompanyName", sql.NVarChar(255), originalCompanyName);
+      originalRequest.input("renewalYear", sql.NVarChar(50), decodedYear);
+      
+      const originalResult = await originalRequest.query(originalQuery);
+      
+      if (originalResult.recordset.length > 0) {
+        const apiData = originalResult.recordset[0];
+        
+        // Helper functions for data formatting (same as above)
+        const formatCurrency = (value) => {
+          if (value === null || value === undefined || value === '' || value === '-') return '-';
+          return String(value).trim();
+        };
+
+        const formatDate = (dateString) => {
+          if (!dateString || dateString === 'N/A' || dateString === '-') return '-';
+          const date = new Date(dateString);
+          return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          });
+        };
+
+        // Transform data to match policy management structure (same as above)
+        const transformedData = {
+          companyName: apiData['Company Name'] || '-',
+          country: apiData['Country'] || '-',
+          regAddress: apiData['Reg Address'] || '-',
+          warehouseOfficeAddress: apiData['Warehouse/Office Address/es'] || '-',
+          regNo: apiData['Reg No'] || '-',
+          regDate: formatDate(apiData['Reg Date']),
+          companyFirstTimePolicy: apiData['Company first Time Policy'] || '-',
+          directorOwnerName: apiData['Director/Owner Name'] || '-',
+          companyHandledBy: apiData['Company Handle By'] || '-',
+          vatNumber: apiData['VAT Number'] || '-',
+          commodity: apiData['Comodity'] || '-',
+          currency: apiData['Currency'] || '-',
+          turnoverGBP: apiData['Turnover in £ Mn'] || '-',
+          insuranceAgent: apiData['Insurance Agent'] || '-',
+          accountHandler: apiData['A/C HANDLER'] || '-',
+          employeeCount: apiData['Emp Count'] || '-',
+          
+          // Commercial Insurance
+          commercialPolicy: apiData['Commercial Policy'] || '-',
+          commercialRenewalDate: formatDate(apiData['Commercial Renewal Date']),
+          commercialPolicyLink: apiData['Commercial Policy Link'] || '-',
+          commercialPremiumPaid: apiData['Commercial Premium Paid'] || '-',
+          employeeLiabilityCover: apiData['Employee Liability Cover'] || '-',
+          empLiabilityRenewalDate: formatDate(apiData['Emp_Liabality Renewal Date']),
+          floatingStock: apiData['Floting stock'] || '-',
+          stockCover: apiData['Stock Cover'] || '-',
+          stockLocation: apiData['Stock Location'] || '-',
+          productLiability: apiData['Product Liability'] || '-',
+          amazonVendorLiability: apiData['Amazon Vendor Liability'] || '-',
+          legalExpenseCover: apiData['Legal Expense Cover'] || '-',
+          commercialExcessPerClaim: apiData['Commercial Excess Per claim'] || '-',
+          noOfClaimCommercial: apiData['No Of claim Commercial'] || '-',
+          
+          // Marine Insurance
+          marine: apiData['Marine'] || '-',
+          marinePolicyLink: apiData['Marine Policy Link'] || '-',
+          marineRenewal: formatDate(apiData['Marine Renewal']),
+          marinePremiumPaid: apiData['Marine Premium Paid'] || '-',
+          perTransitCover: apiData['Per Transit Cover'] || '-',
+          
+          // Building/Property Insurance
+          buildingInsurance: apiData['Building Insurance'] || '-',
+          propertyPolicyLink: apiData['Property Policy Link'] || '-',
+          renewalDate: formatDate(apiData['Renewal Date']),
+          buildingPremiumPaid: apiData['Building Premium Paid'] || '-',
+          sumAssuredValueOfPremises: apiData['Sume Assure(Value of )Premises'] || '-',
+          declareValue: apiData['Declare Value'] || '-',
+          buildingLocation: apiData['Building Location'] || '-',
+          buildingExcessPerClaim: apiData['Building Excess Per claim'] || '-',
+          noOfClaimBuilding: apiData['No Of claim Building'] || '-',
+          
+          // Fleet Policy
+          fleetPolicy: apiData['Fleet Policy'] || '-',
+          fleetPolicyLink: apiData['Fleet Policy Link'] || '-',
+          renewalDate2: formatDate(apiData['Renewal Date2']),
+          fleetPremiumPaid: apiData['Fleet Premium Paid'] || '-',
+          regNo2: apiData['Reg No2'] || '-',
+          fleetExcessPerClaim: apiData['Fleet Excess Per claim '] || '-',
+          noOfClaimMadeFleet: apiData['No Of claim made fleet'] || '-',
+          
+          renewalYear: apiData['Year '] || apiData['Year'] || renewalYear
+        };
+        
+        return res.json(transformedData);
+      }
+      
       return res.status(404).json({ 
         message: "No matching policy found",
         searchParameters: { companyName: decodedCompany, renewalYear: decodedYear }
