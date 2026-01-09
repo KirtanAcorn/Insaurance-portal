@@ -331,18 +331,11 @@ const Dashboard = () => {
   
   // Fetch data when selected company or year changes
   useEffect(() => {
-    console.log('🔍 DEBUG - useEffect triggered with:', { selectedCompanyPolicy, policyYear });
     if (selectedCompanyPolicy && policyYear) {
       const company = policyCompanies.find(c => c.id === selectedCompanyPolicy);
-      console.log('🔍 DEBUG - Found company:', company);
       if (company) {
-        console.log('🔍 DEBUG - Calling fetchPolicyData with:', company.name, policyYear);
         fetchPolicyData(company.name, policyYear);
-      } else {
-        console.log('🔍 DEBUG - Company not found in policyCompanies for ID:', selectedCompanyPolicy);
       }
-    } else {
-      console.log('🔍 DEBUG - Missing selectedCompanyPolicy or policyYear');
     }
   }, [selectedCompanyPolicy, policyYear]);
 
@@ -380,8 +373,6 @@ const Dashboard = () => {
 
   // Fetch policy data for selected company and year
   const fetchPolicyData = async (companyName, year) => {
-    console.log('🔍 DEBUG - fetchPolicyData called with:', { companyName, year });
-    
     if (!companyName || !year) {
       console.error("Company name or year is missing.");
       setPolicyData(policyDataShape); 
@@ -396,14 +387,11 @@ const Dashboard = () => {
     try {
       // Use the year as is from the dropdown
       const apiUrl = `/api/policies/company-details?companyName=${encodeURIComponent(companyName)}&renewalYear=${year}`;
-      console.log('🔍 DEBUG - API URL:', apiUrl);
 
       const response = await axios.get(apiUrl);
-      console.log('🔍 DEBUG - API Response:', { status: response.status, dataLength: response.data?.length, data: response.data });
   
       if (response.status === 200 && response.data && response.data.length > 0) {
           const apiData = response.data[0];
-          console.log('🔍 DEBUG - Processing API data for company:', companyName);
 
               // Helper functions for data formatting
               const formatCurrency = (value) => {
@@ -496,16 +484,14 @@ const Dashboard = () => {
               };
               setPolicyData(transformedData);
               setPolicyError(null);
-              console.log('🔍 DEBUG - Policy data set successfully for:', companyName);
           } else {
               // No data found - set empty state without error
-              console.log('🔍 DEBUG - No data found for company:', companyName, 'year:', year);
               setPolicyData(policyDataShape);
               setPolicyError(null); // Don't set error for empty results
               // Don't show toast error for empty results
           }
       } catch (error) {
-          console.error('🔍 DEBUG - Error fetching policy data for:', companyName, error);
+          console.error('Error fetching policy data:', error);
           setPolicyError(error);
           setPolicyData(policyDataShape);
           toast.error(`Error loading policy data: ${error.message}`);

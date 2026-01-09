@@ -55,11 +55,9 @@ const ContentGrid = ({
 
   // Helper function to parse date string in DD/MM/YYYY format
   const parseDate = (dateStr) => {
-    if (!dateStr || dateStr === 'N/A') return null;
+    if (!dateStr || dateStr === 'N/A' || dateStr === '-' || dateStr === 'null') return null;
     
     try {
-   
-      
       // Handle DD/MM/YYYY format
       if (typeof dateStr === 'string' && dateStr.includes('/')) {
         const parts = dateStr.split('/').map(Number);
@@ -71,10 +69,30 @@ const ContentGrid = ({
         }
       }
       
-      // Try ISO format
-      let date = new Date(dateStr);
+      // Handle "Saturday, January 10, 2026" format (remove day name)
+      if (typeof dateStr === 'string' && dateStr.includes(',')) {
+        const cleanDateStr = dateStr.replace(/^[A-Za-z]+,\s*/, '').trim();
+        const date = new Date(cleanDateStr + ' UTC'); // Force UTC parsing
+        if (!isNaN(date.getTime())) {
+          return date;
+        }
+      }
+      
+      // Try ISO format with UTC
+      let date = new Date(dateStr + ' UTC');
       if (!isNaN(date.getTime())) {
         return date;
+      }
+      
+      // Try regular parsing as fallback
+      date = new Date(dateStr);
+      if (!isNaN(date.getTime())) {
+        // Convert to UTC to avoid timezone issues
+        return new Date(Date.UTC(
+          date.getFullYear(),
+          date.getMonth(),
+          date.getDate()
+        ));
       }
       
       // Try timestamp
@@ -84,7 +102,6 @@ const ContentGrid = ({
           return date;
         }
       }
-      
       
       return null;
     } catch (error) {
