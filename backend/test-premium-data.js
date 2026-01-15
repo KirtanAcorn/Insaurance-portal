@@ -11,7 +11,7 @@ async function testPremiumData() {
     // Get latest year
     const latestYearQuery = `
       SELECT TOP 1 [Year ] AS renewalYear
-      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      FROM Facility_Insurance_Details WITH (NOLOCK)
       WHERE [Year ] IS NOT NULL AND LTRIM(RTRIM([Year ])) <> ''
       ORDER BY TRY_CONVERT(datetime, SUBSTRING([Year ], 1, 4) + '-01-01') DESC
     `;
@@ -30,7 +30,7 @@ async function testPremiumData() {
         [Marine Premium Paid],
         [Building Premium Paid],
         [Fleet Premium Paid]
-      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      FROM Facility_Insurance_Details WITH (NOLOCK)
       WHERE [Year ] = @renewalYear
     `;
     
@@ -94,7 +94,7 @@ async function testPremiumData() {
             )
           END
         ) AS fleetTotal
-      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      FROM Facility_Insurance_Details WITH (NOLOCK)
       WHERE [Year ] = @renewalYear
       GROUP BY CASE 
           WHEN UPPER([Currency]) LIKE '%GBP%' OR UPPER([Currency]) LIKE '%£%' THEN 'GBP'

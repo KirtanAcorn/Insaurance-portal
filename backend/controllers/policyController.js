@@ -31,7 +31,7 @@ exports.getPoliciesByYear = async (req, res) => {
     if (!targetYear) {
       const latestYearQuery = `
         SELECT TOP 1 [Year ] AS renewalYear
-        FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+        FROM Facility_Insurance_Details WITH (NOLOCK)
         WHERE [Year ] IS NOT NULL AND LTRIM(RTRIM([Year ])) <> ''
         ORDER BY TRY_CONVERT(datetime, SUBSTRING([Year ], 1, 4) + '-01-01') DESC
       `;
@@ -53,7 +53,7 @@ exports.getPoliciesByYear = async (req, res) => {
         [Building Premium Paid],
         [Fleet Premium Paid],
         [Year ]
-      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      FROM Facility_Insurance_Details WITH (NOLOCK)
       WHERE [Year ] = @renewalYear
     `;
 
@@ -112,7 +112,7 @@ exports.getPoliciesByYear = async (req, res) => {
             )
           END
         ) AS fleetTotal
-      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      FROM Facility_Insurance_Details WITH (NOLOCK)
       WHERE [Year ] = @renewalYear
       GROUP BY CASE 
           WHEN UPPER([Currency]) LIKE '%GBP%' OR UPPER([Currency]) LIKE '%£%' THEN 'GBP'
@@ -149,11 +149,11 @@ exports.getCompanyDetails = async (req, res) => {
     pool = await poolPromise;
     
     // First, check if the table exists and is accessible
-    await pool.request().query('SELECT TOP 1 1 FROM Tbl_Insurance_Details_Facility');
+    await pool.request().query('SELECT TOP 1 1 FROM Facility_Insurance_Details');
     
     // Query with new table structure - using [Year ] field (note the trailing space)
     const query = `
-      SELECT TOP 50 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      SELECT TOP 50 * FROM Facility_Insurance_Details WITH (NOLOCK)
       WHERE 
         [Company Name] = @companyName AND
         [Year ] = @renewalYear
@@ -172,7 +172,7 @@ exports.getCompanyDetails = async (req, res) => {
       // This handles the "Hetasveeben & Pratibhakumari - Landlord" company specifically
       const originalCompanyName = decodeURIComponent(companyName).trim();
       const originalQuery = `
-        SELECT TOP 50 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+        SELECT TOP 50 * FROM Facility_Insurance_Details WITH (NOLOCK)
         WHERE 
           [Company Name] = @originalCompanyName AND
           [Year ] = @renewalYear
@@ -190,7 +190,7 @@ exports.getCompanyDetails = async (req, res) => {
       
       // Try with a more flexible search if no exact match found
       const likeQuery = `
-        SELECT TOP 50 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+        SELECT TOP 50 * FROM Facility_Insurance_Details WITH (NOLOCK)
         WHERE 
           [Company Name] LIKE '%' + @companyName + '%' AND
           [Year ] LIKE '%' + @renewalYear + '%'
@@ -240,7 +240,7 @@ exports.createPolicy = async (req, res) => {
     // Check if a policy already exists for this company and year
     const checkQuery = `
       SELECT COUNT(*) as count 
-      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      FROM Facility_Insurance_Details WITH (NOLOCK)
       WHERE [Company Name] = @companyName AND [Year ] = @year
     `;
     
@@ -346,7 +346,7 @@ exports.createPolicy = async (req, res) => {
     }
 
     const query = `
-      INSERT INTO Tbl_Insurance_Details_Facility (${fields.join(', ')})
+      INSERT INTO Facility_Insurance_Details (${fields.join(', ')})
       VALUES (${values.join(', ')})
     `;
 
@@ -384,7 +384,7 @@ exports.getPolicyDetailsForClaim = async (req, res) => {
     
     // Query with new table structure - using [Year ] field (note the trailing space)
     const query = `
-      SELECT TOP 1 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      SELECT TOP 1 * FROM Facility_Insurance_Details WITH (NOLOCK)
       WHERE 
         [Company Name] = @companyName AND
         [Year ] = @renewalYear
@@ -505,7 +505,7 @@ exports.getPolicyDetailsForClaim = async (req, res) => {
       // This handles the "Hetasveeben & Pratibhakumari - Landlord" company specifically
       const originalCompanyName = decodeURIComponent(companyName).trim();
       const originalQuery = `
-        SELECT TOP 1 * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+        SELECT TOP 1 * FROM Facility_Insurance_Details WITH (NOLOCK)
         WHERE 
           [Company Name] = @originalCompanyName AND
           [Year ] = @renewalYear
@@ -717,7 +717,7 @@ exports.updatePolicy = async (req, res) => {
     }
 
     const query = `
-      UPDATE Tbl_Insurance_Details_Facility
+      UPDATE Facility_Insurance_Details
       SET ${updates.join(', ')}
       WHERE Id = @id
     `;
@@ -752,7 +752,7 @@ exports.getAvailableYears = async (req, res) => {
     
     const query = `
       SELECT DISTINCT [Year ] as year
-      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      FROM Facility_Insurance_Details WITH (NOLOCK)
       WHERE [Year ] IS NOT NULL AND LTRIM(RTRIM([Year ])) <> ''
       ORDER BY [Year ] DESC
     `;
@@ -787,7 +787,7 @@ exports.getCompanyPolicies = async (req, res) => {
     const schemaQuery = `
       SELECT COLUMN_NAME 
       FROM INFORMATION_SCHEMA.COLUMNS 
-      WHERE TABLE_NAME = 'Tbl_Insurance_Details_Facility'
+      WHERE TABLE_NAME = 'Facility_Insurance_Details'
     `;
     const schemaResult = await pool.request().query(schemaQuery);
     
@@ -810,7 +810,7 @@ exports.getCompanyPolicies = async (req, res) => {
         [Renewal Date] AS propertyRenewalDate,
         [Renewal Date2] AS fleetRenewalDate,
         [Year ] AS renewalYear
-      FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      FROM Facility_Insurance_Details WITH (NOLOCK)
       WHERE [Company Name] = @companyName
     `;
     
@@ -856,7 +856,7 @@ exports.exportPolicyData = async (req, res) => {
 
     // Query to get ALL policy data from the table
     const query = `
-      SELECT * FROM Tbl_Insurance_Details_Facility WITH (NOLOCK)
+      SELECT * FROM Facility_Insurance_Details WITH (NOLOCK)
       ORDER BY [Company Name], [Year ]
     `;
 

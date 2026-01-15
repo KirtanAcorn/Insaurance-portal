@@ -10,7 +10,7 @@ exports.getQuickStats = async (req, res) => {
       SELECT
         COUNT(*) AS totalClaims,
         SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) AS approvedClaims
-      FROM Claims
+      FROM Facility_Claims
     `);
     const { totalClaims, approvedClaims } = claimsResult.recordset[0];
     const claimSuccessPercentage = totalClaims > 0 ? (approvedClaims / totalClaims) * 100 : 0;
@@ -18,7 +18,7 @@ exports.getQuickStats = async (req, res) => {
     // 2. Global Coverage Calculation
     const latestYearResult = await pool.request().query(`
       SELECT TOP 1 [Year] AS renewalYear
-      FROM Tbl_Insurance_Details_Facility
+      FROM Facility_Insurance_Details
       WHERE [Year] IS NOT NULL AND LTRIM(RTRIM([Year])) <> ''
       ORDER BY [Year] DESC
     `);
@@ -28,8 +28,8 @@ exports.getQuickStats = async (req, res) => {
     if (latestRenewalYear) {
       const coverageResult = await pool.request().query(`
         SELECT 
-          (SELECT COUNT(DISTINCT [Company Name]) FROM Tbl_Insurance_Details_Facility WHERE [Year] = '${latestRenewalYear}') AS companiesWithPolicyInYear,
-          (SELECT COUNT(DISTINCT [Company Name]) FROM Tbl_Insurance_Details_Facility) AS totalUniqueCompanies
+          (SELECT COUNT(DISTINCT [Company Name]) FROM Facility_Insurance_Details WHERE [Year] = '${latestRenewalYear}') AS companiesWithPolicyInYear,
+          (SELECT COUNT(DISTINCT [Company Name]) FROM Facility_Insurance_Details) AS totalUniqueCompanies
       `);
       const { companiesWithPolicyInYear, totalUniqueCompanies } = coverageResult.recordset[0];
       globalCoveragePercentage = totalUniqueCompanies > 0 ? (companiesWithPolicyInYear / totalUniqueCompanies) * 100 : 0;
@@ -43,8 +43,8 @@ exports.getQuickStats = async (req, res) => {
 
     const dataSecurityResult = await pool.request().query(`
         SELECT
-            (SELECT COUNT(*) FROM Tbl_Insurance_Details_Facility WHERE [Year] = '${currentYearStr}') AS policiesCurrentYear,
-            (SELECT COUNT(*) FROM Tbl_Insurance_Details_Facility WHERE [Year] = '${lastYearStr}') AS policiesLastYear
+            (SELECT COUNT(*) FROM Facility_Insurance_Details WHERE [Year] = '${currentYearStr}') AS policiesCurrentYear,
+            (SELECT COUNT(*) FROM Facility_Insurance_Details WHERE [Year] = '${lastYearStr}') AS policiesLastYear
     `);
     const { policiesCurrentYear, policiesLastYear } = dataSecurityResult.recordset[0];
     const dataSecurityPercentage = policiesLastYear > 0 ? (policiesCurrentYear / policiesLastYear) * 100 : (policiesCurrentYear > 0 ? 100 : 0);

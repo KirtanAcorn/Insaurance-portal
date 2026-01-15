@@ -7,19 +7,19 @@ exports.getUserStats = async (req, res) => {
     
     // Get total users count
     const totalResult = await pool.request()
-      .query("SELECT COUNT(*) as total FROM Users_ WHERE isActive = 1");
+      .query("SELECT COUNT(*) as total FROM Facility_Users WHERE isActive = 1");
     
     // Get active users count
     const activeResult = await pool.request()
-      .query("SELECT COUNT(*) as active FROM Users_ WHERE isActive = 1 AND accountStatus = 'Active'");
+      .query("SELECT COUNT(*) as active FROM Facility_Users WHERE isActive = 1 AND accountStatus = 'Active'");
     
     // Get team members count
     const teamMembersResult = await pool.request()
-      .query("SELECT COUNT(*) as teamMembers FROM Users_ WHERE isActive = 1 AND userRole = 'Team Member'");
+      .query("SELECT COUNT(*) as teamMembers FROM Facility_Users WHERE isActive = 1 AND userRole = 'Team Member'");
     
     // Get clients count
     const clientsResult = await pool.request()
-      .query("SELECT COUNT(*) as clients FROM Users_ WHERE isActive = 1 AND userRole = 'Client'");
+      .query("SELECT COUNT(*) as clients FROM Facility_Users WHERE isActive = 1 AND userRole = 'Client'");
 
     res.json({
       totalUsers: totalResult.recordset[0].total,
@@ -59,7 +59,7 @@ exports.getAllUsers = async (req, res) => {
     }
     
     // Get total count of filtered users
-    const countQuery = `SELECT COUNT(*) as total FROM Users_ ${whereClause}`;
+    const countQuery = `SELECT COUNT(*) as total FROM Facility_Users ${whereClause}`;
     const countRequest = pool.request();
     
     if (search.trim()) {
@@ -72,7 +72,7 @@ exports.getAllUsers = async (req, res) => {
 
     // Get paginated and filtered users
     const dataQuery = `
-      SELECT * FROM Users_ 
+      SELECT * FROM Facility_Users 
       ${whereClause}
       ORDER BY createdAt DESC
       OFFSET @offset ROWS 
@@ -114,7 +114,7 @@ exports.getUserById = async (req, res) => {
     const pool = await poolPromise;
     const result = await pool.request()
       .input("id", sql.Int, id)
-      .query("SELECT * FROM Users_ WHERE id = @id");
+      .query("SELECT * FROM Facility_Users WHERE id = @id");
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ error: "User not found" });
@@ -144,7 +144,7 @@ exports.createUser = async (req, res) => {
     // First check if user with this email already exists
     const existingUser = await pool.request()
       .input("checkEmail", sql.VarChar, email)
-      .query("SELECT id FROM Users_ WHERE email = @checkEmail");
+      .query("SELECT id FROM Facility_Users WHERE email = @checkEmail");
 
     if (existingUser.recordset.length > 0) {
       return res.status(400).json({ 
@@ -171,7 +171,7 @@ exports.createUser = async (req, res) => {
       .input("updatedAt", sql.DateTime, new Date())
       .input("companyAccess", sql.VarChar, JSON.stringify(companyAccess))
       .query(`
-        INSERT INTO Users_ (
+        INSERT INTO Facility_Users (
           firstName, lastName, email, phoneNumber, department, location, userRole,
           accountStatus, temporaryPassword, canViewClaims, canProcessClaims,
           canCreatePolicies, canManageUsers, additionalNotes,
@@ -290,7 +290,7 @@ exports.updateUser = async (req, res) => {
     }
 
     const query = `
-      UPDATE Users_
+      UPDATE Facility_Users
       SET ${setClauses.join(", ")}
       WHERE id = @id
     `;
@@ -318,7 +318,7 @@ exports.deleteUser = async (req, res) => {
 
     const result = await pool.request()
       .input("id", sql.Int, id)
-      .query("UPDATE Users_ SET isActive = 0 WHERE id = @id");
+      .query("UPDATE Facility_Users SET isActive = 0 WHERE id = @id");
 
     if (result.rowsAffected[0] === 0) {
       return res.status(404).json({ error: "User not found or already inactive" });
@@ -361,7 +361,7 @@ exports.login = async (req, res) => {
         id, firstName, lastName, email, 
         temporaryPassword,  -- Using temporaryPassword instead of password
         userRole, isActive, department, location, companyAccess
-      FROM Users_ 
+      FROM Facility_Users 
       WHERE email = @email
     `;
     
@@ -448,7 +448,7 @@ exports.getUserRoleByEmail = async (req, res) => {
       .input("email", sql.VarChar, email)
       .query(`
         SELECT userRole 
-        FROM Users_ 
+        FROM Facility_Users 
         WHERE email = @email AND isActive = 1
       `);
 

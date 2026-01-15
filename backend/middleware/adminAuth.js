@@ -18,7 +18,7 @@ const verifyAdmin = async (req, res, next) => {
     const pool = await poolPromise;
     const query = `
       SELECT userRole 
-      FROM Users_ 
+      FROM Facility_Users 
       WHERE id = @userId AND isActive = 1
     `;
     

@@ -20,8 +20,8 @@ exports.getAllClaims = async (req, res) => {
         u.firstName as createdByFirstName,
         u.lastName as createdByLastName,
         u.email as createdByEmail
-      FROM Claims c
-      LEFT JOIN Users_ u ON c.createdByUserId = u.id
+      FROM Facility_Claims c
+      LEFT JOIN Facility_Users u ON c.createdByUserId = u.id
     `;
     let request = pool.request();
     
@@ -31,7 +31,7 @@ exports.getAllClaims = async (req, res) => {
       // First get the user's company access
       const userResult = await pool.request()
         .input('userEmail', sql.VarChar, userEmail)
-        .query('SELECT companyAccess FROM Users_ WHERE email = @userEmail');
+        .query('SELECT companyAccess FROM Facility_Users WHERE email = @userEmail');
       
       if (userResult.recordset.length > 0) {
         const companyAccess = userResult.recordset[0].companyAccess;
@@ -80,7 +80,7 @@ exports.getClaimById = async (req, res) => {
     const pool = await poolPromise;
     const result = await pool.request()
       .input('claimId', sql.Int, id)
-      .query('SELECT * FROM Claims WHERE claimId = @claimId');
+      .query('SELECT * FROM Facility_Claims WHERE claimId = @claimId');
     if (result.recordset.length === 0) {
       return res.status(404).json({ error: 'Claim not found' });
     }
@@ -139,7 +139,7 @@ exports.createClaim = async (req, res) => {
       .input('description', sql.VarChar, description)
       .input('createdByUserId', sql.Int, createdByUserId || null)
       .input('twoMinutesAgo', sql.DateTime, twoMinutesAgo)
-      .query(`SELECT claimId FROM Claims 
+      .query(`SELECT claimId FROM Facility_Claims 
               WHERE companyName = @companyName 
               AND policyName = @policyName 
               AND claimAmount = @claimAmount 
@@ -186,7 +186,7 @@ exports.createClaim = async (req, res) => {
       .input('supportingDocuments', sql.VarChar, supportingDocuments)
       .input('assignedToUserID', sql.Int, assignedToUserID || null)
       .input('createdByUserId', sql.Int, createdByUserId || null)
-      .query(`INSERT INTO Claims
+      .query(`INSERT INTO Facility_Claims
               (claimType, claimAmount, companyName, policyName, description, incidentDate, supportingDocuments, excess, netAmount, status, assignedToUserID, createdByUserId)
               OUTPUT INSERTED.claimID
               VALUES (@claimType, @claimAmount, @companyName, @policyName, @description, @incidentDate, @supportingDocuments, @excess, @netAmount, @status, @assignedToUserID, @createdByUserId)`);
@@ -196,7 +196,7 @@ exports.createClaim = async (req, res) => {
     // Fetch the complete claim record to send in email
     const claimRecord = await pool.request()
       .input('claimId', sql.Int, insertedId)
-      .query('SELECT * FROM Claims WHERE claimId = @claimId');
+      .query('SELECT * FROM Facility_Claims WHERE claimId = @claimId');
 
     // Send email notification for new claim creation
     try {
@@ -300,7 +300,7 @@ exports.updateClaim = async (req, res) => {
     updateFields.push('updatedAt = GETDATE()');
 
     const query = `
-      UPDATE Claims
+      UPDATE Facility_Claims
       SET ${updateFields.join(', ')}
       WHERE claimId = @claimId;
     `;
@@ -317,7 +317,7 @@ exports.updateClaim = async (req, res) => {
         // Fetch user details - using SELECT * to get all columns
         const userResult = await (await poolPromise).request()
           .input('userId', sql.Int, parseInt(req.body.assignedToUserID))
-          .query('SELECT * FROM Users_ WHERE id = @userId');
+          .query('SELECT * FROM Facility_Users WHERE id = @userId');
 
         if (userResult.recordset.length > 0) {
           const user = userResult.recordset[0];
@@ -325,7 +325,7 @@ exports.updateClaim = async (req, res) => {
           // Fetch complete claim details
           const claimResult = await (await poolPromise).request()
             .input('claimId', sql.Int, claimId)
-            .query('SELECT * FROM Claims WHERE claimId = @claimId');
+            .query('SELECT * FROM Facility_Claims WHERE claimId = @claimId');
 
           if (claimResult.recordset.length > 0) {
             const claim = claimResult.recordset[0];
@@ -384,7 +384,7 @@ exports.deleteClaim = async (req, res) => {
     const pool = await poolPromise;
     await pool.request()
       .input('claimId', sql.Int, claimId)
-      .query('DELETE FROM Claims WHERE claimId = @claimId');
+      .query('DELETE FROM Facility_Claims WHERE claimId = @claimId');
     
     res.json({ message: 'Claim deleted successfully' });
   } catch (err) {
