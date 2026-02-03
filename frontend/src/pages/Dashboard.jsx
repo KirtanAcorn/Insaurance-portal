@@ -43,6 +43,7 @@ const Dashboard = () => {
   const [companyPolicies, setCompanyPolicies] = useState([]);
   const [error, setError] = useState(null);
   const [quickStatsData, setQuickStatsData] = useState({ claimSuccess: 0, globalCoverage: 0, dataSecurity: 0 });
+  const [totalUserCount, setTotalUserCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
   const role = location.state?.role;
@@ -1711,6 +1712,9 @@ const Dashboard = () => {
       if (response.data) {
         const { totalUsers, activeUsers, teamMembers, clients } = response.data;
         
+        // Set the total user count for dashboard stats
+        setTotalUserCount(totalUsers);
+        
         setStats([
           {
             title: 'Total Users',
@@ -1769,6 +1773,8 @@ const Dashboard = () => {
   useEffect(() => {
     fetchUsers();
     fetchClaims();
+    // Also fetch stats directly to ensure they're loaded
+    fetchUserStats();
   }, []);
 
   const openCreateModal = (flag) => {
@@ -1875,7 +1881,7 @@ const Dashboard = () => {
     },
     {
       title: 'Registered Users',
-      value: users?.length?.toString() || '0',
+      value: totalUserCount?.toString() || '0',
       // change: '+8%',
       // changeText: 'from last month',
       icon: Users,
