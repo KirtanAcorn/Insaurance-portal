@@ -59,10 +59,10 @@ const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit, companies = [] }) =
     onClose(); 
   };
 
-  // Check for duplicate policy when company and year are selected
+  // Check for duplicate policy and auto-fill company information when company and year are selected
   useEffect(() => {
     const checkDuplicate = async () => {
-      if (formData.companyName && formData.year) {
+      if (formData.companyName && formData.year && formData.propertyType) {
         setCheckingDuplicate(true);
         try {
           const response = await axios.get('/api/policies/company-details', {
@@ -73,7 +73,44 @@ const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit, companies = [] }) =
           });
           
           if (response.data && response.data.length > 0) {
-            setDuplicateWarning(`Warning: A policy for ${formData.companyName} in ${formData.year} already exists. Creating a new one will result in duplicate entries.`);
+            const existingData = response.data[0];
+            let propertyTypeExists = false;
+            
+            // Check if the specific property type already has data
+            if (formData.propertyType === 'Commercial') {
+              propertyTypeExists = existingData['Commercial Policy'] && existingData['Commercial Policy'].trim() !== '';
+            } else if (formData.propertyType === 'Marine') {
+              propertyTypeExists = existingData['Marine'] && existingData['Marine'].trim() !== '';
+            } else if (formData.propertyType === 'Property') {
+              propertyTypeExists = existingData['Building Insurance'] && existingData['Building Insurance'].trim() !== '';
+            } else if (formData.propertyType === 'Fleet') {
+              propertyTypeExists = existingData['Fleet Policy'] && existingData['Fleet Policy'].trim() !== '';
+            }
+            
+            if (propertyTypeExists) {
+              setDuplicateWarning(`Warning: A ${formData.propertyType} policy for ${formData.companyName} in ${formData.year} already exists. Please use the Edit function to update it.`);
+            } else {
+              // Auto-fill company information from existing record
+              setFormData(prev => ({
+                ...prev,
+                country: existingData['Country'] || '',
+                regAddress: existingData['Reg Address'] || '',
+                warehouseOfficeAddress: existingData['Warehouse/Office Address/es'] || '',
+                regNo: existingData['Reg No'] || '',
+                regDate: existingData['Reg Date'] ? new Date(existingData['Reg Date']).toISOString().split('T')[0] : '',
+                companyFirstTimePolicy: existingData['Company first Time Policy'] || '',
+                directorOwnerName: existingData['Director/Owner Name'] || '',
+                companyHandledBy: existingData['Company Handle By'] || '',
+                vatNumber: existingData['VAT Number'] || '',
+                commodity: existingData['Comodity'] || '',
+                currency: existingData['Currency'] || '',
+                turnoverGBP: existingData['Turnover in £ Mn'] || '',
+                insuranceAgent: existingData['Insurance Agent'] || '',
+                accountHandler: existingData['A/C HANDLER'] || '',
+                empCount: existingData['Emp Count'] || ''
+              }));
+              setDuplicateWarning(`Info: Company record exists for ${formData.companyName} in ${formData.year}. Company information has been auto-filled. The ${formData.propertyType} policy will be added to the existing record.`);
+            }
           } else {
             setDuplicateWarning(null);
           }
@@ -92,7 +129,7 @@ const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit, companies = [] }) =
 
     const debounceTimer = setTimeout(checkDuplicate, 500);
     return () => clearTimeout(debounceTimer);
-  }, [formData.companyName, formData.year]);
+  }, [formData.companyName, formData.year, formData.propertyType]);
 
   // ALL HOOKS MUST BE BEFORE ANY EARLY RETURN
   // Memoized wrapper to pass common props automatically
@@ -158,12 +195,30 @@ const AddPolicyModal = ({ isDark, isOpen, onClose, onSubmit, companies = [] }) =
 
           {/* Duplicate Warning */}
           {duplicateWarning && (
-            <div className={`mb-6 p-4 rounded-lg border-l-4 ${isDark ? 'bg-yellow-900/20 border-yellow-500' : 'bg-yellow-50 border-yellow-400'}`}>
+            <div className={`mb-6 p-4 rounded-lg border-l-4 ${
+              duplicateWarning.startsWith('Warning:') 
+                ? (isDark ? 'bg-yellow-900/20 border-yellow-500' : 'bg-yellow-50 border-yellow-400')
+                : (isDark ? 'bg-blue-900/20 border-blue-500' : 'bg-blue-50 border-blue-400')
+            }`}>
               <div className="flex items-start space-x-3">
-                <AlertTriangle className={`w-5 h-5 mt-0.5 ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`} />
+                <AlertTriangle className={`w-5 h-5 mt-0.5 ${
+                  duplicateWarning.startsWith('Warning:')
+                    ? (isDark ? 'text-yellow-400' : 'text-yellow-600')
+                    : (isDark ? 'text-blue-400' : 'text-blue-600')
+                }`} />
                 <div>
-                  <h4 className={`font-medium ${isDark ? 'text-yellow-300' : 'text-yellow-800'}`}>Duplicate Policy Detected</h4>
-                  <p className={`text-sm mt-1 ${isDark ? 'text-yellow-400' : 'text-yellow-700'}`}>{duplicateWarning}</p>
+                  <h4 className={`font-medium ${
+                    duplicateWarning.startsWith('Warning:')
+                      ? (isDark ? 'text-yellow-300' : 'text-yellow-800')
+                      : (isDark ? 'text-blue-300' : 'text-blue-800')
+                  }`}>
+                    {duplicateWarning.startsWith('Warning:') ? 'Duplicate Policy Detected' : 'Adding to Existing Record'}
+                  </h4>
+                  <p className={`text-sm mt-1 ${
+                    duplicateWarning.startsWith('Warning:')
+                      ? (isDark ? 'text-yellow-400' : 'text-yellow-700')
+                      : (isDark ? 'text-blue-400' : 'text-blue-700')
+                  }`}>{duplicateWarning}</p>
                 </div>
               </div>
             </div>
