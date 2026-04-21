@@ -19,6 +19,33 @@ const extractPolicyData = (record) => {
   };
 }; // <--- FIXED: Missing closing brace was added here
 
+// Strip currency symbols, spaces and thousands separators so values can be stored
+// in columns that SQL Server may have typed as float/decimal.
+// Returns null for empty/dash values, otherwise a clean numeric string (or the original
+// string if it doesn't look like a number at all, e.g. a policy number).
+const sanitizeNumeric = (value) => {
+  if (value === undefined || value === null || value === '' || value === '-') return null;
+  const str = String(value).trim();
+  if (!str || str === '-') return null;
+  // Remove common currency symbols, thousands separators and whitespace
+  const cleaned = str.replace(/[£€$₹¥\s]/g, '').replace(/,/g, '');
+  // If it parses as a finite number, return the cleaned string; otherwise return original
+  return isFinite(Number(cleaned)) && cleaned !== '' ? cleaned : str;
+};
+
+// Fields that map to float/decimal columns in the DB — values must be sanitized before insert/update
+const NUMERIC_FIELDS = new Set([
+  'commercialPremiumPaid', 'employeeLiabilityCover', 'floatingStock', 'stockCover',
+  'productLiability', 'amazonVendorLiability', 'legalExpenseCover', 'commercialExcessPerClaim',
+  'marinePremiumPaid', 'perTransitCover', 'ukUk', 'ukEu', 'ukUsaCanada',
+  'ukMiddleEastDubai', 'usaMiddleEastDubai', 'euMiddleEastDubai', 'euEu', 'euUsa',
+  'usaUsa', 'ukRow', 'usaRow', 'euRow', 'rowRow', 'crossVoyage', 'airSeaRail', 'road',
+  'anyLocationInOrdinaryCourseOfTransit', 'cargoExcessPerClaim', 'noOfClaimCargo',
+  'buildingPremiumPaid', 'sumAssuredValueOfPremises', 'declareValue', 'buildingExcessPerClaim',
+  'noOfClaimBuilding', 'fleetPremiumPaid', 'fleetExcessPerClaim', 'noOfClaimMadeFleet',
+  'noOfClaimCommercial', 'turnoverGBP', 'empCount'
+]);
+
 // Helper function to update existing policy with new property type data
 const updateExistingPolicy = async (pool, policyData, existingRecord, res) => {
   try {
@@ -118,9 +145,12 @@ const updateExistingPolicy = async (pool, policyData, existingRecord, res) => {
 
     const request = pool.request();
     Object.keys(params).forEach(key => {
-      const value = params[key] === undefined || params[key] === null || params[key] === '' 
-        ? null 
-        : String(params[key]);
+      const raw = params[key];
+      const value = raw === undefined || raw === null || raw === ''
+        ? null
+        : sanitizeNumeric(raw) !== null && NUMERIC_FIELDS.has(key)
+          ? sanitizeNumeric(raw)
+          : String(raw);
       request.input(key, sql.NVarChar, value);
     });
 
@@ -492,9 +522,12 @@ exports.createPolicy = async (req, res) => {
     const request = pool.request();
     Object.keys(params).forEach(key => {
       // Convert null/undefined to null for SQL, and ensure strings are valid
-      const value = params[key] === undefined || params[key] === null || params[key] === '' 
-        ? null 
-        : String(params[key]);
+      const raw = params[key];
+      const value = raw === undefined || raw === null || raw === ''
+        ? null
+        : sanitizeNumeric(raw) !== null && NUMERIC_FIELDS.has(key)
+          ? sanitizeNumeric(raw)
+          : String(raw);
       request.input(key, sql.NVarChar, value);
     });
 
@@ -866,10 +899,12 @@ exports.updatePolicy = async (req, res) => {
       if (key === 'id') {
         request.input(key, sql.Int, params[key]);
       } else {
-        // Convert null/undefined to null for SQL, and ensure strings are valid
-        const value = params[key] === undefined || params[key] === null || params[key] === '' 
-          ? null 
-          : String(params[key]);
+        const raw = params[key];
+        const value = raw === undefined || raw === null || raw === ''
+          ? null
+          : sanitizeNumeric(raw) !== null && NUMERIC_FIELDS.has(key)
+            ? sanitizeNumeric(raw)
+            : String(raw);
         request.input(key, sql.NVarChar, value);
       }
     });
